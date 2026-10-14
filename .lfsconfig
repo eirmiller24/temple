@@ -8,4 +8,4 @@
 # detects that state by content and skips the asset-decoding tests with a
 # loud banner rather than failing on them.
 [lfs]
-	url = "http://localhost:8080/api/eirmiller24/temple"
+	url = "http://localhost:8090/api/eirmiller24/temple"
