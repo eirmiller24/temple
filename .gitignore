@@ -20,6 +20,16 @@ data_*/
 mono_crash.*.json
 
 # Export outputs
+build/
 *.exe
-# Uncomment if your project does not version PCK files as runtime dependencies.
-# *.pck
+
+# Python tooling
+__pycache__/
+
+# Source packs (zips, PSDs, full purchased folders). Nothing the game loads
+# lives here -- anything shipped is copied into assets/ with its license
+# recorded in the matching SOURCES.md.
+raw_assets/
+
+# Local editor state
+.claude/settings.local.json

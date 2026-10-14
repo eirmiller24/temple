@@ -1,0 +1,45 @@
+{
+  "_comment": "PixelLab station props + beacon copied unchanged from dungeon-platformer (its stations/ai_provenance.json, 2026-07-28, M14 closure). Single-frame entries, frames cropped to content bbox at assembly (= bottom-center anchor). Schema per entry: file, tool, method, prompt, ids, date, notes, origin.",
+  "entries": [
+    {
+      "file": "training_lever.png",
+      "tool": "pixellab",
+      "method": "ONE create_1_direction_object 64px sidescroller review pack with 12 per-item descriptions (review object cb98b653-cb34-4d04-bba0-19b329afa703); candidates 0-11 matched the briefs in order, all promoted via select_object_frames. Frame cropped to content bbox.",
+      "prompt": "(per-item description for a training lever — exact wording not recorded in the source file)",
+      "ids": {
+        "object_id": "b0525ae0-7f27-4e8c-9992-ecaf6ff7044e",
+        "review_object": "cb98b653-cb34-4d04-bba0-19b329afa703"
+      },
+      "date": "2026-07-28",
+      "notes": "36x49, 1 frame. data/sprites.json objects.lever.",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/stations/training_lever.png (record: stations/ai_provenance.json)"
+    },
+    {
+      "file": "wave_lever.png",
+      "tool": "pixellab",
+      "method": "same stations review pack as training_lever.png; candidate promoted via select_object_frames; frame cropped to content bbox.",
+      "prompt": "(per-item description for a wave lever — exact wording not recorded in the source file)",
+      "ids": {
+        "object_id": "4c5861dc-2555-4609-ab1b-ec3fb4948b5a",
+        "review_object": "cb98b653-cb34-4d04-bba0-19b329afa703"
+      },
+      "date": "2026-07-28",
+      "notes": "28x43, 1 frame. Spare.",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/stations/wave_lever.png (record: stations/ai_provenance.json)"
+    },
+    {
+      "file": "beacon.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object 128px review pack (review object 71a97f08-3562-440c-aa23-e2550085e8d9), candidate 0 promoted as the unlit idle; the lit frame is a create_object_state edit ('lamp lit, glowing teal halo') of that object. Idle + lit share one union-cropped frame box.",
+      "prompt": "(beacon description — exact wording not recorded in the source file; lit state edit prompt: 'lamp lit, glowing teal halo')",
+      "ids": {
+        "object_id": "3341bfee-8834-4708-bf3e-5b460f70a8d9",
+        "lit_state_object_id": "ce98306e-1c76-4ade-829a-2adee755f587",
+        "review_object": "71a97f08-3562-440c-aa23-e2550085e8d9"
+      },
+      "date": "2026-07-28",
+      "notes": "236x119 (unlit + lit frames side by side, 118px cells). data/sprites.json objects.save_shrine uses it as a 236-wide single frame (scale 0.45) — split into two 118px frames if the lit state is wanted.",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/stations/beacon.png (record: stations/ai_provenance.json)"
+    }
+  ]
+}

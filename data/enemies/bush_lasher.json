@@ -1,0 +1,33 @@
+{
+  "_comment": "Bush lasher — the 'lasher': planted (never walks). Faces the player inside sight_range; inside lash_range it tells with a LONG windup, then swings a lash_size hitbox in front of itself for lash_active seconds with heavy knockback. While the swing runs it cannot be staggered or pushed (resist 1); between swings it is a soft target. Touch damage 1. Numbers in px, px/s, seconds.",
+  "behavior": "lasher",
+  "boss": false,
+  "sprite": "bush_lasher",
+  "fit_tiles": 1.3,
+  "hp": 6,
+  "contact_damage": 1,
+  "contact_knockback": [200.0, -160.0],
+  "contact_rearm": 0.5,
+  "speed": 0.0,
+  "gravity": 1400.0,
+  "friction": 1600.0,
+  "body_w": 30.0,
+  "body_h": 40.0,
+  "hurt_stun": 0.2,
+  "knockback_resist": 0.5,
+  "death_linger": 0.6,
+  "xp_placeholder": 4,
+  "hit_sfx": "hit",
+  "lasher": {
+    "sight_range": 260.0,
+    "lash_range": 96.0,
+    "tell_time": 0.7,
+    "lash_startup": 0.25,
+    "lash_active": 0.3,
+    "lash_recover": 0.6,
+    "lash_cooldown": 1.2,
+    "lash_size": [56.0, 30.0],
+    "lash_damage": 1,
+    "lash_knockback": [320.0, -220.0]
+  }
+}

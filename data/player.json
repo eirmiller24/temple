@@ -1,0 +1,57 @@
+{
+  "_comment": "Player tunables. Pixels, px/s, px/s^2 and seconds. F3 reloads from disk; F1 edits live. Missing keys are hard errors — add, never default.",
+  "max_hp": 6,
+  "start": {
+    "room": "test_entry_hall",
+    "entry": "main",
+    "items": {"sword": 1, "slingshot": 1, "grapple": 1, "lantern": 1, "dried_fruit": 2},
+    "weapon": "sword",
+    "slot_x": "slingshot",
+    "slot_y": "grapple"
+  },
+  "sprite": "knight",
+  "sprite_fit_tiles": 1.5,
+  "collider": {"width": 16, "height": 42, "crouch_height": 26},
+
+  "walk_speed": 85.0,
+  "run_speed": 185.0,
+  "walk_threshold": 0.6,
+  "accel": 1500.0,
+  "decel": 2200.0,
+  "air_accel": 1000.0,
+  "crouch_speed": 55.0,
+
+  "gravity": 1500.0,
+  "fall_gravity_mult": 1.35,
+  "terminal_velocity": 640.0,
+  "jump_velocity": -440.0,
+  "jump_cut_mult": 0.45,
+  "coyote_time": 0.1,
+  "jump_buffer": 0.12,
+
+  "dash_speed": 430.0,
+  "dash_time": 0.16,
+  "dash_cooldown": 0.4,
+  "dash_iframes": true,
+
+  "hurt_knockback": [180.0, -230.0],
+  "hurt_stun": 0.25,
+  "iframes": 1.0,
+  "hazard_damage": 1,
+  "hazard_knockback": [140.0, -320.0],
+
+  "swim_gravity_mult": 0.22,
+  "swim_speed": 105.0,
+  "swim_up_velocity": -190.0,
+  "swim_terminal": 110.0,
+
+  "aim_move_mult": 1.0,
+  "aim_indicator_length": 44.0,
+
+  "light_radius": 110.0,
+  "lantern_radius": 300.0,
+  "light_energy": 1.3,
+
+  "push_force": 1.0,
+  "interact_radius": 28.0
+}

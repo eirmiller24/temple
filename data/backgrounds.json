@@ -1,0 +1,76 @@
+{
+  "_comment": "Room backdrops: a fill colour plus parallax layers, far → near. Every layer key is required: texture, factor (0 = glued to the camera, 1 = glued to the world), tint, repeat_x, repeat_y, y_px (offset in art px), scale (draw magnification — the SSW packs are 32 px/tile-era art, so 1 at our 32 px tiles). 'greybox' must stay layer-less. Tuning rules (reviewed 2026-10-13 against the real image sizes): far layers 0.1–0.3, near 0.5–0.7; y_px puts a layer's silhouette top in the upper third of a 540 px view with the camera at the room top; repeat_y only for sheets that actually tile vertically (the SET3/SET4 cave fills) — the silhouette cutouts (SSWorlds_SET2, SET5, CastlePack, SET7, SSW2_SET2) do not; where a cutout stack has no opaque sky under it, color is the bottom-row colour of the nearest cutout so its lower edge blends when the camera scrolls past it. SSW_SET4_MainBackTile.png is a 32 px back-wall TILE SHEET (paint it in DecorBack), not a parallax texture. Sources: assets/backdrops/SOURCES.md.",
+  "greybox": {"color": "#101014", "parallax": []},
+  "black": {"color": "#050507", "parallax": []},
+  "cave_depths": {
+    "color": "#0c0b10",
+    "parallax": [
+      {"texture": "res://assets/backdrops/SSW_SET3_Background3.png", "factor": 0.25, "tint": "#8a8aa0", "repeat_x": true, "repeat_y": true, "y_px": 0, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW_SET3_Background4.png", "factor": 0.5, "tint": "#c0c0d0", "repeat_x": true, "repeat_y": true, "y_px": 0, "scale": 1}
+    ]
+  },
+  "cave_brown": {
+    "color": "#221f20",
+    "parallax": [
+      {"texture": "res://assets/backdrops/SSWorlds_SET2_Background_night1.png", "factor": 0.1, "tint": "#ffffff", "repeat_x": true, "repeat_y": true, "y_px": 0, "scale": 1},
+      {"texture": "res://assets/backdrops/SSWorlds_SET2_Background_night2.png", "factor": 0.25, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": 40, "scale": 1},
+      {"texture": "res://assets/backdrops/SSWorlds_SET2_Background_night3.png", "factor": 0.5, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": 40, "scale": 1}
+    ]
+  },
+  "mine": {
+    "color": "#0e0c0a",
+    "parallax": [
+      {"texture": "res://assets/backdrops/SSW_SET4_background1.png", "factor": 0.25, "tint": "#9a9a9a", "repeat_x": true, "repeat_y": true, "y_px": 0, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW_SET4_background2.png", "factor": 0.45, "tint": "#d0d0d8", "repeat_x": true, "repeat_y": true, "y_px": 0, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW_SET4_background3.png", "factor": 0.65, "tint": "#ffffff", "repeat_x": true, "repeat_y": true, "y_px": 0, "scale": 1}
+    ]
+  },
+  "stone_hall": {
+    "color": "#3e515e",
+    "parallax": [
+      {"texture": "res://assets/backdrops/SSW_SET5_Background2.png", "factor": 0.3, "tint": "#b0b0c8", "repeat_x": true, "repeat_y": false, "y_px": 0, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW_SET5_Background5.png", "factor": 0.6, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": 0, "scale": 1}
+    ]
+  },
+  "cave_pale": {
+    "color": "#52687c",
+    "parallax": [
+      {"texture": "res://assets/backdrops/SSW_SET5_Background1.png", "factor": 0.1, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -20, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW_SET5_Background3.png", "factor": 0.3, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": 0, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW_SET5_Background4.png", "factor": 0.5, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": 40, "scale": 1}
+    ]
+  },
+  "castle": {
+    "color": "#464344",
+    "parallax": [
+      {"texture": "res://assets/backdrops/SSW_CastlePack_Background3.png", "factor": 0.2, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -60, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW_CastlePack_Background4.png", "factor": 0.4, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -20, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW_CastlePack_Background5.png", "factor": 0.6, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": 60, "scale": 1}
+    ]
+  },
+  "roots": {
+    "color": "#29181c",
+    "parallax": [
+      {"texture": "res://assets/backdrops/SSW_SET7_Background5.png", "factor": 0.3, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -100, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW_SET7_Background6.png", "factor": 0.6, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -100, "scale": 1}
+    ]
+  },
+  "jungle_ruins_night": {
+    "color": "#193842",
+    "parallax": [
+      {"texture": "res://assets/backdrops/SSW2_SET2_background_night1.png", "factor": 0.1, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -300, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW2_SET2_background_night2.png", "factor": 0.3, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -160, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW2_SET2_background_night3.png", "factor": 0.5, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -90, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW2_SET2_background_night4.png", "factor": 0.7, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -30, "scale": 1}
+    ]
+  },
+  "jungle_ruins_day": {
+    "color": "#346878",
+    "parallax": [
+      {"texture": "res://assets/backdrops/SSW2_SET2_background_day1.png", "factor": 0.1, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -300, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW2_SET2_background_day2.png", "factor": 0.3, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -160, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW2_SET2_background_day3.png", "factor": 0.5, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -90, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW2_SET2_background_day4.png", "factor": 0.7, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -30, "scale": 1}
+    ]
+  }
+}

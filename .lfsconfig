@@ -1,0 +1,11 @@
+# Git LFS server: self-hosted rudolfs backed by S3, running on the host as a
+# podman quadlet service (~/.config/containers/systemd/rudolfs.container) --
+# the same server dungeon-platformer uses, with this repo's own path.
+#
+# localhost is correct on the dev machine. Anything that clones this repo
+# somewhere else (CI, another computer) gets ~130-byte pointer files instead
+# of images until the server is reachable from there; tests/run_all.sh
+# detects that state by content and skips the asset-decoding tests with a
+# loud banner rather than failing on them.
+[lfs]
+	url = "http://localhost:8080/api/eirmiller24/temple"

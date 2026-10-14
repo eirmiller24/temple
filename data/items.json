@@ -1,0 +1,74 @@
+{
+  "_comment": "Every item the inventory can hold (design_v2 §10). kind: weapon (B button), tool (assignable to X/Y), consumable (usable from the menu), key, passive. hide_use is the Fang trick (§9.2): Use still works but the menu never lists it.",
+  "items": {
+    "sword": {
+      "name": "Bandit's Sword",
+      "kind": "weapon",
+      "weapon": "sword",
+      "description": "A cast-off blade. Stands in for the real kit until the whip and axe exist.",
+      "stack": 1
+    },
+    "whip": {
+      "name": "Whip",
+      "kind": "weapon",
+      "weapon": "whip",
+      "description": "Short-range melee with extra reach, freely aimed. Pulls distant levers.",
+      "stack": 1
+    },
+    "slingshot": {
+      "name": "Slingshot",
+      "kind": "tool",
+      "assignable": true,
+      "use": "slingshot",
+      "description": "Long range, freely aimed, infinite ammo, low damage. Hits distant switches.",
+      "stack": 1
+    },
+    "grapple": {
+      "name": "Grappling Hook",
+      "kind": "tool",
+      "assignable": true,
+      "use": "grapple",
+      "description": "Free-fired. Pulls you to an anchored object, or the object to you if it isn't.",
+      "stack": 1
+    },
+    "lantern": {
+      "name": "Lantern",
+      "kind": "tool",
+      "assignable": true,
+      "usable": true,
+      "use": "lantern",
+      "description": "Light. Its batteries will die before the Knowledge Fang.",
+      "stack": 1
+    },
+    "ratty_boots": {
+      "name": "Ratty Boots",
+      "kind": "passive",
+      "speed_mult": 1.15,
+      "hazard_protect": true,
+      "description": "Taken off a dead bandit. Faster, and the ground hurts a little less.",
+      "stack": 1
+    },
+    "small_key": {
+      "name": "Small Key",
+      "kind": "key",
+      "description": "Opens one locked door.",
+      "stack": 99
+    },
+    "dried_fruit": {
+      "name": "Dried Fruit",
+      "kind": "consumable",
+      "usable": true,
+      "heal": 2,
+      "description": "Restores a little life. Hunger is story, not a mechanic.",
+      "stack": 9
+    },
+    "climbing_gear": {
+      "name": "Climbing Gear",
+      "kind": "tool",
+      "assignable": true,
+      "use": "climbing_gear",
+      "description": "Placeholder. Placing ropes from anchors is not built yet.",
+      "stack": 3
+    }
+  }
+}

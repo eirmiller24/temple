@@ -1,0 +1,30 @@
+{
+  "_comment": "Blue slime — same hopper brain as green_slime, a notch faster and tougher: shorter tell, longer and higher hop, 4 HP, wider aggro. Touch damage 1. Numbers in px, px/s, seconds.",
+  "behavior": "hopper",
+  "boss": false,
+  "sprite": "blue_slime",
+  "fit_tiles": 1.0,
+  "hp": 4,
+  "contact_damage": 1,
+  "contact_knockback": [210.0, -170.0],
+  "contact_rearm": 0.5,
+  "speed": 50.0,
+  "gravity": 1400.0,
+  "friction": 900.0,
+  "body_w": 26.0,
+  "body_h": 20.0,
+  "hurt_stun": 0.22,
+  "knockback_resist": 0.1,
+  "death_linger": 0.5,
+  "xp_placeholder": 3,
+  "hit_sfx": "hit_squish",
+  "hopper": {
+    "aggro_range": 210.0,
+    "idle_wait": 0.5,
+    "tell_time": 0.4,
+    "hop_vx": 220.0,
+    "hop_vy": -380.0,
+    "hop_cooldown": 0.55,
+    "min_air_time": 0.1
+  }
+}

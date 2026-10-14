@@ -1,0 +1,18 @@
+{
+  "_comment": "PixelLab move-effect sheet copied unchanged from dungeon-platformer (its effects/ai_provenance.json, M16, 2026-07-29). Schema per entry: file, tool, method, prompt, ids, date, notes, origin.",
+  "entries": [
+    {
+      "file": "smash_burst.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object (sidescroller, 64px, 16-frame review pack) -> one candidate selected -> animate_object v3 keep_first_frame=false frame_count=6 -> frames assembled left-to-right into a 384x64 single-row strip.",
+      "prompt": "flat-shaded pixel-art rock shatter burst, jagged earth-brown stone shards exploding outward, dust puffs, transparent background, no text, single frame of an impact effect",
+      "ids": {
+        "object_id": "17062876-d8e1-4761-b0b7-552bc172607f",
+        "animation_group": "e7b1f524-8319-4520-b012-14b4dda09d53"
+      },
+      "date": "2026-07-29",
+      "notes": "384x64, 6 frames of 64px. Spare (not yet in data/sprites.json).",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/effects/smash_burst.png (record: effects/ai_provenance.json)"
+    }
+  ]
+}

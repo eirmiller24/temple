@@ -1,0 +1,76 @@
+{
+  "_comment": "Skins dress a room's Collision kind layer at runtime (SkinLayer). tile_tint is required. tileset + terrains map each kind to [terrain_set, terrain] in that TileSet, or to one fixed tile via {\"atlas\": [source_id, x, y]}. Kinds without a mapping draw as greybox rects so collision is never invisible. 'greybox' must stay tileset-less: it is the permanent fallback, not a placeholder. SSW.tres terrain sets: 2=SSWorlds_SET2 3=SSW_SET3 4=SSW_SET4 5/6=SSW_SET5 8=SSW_SET7 (0,1,7 were SSWorlds_SET1/SSW_SET6, removed); SSW.tres atlas source 9 is the one flat teal water square from SSW2_SET2 build1 (the only flat water tile in any copied sheet). SSW2_SET2.tres (jungle_ruins): terrain set 0 = ground (mossy brick blob, source 0 build1) + platform (wooden plank walkway, source 1 build3); water is atlas tile [0, 10, 25]. No copied pack has spike art, so hazard stays unmapped everywhere (greybox draws it). Sources: assets/tilesets/SOURCES.md.",
+  "greybox": {
+    "tile_tint": "#ffffff"
+  },
+  "cave_brown": {
+    "tile_tint": "#ffffff",
+    "tileset": "res://assets/tilesets/SSW.tres",
+    "terrains": {
+      "solid": [2, 0], "breakable": [2, 0], "fortified": [2, 0],
+      "ramp_r": [2, 0], "ramp_l": [2, 0],
+      "oneway": [2, 1],
+      "water": {"atlas": [9, 10, 25]}
+    }
+  },
+  "cave_dark": {
+    "tile_tint": "#ffffff",
+    "tileset": "res://assets/tilesets/SSW.tres",
+    "terrains": {
+      "solid": [3, 0], "breakable": [3, 0], "fortified": [3, 0],
+      "ramp_r": [3, 0], "ramp_l": [3, 0],
+      "oneway": [3, 1],
+      "water": {"atlas": [9, 10, 25]}
+    }
+  },
+  "mine": {
+    "tile_tint": "#ffffff",
+    "tileset": "res://assets/tilesets/SSW.tres",
+    "terrains": {
+      "solid": [4, 0], "breakable": [4, 0], "fortified": [4, 0],
+      "ramp_r": [4, 0], "ramp_l": [4, 0],
+      "oneway": [4, 1],
+      "water": {"atlas": [9, 10, 25]}
+    }
+  },
+  "stone_dark": {
+    "tile_tint": "#ffffff",
+    "tileset": "res://assets/tilesets/SSW.tres",
+    "terrains": {
+      "solid": [5, 0], "breakable": [5, 0], "fortified": [5, 0],
+      "ramp_r": [5, 0], "ramp_l": [5, 0],
+      "oneway": [5, 1],
+      "water": {"atlas": [9, 10, 25]}
+    }
+  },
+  "stone_pale": {
+    "tile_tint": "#ffffff",
+    "tileset": "res://assets/tilesets/SSW.tres",
+    "terrains": {
+      "solid": [6, 0], "breakable": [6, 0], "fortified": [6, 0],
+      "ramp_r": [6, 0], "ramp_l": [6, 0],
+      "oneway": [6, 1],
+      "water": {"atlas": [9, 10, 25]}
+    }
+  },
+  "cave_roots": {
+    "tile_tint": "#ffffff",
+    "tileset": "res://assets/tilesets/SSW.tres",
+    "terrains": {
+      "solid": [8, 0], "breakable": [8, 0], "fortified": [8, 0],
+      "ramp_r": [8, 0], "ramp_l": [8, 0],
+      "oneway": [8, 1],
+      "water": {"atlas": [9, 10, 25]}
+    }
+  },
+  "jungle_ruins": {
+    "tile_tint": "#ffffff",
+    "tileset": "res://assets/tilesets/SSW2_SET2.tres",
+    "terrains": {
+      "solid": [0, 0], "breakable": [0, 0], "fortified": [0, 0],
+      "ramp_r": [0, 0], "ramp_l": [0, 0],
+      "oneway": [0, 1],
+      "water": {"atlas": [0, 10, 25]}
+    }
+  }
+}

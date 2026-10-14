@@ -1,0 +1,118 @@
+[gd_scene format=4]
+
+[ext_resource type="Script" path="res://game/rooms/nodes/room.gd" id="1_pi03u"]
+[ext_resource type="TileSet" path="res://game/rooms/tileset_kind.tres" id="2_sbquv"]
+[ext_resource type="TileSet" path="res://assets/tilesets/SSW.tres" id="3_87a67"]
+[ext_resource type="Script" path="res://game/rooms/nodes/room_entry.gd" id="4_mqcjq"]
+[ext_resource type="Script" path="res://game/rooms/nodes/room_exit.gd" id="5_a475a"]
+[ext_resource type="PackedScene" path="res://game/objects/pickup.tscn" id="6_neuvj"]
+[ext_resource type="Script" path="res://game/objects/pickup.gd" id="7_xaemo"]
+[ext_resource type="PackedScene" path="res://game/objects/lever.tscn" id="8_x3lr8"]
+[ext_resource type="Script" path="res://game/objects/lever.gd" id="9_jcoql"]
+[ext_resource type="PackedScene" path="res://game/objects/gate.tscn" id="10_2u4uv"]
+[ext_resource type="Script" path="res://game/objects/gate.gd" id="11_y0xck"]
+[ext_resource type="PackedScene" path="res://game/objects/save_shrine.tscn" id="12_w3km7"]
+[ext_resource type="Script" path="res://game/objects/save_shrine.gd" id="13_ukbhg"]
+[ext_resource type="PackedScene" path="res://game/objects/grapple_anchor.tscn" id="14_ehy18"]
+[ext_resource type="Script" path="res://game/objects/grapple_anchor.gd" id="15_hlcg0"]
+[ext_resource type="PackedScene" path="res://game/enemies/blue_slime.tscn" id="16_4fois"]
+[ext_resource type="Script" path="res://game/enemies/hopper.gd" id="17_u63ko"]
+[ext_resource type="PackedScene" path="res://game/enemies/mushroom.tscn" id="18_8vw0h"]
+[ext_resource type="Script" path="res://game/enemies/walker.gd" id="19_yrd6b"]
+[ext_resource type="PackedScene" path="res://game/enemies/riftmaw.tscn" id="20_aw2je"]
+[ext_resource type="Script" path="res://game/enemies/aberration.gd" id="21_ibjim"]
+
+[node name="test_gallery" type="Node2D" unique_id=161733029]
+script = ExtResource("1_pi03u")
+display_name = "Gallery"
+world_x = 58
+world_y = 10
+skin = "stone_dark"
+background = "mine"
+music = "galleries"
+darkness = 0.1
+
+[node name="Collision" type="TileMapLayer" parent="." unique_id=669795656]
+tile_map_data = PackedByteArray("AAAAAAAA//////////8BAAAAAAAAAAAAAAACAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAHAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAALAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAANAAAAAAAAAAAAAAAOAAAAAAAAAAAAAAAPAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAARAAAAAAAAAAAAAAASAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAVAAAAAAAAAAAAAAAWAAAAAAAAAAAAAAAXAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAZAAAAAAAAAAAAAAAaAAAAAAAAAAAAAAAbAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAdAAAAAAAAAAAAAAAeAAAAAAAAAAAAAAAfAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAhAAAAAAAAAAAAAAAiAAAAAAAAAAAAAAAjAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAlAAAAAAAAAAAAAAAmAAAAAAAAAAAAAAAnAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAApAAAAAAAAAAAAAAAqAAAAAAAAAAAAAAArAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAAtAAAAAAAAAAAAAAAAABEAAAAAAAAAAAABABEAAAAAAAAAAAACABEAAAAAAAAAAAADABEAAAAAAAAAAAAEABEAAAAAAAAAAAAFABEAAAAAAAAAAAAGABEAAAAAAAAAAAAHABEAAAAAAAAAAAAIABEAAAAAAAAAAAAJABEAAAAAAAAAAAAKABEAAAAAAAAAAAALABEAAAAAAAAAAAAMABEAAAAAAAAAAAANABEAAAAAAAAAAAAOABEAAAAAAAAAAAAPABEAAAAAAAAAAAAQABEAAAAAAAAAAAARABEAAAAAAAAAAAASABEAAAAAAAAAAAATABEAAAAAAAAAAAAUABEAAAAAAAAAAAAVABEAAAAAAAAAAAAWABEAAAAAAAAAAAAXABEAAAAAAAAAAAAYABEAAAAAAAAAAAAZABEAAAAAAAAAAAAaABEAAAAAAAAAAAAbABEAAAAAAAAAAAAcABEAAAAAAAAAAAAdABEAAAAAAAAAAAAeABEAAAAAAAAAAAAfABEAAAAAAAAAAAAgABEAAAAAAAAAAAAhABEAAAAAAAAAAAAiABEAAAAAAAAAAAAjABEAAAAAAAAAAAAkABEAAAAAAAAAAAAlABEAAAAAAAAAAAAmABEAAAAAAAAAAAAnABEAAAAAAAAAAAAoABEAAAAAAAAAAAApABEAAAAAAAAAAAAqABEAAAAAAAAAAAArABEAAAAAAAAAAAAsABEAAAAAAAAAAAAtABEAAAAAAAAAAAAAAAEA//////////8AAAIA//////////8AAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA8AAAAAAAAAAAAAABAAAAAAAAAAAAAtAAEAAAAAAAAAAAAtAAIAAAAAAAAAAAAtAAMAAAAAAAAAAAAtAAQAAAAAAAAAAAAtAAUAAAAAAAAAAAAtAAYAAAAAAAAAAAAtAAcAAAAAAAAAAAAtAAgAAAAAAAAAAAAtAAkAAAAAAAAAAAAtAAoAAAAAAAAAAAAtAAsA//////////8tAAwA//////////8tAA0A//////////8tAA4AAAAAAAAAAAAtAA8AAAAAAAAAAAAtABAAAAAAAAAAAAABAAMAAAAAAAAAAAACAAMAAAAAAAAAAAADAAMAAAAAAAAAAAAEAAMAAAAAAAAAAAAFAAMAAAAAAAAAAAAGAAMAAAAAAAAAAAABAAQAAAAAAAAAAAACAAQAAAAAAAAAAAADAAQAAAAAAAAAAAAEAAQAAAAAAAAAAAABAAUAAAAAAAAAAAACAAUAAAAAAAAAAAADAAUAAAAAAAAAAAAEAAUAAAAAAAAAAAABAAYAAAAAAAAAAAACAAYAAAAAAAAAAAADAAYAAAAAAAAAAAAEAAYAAAAAAAAAAAABAAcAAAAAAAAAAAACAAcAAAAAAAAAAAADAAcAAAAAAAAAAAAEAAcAAAAAAAAAAAABAAgAAAAAAAAAAAACAAgAAAAAAAAAAAADAAgAAAAAAAAAAAAEAAgAAAAAAAAAAAABAAkAAAAAAAAAAAACAAkAAAAAAAAAAAADAAkAAAAAAAAAAAAEAAkAAAAAAAAAAAABAAoAAAAAAAAAAAACAAoAAAAAAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAABAAsAAAAAAAAAAAACAAsAAAAAAAAAAAADAAsAAAAAAAAAAAAEAAsAAAAAAAAAAAABAAwAAAAAAAAAAAACAAwAAAAAAAAAAAADAAwAAAAAAAAAAAAEAAwAAAAAAAAAAAABAA0AAAAAAAAAAAACAA0AAAAAAAAAAAADAA0AAAAAAAAAAAAEAA0AAAAAAAAAAAABAA4AAAAAAAAAAAACAA4AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA4AAAAAAAAAAAABAA8AAAAAAAAAAAACAA8AAAAAAAAAAAADAA8AAAAAAAAAAAAEAA8AAAAAAAAAAAABABAAAAAAAAAAAAACABAAAAAAAAAAAAADABAAAAAAAAAAAAAEABAAAAAAAAAAAAAFAAgAAAABAAAAAAAGAAgAAAABAAAAAAAHAAgAAAABAAAAAAAIAAgAAAABAAAAAAAJAAgAAAABAAAAAAAFAAwAAAABAAAAAAAGAAwAAAABAAAAAAAHAAwAAAABAAAAAAAIAAwAAAABAAAAAAAJAAwAAAABAAAAAAAMAA8AAAAAAAAAAAANAA8AAAAAAAAAAAAOAA8AAAAAAAAAAAAPAA8AAAAAAAAAAAAQAA8AAAAAAAAAAAARAA8AAAAAAAAAAAASAA8AAAAAAAAAAAATAA8AAAAAAAAAAAAUAA8AAAAAAAAAAAAMABAAAAAAAAAAAAANABAAAAAAAAAAAAAOABAAAAAAAAAAAAAPABAAAAAAAAAAAAAQABAAAAAAAAAAAAARABAAAAAAAAAAAAASABAAAAAAAAAAAAATABAAAAAAAAAAAAAUABAAAAAAAAAAAAAaAA0AAAABAAAAAAAbAA0AAAABAAAAAAAcAA0AAAABAAAAAAAdAA0AAAABAAAAAAAeAA0AAAABAAAAAAAiAAsAAAABAAAAAAAjAAsAAAABAAAAAAAkAAsAAAABAAAAAAAlAAsAAAABAAAAAAAmAAsAAAABAAAAAAAoAA4AAAAAAAAAAAApAA4AAAAAAAAAAAAqAA4AAAAAAAAAAAArAA4AAAAAAAAAAAAsAA4AAAAAAAAAAAAoAA8AAAAAAAAAAAApAA8AAAAAAAAAAAAqAA8AAAAAAAAAAAArAA8AAAAAAAAAAAAsAA8AAAAAAAAAAAAoABAAAAAAAAAAAAApABAAAAAAAAAAAAAqABAAAAAAAAAAAAArABAAAAAAAAAAAAAsABAAAAAAAAAAAAAcAAoAAAACAAAAAAAdAAoAAAACAAAAAAAeAAoAAAACAAAAAAAfAAoAAAACAAAAAAAgAAoAAAACAAAAAAAcAAsAAAACAAAAAAAdAAsAAAACAAAAAAAeAAsAAAACAAAAAAAfAAsAAAACAAAAAAAgAAsAAAACAAAAAAAcAAwAAAACAAAAAAAdAAwAAAACAAAAAAAeAAwA//////////8fAAwAAAACAAAAAAAgAAwAAAACAAAAAAA=")
+tile_set = ExtResource("2_sbquv")
+
+[node name="DecorBack" type="TileMapLayer" parent="." unique_id=383302955]
+z_index = -2
+tile_set = ExtResource("3_87a67")
+
+[node name="DecorFront" type="TileMapLayer" parent="." unique_id=1868301669]
+z_index = 2
+tile_set = ExtResource("3_87a67")
+
+[node name="Props" type="Node2D" parent="." unique_id=302689683]
+z_index = 1
+
+[node name="Entries" type="Node2D" parent="." unique_id=449591319]
+
+[node name="main" type="Marker2D" parent="Entries" unique_id=416683511]
+position = Vector2(80, 96)
+script = ExtResource("4_mqcjq")
+
+[node name="from_cistern" type="Marker2D" parent="Entries" unique_id=1315170715]
+position = Vector2(1360, 448)
+script = ExtResource("4_mqcjq")
+id = "from_cistern"
+facing = -1
+
+[node name="Exits" type="Node2D" parent="." unique_id=410579753]
+
+[node name="exit_to_test_shaft" type="Area2D" parent="Exits" unique_id=644958802]
+script = ExtResource("5_a475a")
+to_room = "test_shaft"
+direction = "left"
+
+[node name="exit_to_test_cistern" type="Area2D" parent="Exits" unique_id=594764967]
+position = Vector2(1440, 352)
+script = ExtResource("5_a475a")
+to_room = "test_cistern"
+
+[node name="Objects" type="Node2D" parent="." unique_id=1492402771]
+
+[node name="pocket_fruit" type="Node2D" parent="Objects" unique_id=713441070 instance=ExtResource("6_neuvj")]
+position = Vector2(976, 416)
+script = ExtResource("7_xaemo")
+item_id = "dried_fruit"
+count = 2
+flag = "gallery_pocket"
+
+[node name="door_lever" type="Node2D" parent="Objects" unique_id=2071102397 instance=ExtResource("8_x3lr8")]
+position = Vector2(432, 480)
+script = ExtResource("9_jcoql")
+flag = "gallery_door_lever"
+
+[node name="door_gate" type="Node2D" parent="Objects" unique_id=965147068 instance=ExtResource("10_2u4uv")]
+position = Vector2(1424, 448)
+script = ExtResource("11_y0xck")
+
+[node name="shrine_gallery" type="Node2D" parent="Objects" unique_id=471378158 instance=ExtResource("12_w3km7")]
+position = Vector2(144, 96)
+script = ExtResource("13_ukbhg")
+
+[node name="anchor_a" type="Node2D" parent="Objects" unique_id=1409465562 instance=ExtResource("14_ehy18")]
+position = Vector2(720, 288)
+script = ExtResource("15_hlcg0")
+
+[node name="Enemies" type="Node2D" parent="." unique_id=1822080175]
+
+[node name="slime_b" type="CharacterBody2D" parent="Enemies" unique_id=1903453231 instance=ExtResource("16_4fois")]
+position = Vector2(528, 480)
+script = ExtResource("17_u63ko")
+species = "blue_slime"
+facing = -1
+
+[node name="shroom_b" type="CharacterBody2D" parent="Enemies" unique_id=42719074 instance=ExtResource("18_8vw0h")]
+position = Vector2(784, 544)
+script = ExtResource("19_yrd6b")
+species = "mushroom"
+facing = -1
+
+[node name="riftmaw" type="CharacterBody2D" parent="Enemies" unique_id=956814955 instance=ExtResource("20_aw2je")]
+position = Vector2(1168, 544)
+script = ExtResource("21_ibjim")
+species = "riftmaw"
+facing = -1

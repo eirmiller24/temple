@@ -1,0 +1,155 @@
+{
+  "_comment": "Sprite manifest (SpriteDb). Per entry: frame_w/frame_h (cell px), ground_y (row the feet stand on), body_h (real body height — owners fit to it), faces_left, scale, optional default sheet, clips {name: {sheet?, row, frames (int or [indices]), fps, loop}}. Purchased art lives under assets/<class>/ with a SOURCES.md entry; anything AI-generated lives under assets/ai_placeholder/<class>/ with an ai_provenance.json entry — and nowhere else.",
+  "players": {
+    "knight": {
+      "_source": "assets/character/SOURCES.md — Knight by @Jump_Button (placeholder for the archaeology student)",
+      "frame_w": 100, "frame_h": 64, "ground_y": 64, "body_h": 61, "faces_left": false, "scale": 1.0,
+      "clips": {
+        "idle":        {"sheet": "res://assets/character/Knight_player/Idle_KG_1.png", "frames": 4, "fps": 6, "loop": true},
+        "walk":        {"sheet": "res://assets/character/Knight_player/Walking_KG_1.png", "frames": 7, "fps": 9, "loop": true},
+        "run":         {"sheet": "res://assets/character/Knight_player/Walking_KG_2.png", "frames": 7, "fps": 14, "loop": true},
+        "jump":        {"sheet": "res://assets/character/Knight_player/Jump_KG_1.png", "frames": 6, "fps": 12, "loop": false},
+        "fall":        {"sheet": "res://assets/character/Knight_player/Fall_KG_1.png", "frames": 3, "fps": 8, "loop": true},
+        "land":        {"sheet": "res://assets/character/Knight_player/Landing_KG_1.png", "frames": 4, "fps": 16, "loop": false},
+        "crouch":      {"sheet": "res://assets/character/Knight_player/Crouching_KG_1.png", "frames": 3, "fps": 16, "loop": false},
+        "crouch_idle": {"sheet": "res://assets/character/Knight_player/Crouching_Idle_KG_1.png", "frames": 3, "fps": 5, "loop": true},
+        "crawl":       {"sheet": "res://assets/character/Knight_player/Crouching_Walk_KG_1.png", "frames": 4, "fps": 8, "loop": true},
+        "dash":        {"sheet": "res://assets/character/Knight_player/Dashing_KG_1.png", "frames": 4, "fps": 18, "loop": false},
+        "attack":      {"sheet": "res://assets/character/Knight_player/Attack_KG_1.png", "frames": 6, "fps": 20, "loop": false},
+        "attack2":     {"sheet": "res://assets/character/Knight_player/Attack_KG_2.png", "frames": 6, "fps": 20, "loop": false},
+        "attack_air":  {"sheet": "res://assets/character/Knight_player/Attack_KG_4.png", "frames": 5, "fps": 18, "loop": false},
+        "hurt":        {"sheet": "res://assets/character/Knight_player/Hurt_KG_1.png", "frames": 4, "fps": 14, "loop": false},
+        "death":       {"sheet": "res://assets/character/Knight_player/Dying_KG_1.png", "frames": 5, "fps": 8, "loop": false},
+        "push":        {"sheet": "res://assets/character/Knight_player/Pushing_KG_1.png", "frames": 5, "fps": 8, "loop": true},
+        "use_item":    {"sheet": "res://assets/character/Knight_player/Drinking_KG_1.png", "frames": 7, "fps": 10, "loop": false},
+        "aim":         {"sheet": "res://assets/character/Knight_player/Shield_Up_KG_1.png", "frames": [0], "fps": 1, "loop": true},
+        "swim":        {"sheet": "res://assets/character/Knight_player/Fall_KG_1.png", "frames": 3, "fps": 5, "loop": true},
+        "ladder":      {"sheet": "res://assets/character/Knight_player/ladders_KG_1.png", "frames": 4, "fps": 8, "loop": true},
+        "wall":        {"sheet": "res://assets/character/Knight_player/Wallside_KG_1.png", "frames": 2, "fps": 6, "loop": true},
+        "ledge":       {"sheet": "res://assets/character/Knight_player/Ledge_Grab_KG_1.png", "frames": 6, "fps": 10, "loop": false}
+      }
+    }
+  },
+  "enemies": {
+    "green_slime": {
+      "_source": "assets/enemies/SOURCES.md — Forest Monsters pack (with VFX)",
+      "frame_w": 64, "frame_h": 64, "ground_y": 64, "body_h": 22, "faces_left": true, "scale": 1.5,
+      "clips": {
+        "idle":   {"sheet": "res://assets/enemies/forest_monsters/Green_Slime-Idle.png", "frames": 7, "fps": 8, "loop": true},
+        "walk":   {"sheet": "res://assets/enemies/forest_monsters/Green_Slime-Run.png", "frames": 6, "fps": 10, "loop": true},
+        "jump":   {"sheet": "res://assets/enemies/forest_monsters/Green_Slime-Run_Jump.png", "frames": 11, "fps": 14, "loop": false},
+        "tell":   {"sheet": "res://assets/enemies/forest_monsters/Green_Slime-Idle_Jump.png", "frames": [0, 1, 2, 3], "fps": 10, "loop": true},
+        "attack": {"sheet": "res://assets/enemies/forest_monsters/Green_Slime-Attack_Ground.png", "frames": 12, "fps": 16, "loop": false},
+        "hurt":   {"sheet": "res://assets/enemies/forest_monsters/Green_Slime-Hit_Ground.png", "frames": 4, "fps": 14, "loop": false},
+        "death":  {"sheet": "res://assets/enemies/forest_monsters/Green_Slime-Die_Ground.png", "frames": 11, "fps": 14, "loop": false}
+      }
+    },
+    "blue_slime": {
+      "frame_w": 64, "frame_h": 64, "ground_y": 64, "body_h": 22, "faces_left": true, "scale": 1.5,
+      "clips": {
+        "idle":   {"sheet": "res://assets/enemies/forest_monsters/Blue_Slime-Idle.png", "frames": 7, "fps": 8, "loop": true},
+        "walk":   {"sheet": "res://assets/enemies/forest_monsters/Blue_Slime-Run.png", "frames": 6, "fps": 10, "loop": true},
+        "jump":   {"sheet": "res://assets/enemies/forest_monsters/Blue_Slime-Run_Jump.png", "frames": 11, "fps": 14, "loop": false},
+        "tell":   {"sheet": "res://assets/enemies/forest_monsters/Blue_Slime-Idle_Jump.png", "frames": [0, 1, 2, 3], "fps": 10, "loop": true},
+        "attack": {"sheet": "res://assets/enemies/forest_monsters/Blue_Slime-Attack_Ground.png", "frames": 12, "fps": 16, "loop": false},
+        "hurt":   {"sheet": "res://assets/enemies/forest_monsters/Blue_Slime-Hit_Ground.png", "frames": 4, "fps": 14, "loop": false},
+        "death":  {"sheet": "res://assets/enemies/forest_monsters/Blue_Slime-Die_Ground.png", "frames": 11, "fps": 14, "loop": false}
+      }
+    },
+    "orange_slime": {
+      "frame_w": 64, "frame_h": 64, "ground_y": 64, "body_h": 22, "faces_left": true, "scale": 1.5,
+      "clips": {
+        "idle":   {"sheet": "res://assets/enemies/forest_monsters/Orange_Slime-Idle.png", "frames": 7, "fps": 8, "loop": true},
+        "walk":   {"sheet": "res://assets/enemies/forest_monsters/Orange_Slime-Run.png", "frames": 6, "fps": 10, "loop": true},
+        "jump":   {"sheet": "res://assets/enemies/forest_monsters/Orange_Slime-Run_Jump.png", "frames": 11, "fps": 14, "loop": false},
+        "tell":   {"sheet": "res://assets/enemies/forest_monsters/Orange_Slime-Idle_Jump.png", "frames": [0, 1, 2, 3], "fps": 10, "loop": true},
+        "attack": {"sheet": "res://assets/enemies/forest_monsters/Orange_Slime-Attack_Ground.png", "frames": 12, "fps": 16, "loop": false},
+        "hurt":   {"sheet": "res://assets/enemies/forest_monsters/Orange_Slime-Hit_Ground.png", "frames": 4, "fps": 14, "loop": false},
+        "death":  {"sheet": "res://assets/enemies/forest_monsters/Orange_Slime-Die_Ground.png", "frames": 11, "fps": 14, "loop": false}
+      }
+    },
+    "mushroom": {
+      "frame_w": 80, "frame_h": 64, "ground_y": 64, "body_h": 33, "faces_left": true, "scale": 1.5,
+      "clips": {
+        "idle":   {"sheet": "res://assets/enemies/forest_monsters/Mushroom-Idle.png", "frames": 7, "fps": 8, "loop": true},
+        "walk":   {"sheet": "res://assets/enemies/forest_monsters/Mushroom-Run.png", "frames": 8, "fps": 12, "loop": true},
+        "tell":   {"sheet": "res://assets/enemies/forest_monsters/Mushroom-Attack.png", "frames": [0, 1, 2], "fps": 8, "loop": true},
+        "attack": {"sheet": "res://assets/enemies/forest_monsters/Mushroom-Attack.png", "frames": 10, "fps": 14, "loop": false},
+        "spore":  {"sheet": "res://assets/enemies/forest_monsters/Mushroom-AttackWithStun.png", "frames": 24, "fps": 16, "loop": false},
+        "hurt":   {"sheet": "res://assets/enemies/forest_monsters/Mushroom-Hit.png", "frames": 5, "fps": 14, "loop": false},
+        "death":  {"sheet": "res://assets/enemies/forest_monsters/Mushroom-Die.png", "frames": 15, "fps": 14, "loop": false}
+      }
+    },
+    "bush_lasher": {
+      "frame_w": 90, "frame_h": 64, "ground_y": 64, "body_h": 27, "faces_left": true, "scale": 1.6,
+      "clips": {
+        "idle":   {"sheet": "res://assets/enemies/forest_monsters/Bush_Monster-Idle.png", "frames": 8, "fps": 8, "loop": true},
+        "walk":   {"sheet": "res://assets/enemies/forest_monsters/Bush_Monster-Run.png", "frames": 7, "fps": 10, "loop": true},
+        "tell":   {"sheet": "res://assets/enemies/forest_monsters/Bush_Monster-AttackTimeFrame.png", "frames": 1, "fps": 8, "loop": true},
+        "attack": {"sheet": "res://assets/enemies/forest_monsters/Bush_Monster-Attack.png", "frames": 18, "fps": 18, "loop": false},
+        "hurt":   {"sheet": "res://assets/enemies/forest_monsters/Bush_Monster-Hit.png", "frames": 4, "fps": 14, "loop": false},
+        "death":  {"sheet": "res://assets/enemies/forest_monsters/Bush_Monster-Die.png", "frames": 14, "fps": 14, "loop": false}
+      }
+    },
+    "stone_guardian": {
+      "_source": "assets/ai_placeholder/enemies/ai_provenance.json — PixelLab, quarantined",
+      "sheet": "res://assets/ai_placeholder/enemies/stone_guardian.png",
+      "frame_w": 128, "frame_h": 128, "ground_y": 128, "body_h": 120, "faces_left": false, "scale": 1.0,
+      "clips": {
+        "idle":   {"row": 0, "frames": 4, "fps": 4, "loop": true},
+        "walk":   {"row": 1, "frames": 6, "fps": 6, "loop": true},
+        "tell":   {"row": 2, "frames": 4, "fps": 8, "loop": true},
+        "attack": {"row": 3, "frames": 6, "fps": 12, "loop": false},
+        "hurt":   {"row": 4, "frames": 4, "fps": 10, "loop": false}
+      }
+    },
+    "riftmaw": {
+      "_source": "assets/ai_placeholder/enemies/ai_provenance.json — PixelLab, quarantined",
+      "sheet": "res://assets/ai_placeholder/enemies/riftmaw.png",
+      "frame_w": 128, "frame_h": 128, "ground_y": 128, "body_h": 110, "faces_left": false, "scale": 1.0,
+      "clips": {
+        "idle":   {"row": 0, "frames": 4, "fps": 4, "loop": true},
+        "walk":   {"row": 1, "frames": 6, "fps": 8, "loop": true},
+        "tell":   {"row": 2, "frames": 4, "fps": 8, "loop": true},
+        "attack": {"row": 3, "frames": 6, "fps": 12, "loop": false},
+        "hurt":   {"row": 4, "frames": 4, "fps": 10, "loop": false}
+      }
+    }
+  },
+  "objects": {
+    "push_block": {
+      "_source": "assets/ai_placeholder/objects/ai_provenance.json — PixelLab, quarantined",
+      "sheet": "res://assets/ai_placeholder/objects/box.png",
+      "frame_w": 64, "frame_h": 64, "ground_y": 64, "body_h": 64, "scale": 0.5,
+      "clips": {"idle": {"row": 0, "frames": 1, "fps": 1, "loop": true}}
+    },
+    "boulder": {
+      "sheet": "res://assets/ai_placeholder/objects/boulder.png",
+      "frame_w": 64, "frame_h": 64, "ground_y": 64, "body_h": 64, "scale": 0.5,
+      "clips": {"idle": {"row": 0, "frames": 1, "fps": 1, "loop": true}}
+    },
+    "button": {
+      "sheet": "res://assets/ai_placeholder/objects/button.png",
+      "frame_w": 64, "frame_h": 64, "ground_y": 64, "body_h": 64, "scale": 0.5,
+      "clips": {
+        "raised":  {"row": 0, "frames": 1, "fps": 1, "loop": true},
+        "pressed": {"row": 1, "frames": 1, "fps": 1, "loop": true}
+      }
+    },
+    "lever": {
+      "sheet": "res://assets/ai_placeholder/stations/training_lever.png",
+      "frame_w": 36, "frame_h": 49, "ground_y": 49, "body_h": 49, "scale": 1.0,
+      "clips": {"idle": {"row": 0, "frames": 1, "fps": 1, "loop": true}}
+    },
+    "chest": {
+      "sheet": "res://assets/ai_placeholder/pickups/chest.png",
+      "frame_w": 58, "frame_h": 46, "ground_y": 46, "body_h": 46, "scale": 0.6,
+      "clips": {"idle": {"row": 0, "frames": 1, "fps": 1, "loop": true}}
+    },
+    "save_shrine": {
+      "sheet": "res://assets/ai_placeholder/stations/beacon.png",
+      "frame_w": 236, "frame_h": 119, "ground_y": 119, "body_h": 119, "scale": 0.45,
+      "clips": {"idle": {"row": 0, "frames": 1, "fps": 1, "loop": true}}
+    }
+  }
+}

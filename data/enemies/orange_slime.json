@@ -1,0 +1,30 @@
+{
+  "_comment": "Orange slime — the heavy hopper: same brain as green_slime but slow and deliberate, with a long tell, a short low hop and TOUCH DAMAGE 2 (a third of the player's 6 HP). 5 HP, some knockback resistance. Numbers in px, px/s, seconds.",
+  "behavior": "hopper",
+  "boss": false,
+  "sprite": "orange_slime",
+  "fit_tiles": 1.1,
+  "hp": 5,
+  "contact_damage": 2,
+  "contact_knockback": [240.0, -180.0],
+  "contact_rearm": 0.6,
+  "speed": 30.0,
+  "gravity": 1400.0,
+  "friction": 900.0,
+  "body_w": 28.0,
+  "body_h": 22.0,
+  "hurt_stun": 0.3,
+  "knockback_resist": 0.35,
+  "death_linger": 0.5,
+  "xp_placeholder": 5,
+  "hit_sfx": "hit_squish",
+  "hopper": {
+    "aggro_range": 170.0,
+    "idle_wait": 0.8,
+    "tell_time": 0.6,
+    "hop_vx": 130.0,
+    "hop_vy": -300.0,
+    "hop_cooldown": 0.9,
+    "min_air_time": 0.1
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "_comment": "Attack-button weapons. Timings in seconds; hitbox [w, h] px, placed `reach` px from the player's centre along the attack direction. aimable weapons follow free-aim (LT); the others swing in the facing direction.",
+  "sword": {
+    "damage": 1,
+    "reach": 22.0,
+    "hitbox": [36.0, 28.0],
+    "startup": 0.06,
+    "active": 0.12,
+    "recovery": 0.14,
+    "knockback": [230.0, -120.0],
+    "hitstop": 0.05,
+    "aimable": false,
+    "clip": "attack",
+    "sfx": "swing"
+  },
+  "whip": {
+    "damage": 1,
+    "reach": 46.0,
+    "hitbox": [76.0, 14.0],
+    "startup": 0.09,
+    "active": 0.1,
+    "recovery": 0.22,
+    "knockback": [180.0, -80.0],
+    "hitstop": 0.04,
+    "aimable": true,
+    "clip": "attack",
+    "sfx": "whip"
+  }
+}

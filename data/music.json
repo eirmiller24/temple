@@ -1,0 +1,48 @@
+{
+  "_comment": "Named music tracks. Rooms name a track in their `music` field; the same name across a seam keeps playing. A track with no stream is deliberate silence. Sources: assets/music/SOURCES.md.",
+  "base_db": -8.0,
+  "crossfade_s": 1.5,
+  "tracks": {
+    "silence": {},
+    "title": {
+      "stream": "res://assets/music/Sketchbook 2024-09-04_LOOP.ogg",
+      "volume_db": 0.0,
+      "loop": true
+    },
+    "collapse": {
+      "stream": "res://assets/music/Sketchbook 2024-06-19.ogg",
+      "volume_db": 0.0,
+      "loop": true
+    },
+    "galleries": {
+      "stream": "res://assets/music/Sketchbook 2024-08-07.ogg",
+      "volume_db": 0.0,
+      "loop": true
+    },
+    "cistern": {
+      "stream": "res://assets/music/Sketchbook 2024-11-30.ogg",
+      "volume_db": -2.0,
+      "loop": true
+    },
+    "vault": {
+      "stream": "res://assets/music/Sketchbook 2024-12-26.ogg",
+      "volume_db": 0.0,
+      "loop": true
+    },
+    "deep": {
+      "stream": "res://assets/music/Sketchbook 2025-11-13.ogg",
+      "volume_db": 0.0,
+      "loop": true
+    },
+    "quiet": {
+      "stream": "res://assets/music/Sketchbook 2024-03-20_01.ogg",
+      "volume_db": -3.0,
+      "loop": true
+    },
+    "boss": {
+      "stream": "res://assets/music/Sketchbook 2024-02-07.ogg",
+      "volume_db": 1.0,
+      "loop": true
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# Binary assets -- stored in Git LFS (see .lfsconfig).
+#
+# Run `git lfs install` once per clone BEFORE the first commit: without it,
+# files still become pointers on commit but nothing is ever pushed to the
+# server, so they would exist only in your local .git/lfs.
+#
+# Same layout as dungeon-platformer's .gitattributes. .import files (Godot
+# metadata) and every JSON under data/ stay in git proper so that the
+# room-registry drift guard can diff them as text.
+*.png   filter=lfs diff=lfs merge=lfs -text
+*.jpg   filter=lfs diff=lfs merge=lfs -text
+*.jpeg  filter=lfs diff=lfs merge=lfs -text
+*.webp  filter=lfs diff=lfs merge=lfs -text
+*.tga   filter=lfs diff=lfs merge=lfs -text
+*.xcf   filter=lfs diff=lfs merge=lfs -text
+*.psd   filter=lfs diff=lfs merge=lfs -text
+*.ogg   filter=lfs diff=lfs merge=lfs -text
+*.wav   filter=lfs diff=lfs merge=lfs -text
+*.mp3   filter=lfs diff=lfs merge=lfs -text
+*.ttf   filter=lfs diff=lfs merge=lfs -text
+*.otf   filter=lfs diff=lfs merge=lfs -text

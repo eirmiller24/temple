@@ -1,0 +1,122 @@
+[gd_scene format=4]
+
+[ext_resource type="Script" path="res://game/rooms/nodes/room.gd" id="1_twrcb"]
+[ext_resource type="TileSet" path="res://game/rooms/tileset_kind.tres" id="2_qgdrg"]
+[ext_resource type="TileSet" path="res://assets/tilesets/SSW.tres" id="3_wc247"]
+[ext_resource type="Script" path="res://game/rooms/nodes/room_entry.gd" id="4_0wsx2"]
+[ext_resource type="Script" path="res://game/rooms/nodes/room_exit.gd" id="5_n0kcr"]
+[ext_resource type="PackedScene" path="res://game/objects/push_block.tscn" id="6_du5yi"]
+[ext_resource type="Script" path="res://game/objects/push_block.gd" id="7_4jkru"]
+[ext_resource type="PackedScene" path="res://game/objects/floor_button.tscn" id="8_d3eap"]
+[ext_resource type="Script" path="res://game/objects/floor_button.gd" id="9_bcr65"]
+[ext_resource type="PackedScene" path="res://game/objects/gate.tscn" id="10_wbecn"]
+[ext_resource type="Script" path="res://game/objects/gate.gd" id="11_tsjwx"]
+[ext_resource type="PackedScene" path="res://game/objects/grapple_anchor.tscn" id="12_w4ncf"]
+[ext_resource type="Script" path="res://game/objects/grapple_anchor.gd" id="13_lqtek"]
+[ext_resource type="PackedScene" path="res://game/objects/pickup.tscn" id="14_t3qdx"]
+[ext_resource type="Script" path="res://game/objects/pickup.gd" id="15_miycl"]
+[ext_resource type="PackedScene" path="res://game/objects/save_shrine.tscn" id="16_k3sa2"]
+[ext_resource type="Script" path="res://game/objects/save_shrine.gd" id="17_nnyfr"]
+[ext_resource type="PackedScene" path="res://game/objects/lever.tscn" id="18_uly2s"]
+[ext_resource type="Script" path="res://game/objects/lever.gd" id="19_8c6nk"]
+[ext_resource type="PackedScene" path="res://game/enemies/green_slime.tscn" id="20_kdpe2"]
+[ext_resource type="Script" path="res://game/enemies/hopper.gd" id="21_th1c2"]
+[ext_resource type="PackedScene" path="res://game/enemies/mushroom.tscn" id="22_3ufss"]
+[ext_resource type="Script" path="res://game/enemies/walker.gd" id="23_n5u3f"]
+
+[node name="test_entry_hall" type="Node2D" unique_id=1994153477]
+script = ExtResource("1_twrcb")
+display_name = "Entry Hall"
+world_x = 0
+world_y = 0
+skin = "cave_dark"
+background = "cave_depths"
+music = "collapse"
+
+[node name="Collision" type="TileMapLayer" parent="." unique_id=1286227559]
+tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAACAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAHAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAALAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAANAAAAAAAAAAAAAAAOAAAAAAAAAAAAAAAPAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAARAAAAAAAAAAAAAAASAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAVAAAAAAAAAAAAAAAWAAAAAAAAAAAAAAAXAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAZAAAAAAAAAAAAAAAaAAAAAAAAAAAAAAAbAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAdAAAAAAAAAAAAAAAeAAAAAAAAAAAAAAAfAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAhAAAAAAAAAAAAAAAiAAAAAAAAAAAAAAAjAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAlAAAAAAAAAAAAAAAmAAAAAAAAAAAAAAAnAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAApAAAAAAAAAAAAAAAqAAAAAAAAAAAAAAArAAAAAAAAAAAAAAAAABEAAAAAAAAAAAABABEAAAAAAAAAAAACABEAAAAAAAAAAAADABEAAAAAAAAAAAAEABEAAAAAAAAAAAAFABEAAAAAAAAAAAAGABEAAAAAAAAAAAAHABEAAAAAAAAAAAAIABEAAAAAAAAAAAAJABEAAAAAAAAAAAAKABEAAAAAAAAAAAALABEAAAAAAAAAAAAMABEAAAAAAAAAAAANABEAAAAAAAAAAAAOABEAAAAAAAAAAAAPABEAAAAAAAAAAAAQABEAAAAAAAAAAAARABEAAAAAAAAAAAASABEAAAAAAAAAAAATABEAAAAAAAAAAAAUABEAAAAAAAAAAAAVABEAAAAAAAAAAAAWABEAAAAAAAAAAAAXABEAAAAAAAAAAAAYABEAAAAAAAAAAAAZABEAAAAAAAAAAAAaABEAAAAAAAAAAAAbABEAAAAAAAAAAAAcABEAAAAAAAAAAAAdABEAAAAAAAAAAAAeABEAAAAAAAAAAAAfABEAAAAAAAAAAAAgABEAAAAAAAAAAAAhABEAAAAAAAAAAAAiABEAAAAAAAAAAAAjABEAAAAAAAAAAAAkABEAAAAAAAAAAAAlABEAAAAAAAAAAAAmABEAAAAAAAAAAAAnABEAAAAAAAAAAAAoABEAAAAAAAAAAAApABEAAAAAAAAAAAAqABEAAAAAAAAAAAArABEAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA8AAAAAAAAAAAAAABAAAAAAAAAAAAArAAEAAAAAAAAAAAArAAIAAAAAAAAAAAArAAMAAAAAAAAAAAArAAQAAAAAAAAAAAArAAUAAAAAAAAAAAArAAYAAAAAAAAAAAArAAcAAAAAAAAAAAArAAgAAAAAAAAAAAArAAkAAAAAAAAAAAArAAoAAAAAAAAAAAArAAsAAAAAAAAAAAArAAwAAAAAAAAAAAArAA0AAAAAAAAAAAArAA4A//////////8rAA8A//////////8rABAA//////////8BAA4AAAAAAAAAAAACAA4AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA4AAAAAAAAAAAAFAA4AAAAAAAAAAAAGAA4AAAAAAAAAAAAHAA4AAAAAAAAAAAAIAA4AAAAAAAAAAAABAA8AAAAAAAAAAAACAA8AAAAAAAAAAAADAA8AAAAAAAAAAAAEAA8AAAAAAAAAAAAFAA8AAAAAAAAAAAAGAA8AAAAAAAAAAAAHAA8AAAAAAAAAAAAIAA8AAAAAAAAAAAABABAAAAAAAAAAAAACABAAAAAAAAAAAAADABAAAAAAAAAAAAAEABAAAAAAAAAAAAAFABAAAAAAAAAAAAAGABAAAAAAAAAAAAAHABAAAAAAAAAAAAAIABAAAAAAAAAAAAAJABAAAAAAAAAAAAAKABAAAAAAAAAAAAALABAAAAAAAAAAAAAMABAAAAAAAAAAAAANABAAAAAAAAAAAAAOABAAAAAAAAAAAAAPAA8AAAAEAAAAAAAQAA8AAAAEAAAAAAARAA8AAAAEAAAAAAASAA8AAAAEAAAAAAATAA8AAAAEAAAAAAAUAA8AAAAEAAAAAAAVAA8AAAAEAAAAAAAWAA8AAAAEAAAAAAAPABAAAAAEAAAAAAAQABAAAAAEAAAAAAARABAAAAAEAAAAAAASABAAAAAEAAAAAAATABAAAAAEAAAAAAAUABAAAAAEAAAAAAAVABAAAAAEAAAAAAAWABAAAAAEAAAAAAAXAA8AAAAAAAAAAAAYAA8AAAAAAAAAAAAZAA8AAAAAAAAAAAAaAA8AAAAAAAAAAAAbAA8AAAAAAAAAAAAcAA8AAAAAAAAAAAAdAA8AAAAAAAAAAAAeAA8AAAAAAAAAAAAXABAAAAAAAAAAAAAYABAAAAAAAAAAAAAZABAAAAAAAAAAAAAaABAAAAAAAAAAAAAbABAAAAAAAAAAAAAcABAAAAAAAAAAAAAdABAAAAAAAAAAAAAeABAAAAAAAAAAAAAMAAsAAAABAAAAAAANAAsAAAABAAAAAAAOAAsAAAABAAAAAAAPAAsAAAABAAAAAAAQAAsAAAABAAAAAAARAAsAAAABAAAAAAAZAAoAAAABAAAAAAAaAAoAAAABAAAAAAAbAAoAAAABAAAAAAAcAAoAAAABAAAAAAAdAAoAAAABAAAAAAAeAAoAAAABAAAAAAAhAA0AAAABAAAAAAAiAA0AAAABAAAAAAAjAA0AAAABAAAAAAAkAA0AAAABAAAAAAAlAA0AAAABAAAAAAAmAAkAAAAAAAAAAAAnAAkAAAAAAAAAAAAoAAkAAAAAAAAAAAApAAkAAAAAAAAAAAAqAAkAAAAAAAAAAAApAAoAAAACAAAAAAAqAAoAAAACAAAAAAApAAsAAAACAAAAAAAqAAsAAAACAAAAAAApAAwAAAACAAAAAAAqAAwAAAACAAAAAAA=")
+tile_set = ExtResource("2_qgdrg")
+
+[node name="DecorBack" type="TileMapLayer" parent="." unique_id=1003074092]
+z_index = -2
+tile_set = ExtResource("3_wc247")
+
+[node name="DecorFront" type="TileMapLayer" parent="." unique_id=1566860203]
+z_index = 2
+tile_set = ExtResource("3_wc247")
+
+[node name="Props" type="Node2D" parent="." unique_id=1166758974]
+z_index = 1
+
+[node name="Entries" type="Node2D" parent="." unique_id=821884514]
+
+[node name="main" type="Marker2D" parent="Entries" unique_id=1774697972]
+position = Vector2(112, 448)
+script = ExtResource("4_0wsx2")
+
+[node name="from_shaft" type="Marker2D" parent="Entries" unique_id=679487602]
+position = Vector2(1328, 544)
+script = ExtResource("4_0wsx2")
+id = "from_shaft"
+facing = -1
+
+[node name="Exits" type="Node2D" parent="." unique_id=870421980]
+
+[node name="exit_to_test_shaft" type="Area2D" parent="Exits" unique_id=874614064]
+position = Vector2(1376, 448)
+script = ExtResource("5_n0kcr")
+to_room = "test_shaft"
+
+[node name="Objects" type="Node2D" parent="." unique_id=1020137586]
+
+[node name="block" type="CharacterBody2D" parent="Objects" unique_id=800429340 instance=ExtResource("6_du5yi")]
+position = Vector2(144, 448)
+script = ExtResource("7_4jkru")
+
+[node name="plate" type="Node2D" parent="Objects" unique_id=1274148052 instance=ExtResource("8_d3eap")]
+position = Vector2(240, 448)
+script = ExtResource("9_bcr65")
+
+[node name="exit_gate" type="Node2D" parent="Objects" unique_id=1257568666 instance=ExtResource("10_wbecn")]
+position = Vector2(1232, 544)
+script = ExtResource("11_tsjwx")
+
+[node name="anchor_trough" type="Node2D" parent="Objects" unique_id=1683179236 instance=ExtResource("12_w4ncf")]
+position = Vector2(624, 384)
+script = ExtResource("13_lqtek")
+
+[node name="fruit" type="Node2D" parent="Objects" unique_id=1811172389 instance=ExtResource("14_t3qdx")]
+position = Vector2(880, 320)
+script = ExtResource("15_miycl")
+item_id = "dried_fruit"
+flag = "hall_fruit"
+
+[node name="shrine_hall" type="Node2D" parent="Objects" unique_id=1172616417 instance=ExtResource("16_k3sa2")]
+position = Vector2(1072, 544)
+script = ExtResource("17_nnyfr")
+
+[node name="shelf_lever" type="Node2D" parent="Objects" unique_id=772201118 instance=ExtResource("18_uly2s")]
+position = Vector2(1296, 288)
+script = ExtResource("19_8c6nk")
+flag = "hall_shelf_lever"
+channel = 1
+
+[node name="shelf_gate" type="Node2D" parent="Objects" unique_id=249991415 instance=ExtResource("10_wbecn")]
+position = Vector2(1168, 416)
+script = ExtResource("11_tsjwx")
+inverted = true
+channel = 1
+
+[node name="Enemies" type="Node2D" parent="." unique_id=2075282079]
+
+[node name="slime_a" type="CharacterBody2D" parent="Enemies" unique_id=1116980692 instance=ExtResource("20_kdpe2")]
+position = Vector2(848, 480)
+script = ExtResource("21_th1c2")
+species = "green_slime"
+facing = -1
+
+[node name="shroom_a" type="CharacterBody2D" parent="Enemies" unique_id=1738350417 instance=ExtResource("22_3ufss")]
+position = Vector2(1136, 544)
+script = ExtResource("23_n5u3f")
+species = "mushroom"
+facing = -1

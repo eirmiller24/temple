@@ -1,0 +1,44 @@
+{
+  "_comment": "PixelLab boss sheets copied from dungeon-platformer (its enemies/ai_provenance.json, 2026-07-13) and RENAMED on copy: stone_guardian.png was basalt_sentinel_ai.png, riftmaw.png was riftmaw_ai.png. Both are 768x640 sheets of 128px cells, rows idle(4) walk(6) tell(4) attack(6) hurt(4), frames bottom-anchored per frame (vertical only). Schema per entry: file, tool, method, prompt, ids, date, notes, origin.",
+  "entries": [
+    {
+      "file": "stone_guardian.png",
+      "tool": "pixellab",
+      "method": "Base: create_1_direction_object 128px sidescroller, style-matched to the riftmaw_ai boss idle frame + the basalthorn pet sheet at 2x (quantized), candidate 1 of 4. Clips: v3 animate_object jobs, keep_first_frame=false; rows idle(4) walk(6) tell(4) attack(6) hurt(4), 128px cells, per-frame bottom anchor (vertical only).",
+      "prompt": "(the basalt sentinel brief — a basalt stone golem boss, sidescroller view — exact wording not recorded in the source file; style images were the riftmaw boss idle frame and the basalthorn pet sheet)",
+      "ids": {
+        "object_id": "30d9a150-08df-4c63-885a-859dbc3bcd71",
+        "review_object_id": "0db2e480-30b3-438c-aa6a-5d0e65f427aa",
+        "animation_groups": {
+          "idle": "4c035493-5c19-4fbc-94de-196497ba0e1d",
+          "walk": "41127569-e872-4ca4-a3cd-8e5bdedcfd70",
+          "tell": "5edc50cd-5f56-42f4-a477-024c1f0a173d",
+          "attack": "2bea1489-e7fa-495a-a736-fb00fb663ef2",
+          "hurt": "5619da50-04fe-40f4-acfa-08053f6d096d"
+        }
+      },
+      "date": "2026-07-13",
+      "notes": "Was dungeon-platformer's 'basalt_sentinel' boss. data/sprites.json enemies.stone_guardian.",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/enemies/basalt_sentinel_ai.png (renamed; record: the 'basalt_sentinel' block of enemies/ai_provenance.json)"
+    },
+    {
+      "file": "riftmaw.png",
+      "tool": "pixellab",
+      "method": "Base: create_1_direction_object 128px sidescroller, style-matched to sprites/pets/riftmaw_ai.png (2x nearest as style image), candidate 3 of 4. Clips: v3 animate_object jobs (keep_first_frame=false); frames bottom-anchored per frame at assembly. Rows idle(4) walk(6) tell(4) attack(6) hurt(4), 128px cells.",
+      "prompt": "(the riftmaw boss brief — a legendary rift-creature boss, sidescroller view — exact wording not recorded in the source file; style image was the riftmaw pet sheet at 2x)",
+      "ids": {
+        "object_id": "9a2d72e7-0bc3-47cf-b8f8-fdec175554c5",
+        "animation_groups": {
+          "idle": "4681bcfe-4748-4064-8134-97adbad86c20",
+          "walk": "7ba7882a-8a5f-456b-8076-13620f2e5e67",
+          "tell": "3df6dca1-bfc0-4f7c-a842-cda374269b6f",
+          "attack": "7cc6e1d2-5568-4f8d-89bf-dc41a3eba0a3",
+          "hurt": "cd535bc9-e480-4c76-badb-93fe30e091eb"
+        }
+      },
+      "date": "2026-07-13",
+      "notes": "data/sprites.json enemies.riftmaw.",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/enemies/riftmaw_ai.png (renamed; record: the top-level object_id/animation_groups of enemies/ai_provenance.json)"
+    }
+  ]
+}

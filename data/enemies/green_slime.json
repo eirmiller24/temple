@@ -1,0 +1,30 @@
+{
+  "_comment": "Green slime — the baseline 'hopper': idles until the player is within aggro_range, tells (white pulse, ~half a second), then hops at them; touch damage 1 the whole hop, squashes on landing, waits hop_cooldown. 3 HP = three sword hits. Numbers in px, px/s, seconds.",
+  "behavior": "hopper",
+  "boss": false,
+  "sprite": "green_slime",
+  "fit_tiles": 1.0,
+  "hp": 3,
+  "contact_damage": 1,
+  "contact_knockback": [200.0, -160.0],
+  "contact_rearm": 0.5,
+  "speed": 40.0,
+  "gravity": 1400.0,
+  "friction": 900.0,
+  "body_w": 26.0,
+  "body_h": 20.0,
+  "hurt_stun": 0.25,
+  "knockback_resist": 0.0,
+  "death_linger": 0.5,
+  "xp_placeholder": 2,
+  "hit_sfx": "hit_squish",
+  "hopper": {
+    "aggro_range": 190.0,
+    "idle_wait": 0.6,
+    "tell_time": 0.45,
+    "hop_vx": 180.0,
+    "hop_vy": -340.0,
+    "hop_cooldown": 0.7,
+    "min_air_time": 0.1
+  }
+}

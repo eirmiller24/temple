@@ -1,0 +1,45 @@
+{
+  "_comment": "PixelLab placeholders copied unchanged from dungeon-platformer (its objects/ai_provenance.json, 2026-07-28). Schema per entry: file, tool, method, prompt, ids, date, notes, origin. tests/test_assets.tscn requires an entry for every png/wav/ogg in this folder.",
+  "entries": [
+    {
+      "file": "box.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object review pack (view=sidescroller, 64px, 16 candidates over 4 per-item briefs); winner re-anchored bottom-center via a stdlib script (content centered horizontally, bottom edge on the last row). Single-frame idle.",
+      "prompt": "flat-shaded pixel-art side-view {object}, transparent background, no text  (per-item brief: a pushable wooden crate; exact wording not recorded in the source file)",
+      "ids": {
+        "object_id": "4da626a5-f42a-4810-bfb5-750b2392a4f3",
+        "review_pack": "1afe5234-9b7e-4ac3-994a-d91d2ed2f974 (dismissed after selection)"
+      },
+      "date": "2026-07-28",
+      "notes": "64x64, 1 frame. data/sprites.json objects.push_block (scale 0.5 = 1 tile).",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/objects/box.png (record: objects/ai_provenance.json)"
+    },
+    {
+      "file": "button.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object review pack (view=sidescroller, 64px); two winners (raised, pressed) re-anchored bottom-center and stacked into a 64x128 two-row sheet: row 0 raised, row 1 pressed.",
+      "prompt": "flat-shaded pixel-art side-view {object}, transparent background, no text  (per-item briefs: a raised floor button / the same button pressed; exact wording not recorded in the source file)",
+      "ids": {
+        "button_raised": "08a40985-cdf6-4c6f-9574-3ae860a3269c",
+        "button_pressed": "64a9fade-4a11-47d9-ae48-f398e5feb881",
+        "review_pack": "1afe5234-9b7e-4ac3-994a-d91d2ed2f974 (dismissed after selection)"
+      },
+      "date": "2026-07-28",
+      "notes": "64x128, rows raised/pressed. data/sprites.json objects.button.",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/objects/button.png (record: objects/ai_provenance.json)"
+    },
+    {
+      "file": "boulder.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object review pack (view=sidescroller, 64px, 16 candidates over 4 per-item briefs); winner re-anchored bottom-center. Single-frame idle.",
+      "prompt": "flat-shaded pixel-art side-view {object}, transparent background, no text  (per-item brief: a round rolling boulder; exact wording not recorded in the source file)",
+      "ids": {
+        "object_id": "8c65e0b6-fb8d-4680-bbf9-3d8ecc2c17e5",
+        "review_pack": "1afe5234-9b7e-4ac3-994a-d91d2ed2f974 (dismissed after selection)"
+      },
+      "date": "2026-07-28",
+      "notes": "64x64, 1 frame. data/sprites.json objects.boulder.",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/objects/boulder.png (record: objects/ai_provenance.json)"
+    }
+  ]
+}

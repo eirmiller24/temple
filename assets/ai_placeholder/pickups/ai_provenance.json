@@ -1,0 +1,57 @@
+{
+  "_comment": "PixelLab pickup/chest statics copied unchanged from dungeon-platformer (its pickups/ai_provenance.json, 2026-07-28, M14 closure). Single-frame entries; each frame cropped to its content bbox at assembly (= bottom-center anchor). Schema per entry: file, tool, method, prompt, ids, date, notes, origin.",
+  "entries": [
+    {
+      "file": "money.png",
+      "tool": "pixellab",
+      "method": "ONE create_1_direction_object 64px sidescroller review pack with 8 per-item descriptions (review object 619fc25d-e55f-40c1-9841-b02fb0857f04); candidates 0-7 matched the briefs in order and were promoted via select_object_frames. Frame cropped to content bbox.",
+      "prompt": "(per-item description for the money pickup — exact wording not recorded in the source file)",
+      "ids": {
+        "object_id": "86c2e9ff-309f-434c-a673-4d48f95b64de",
+        "review_object": "619fc25d-e55f-40c1-9841-b02fb0857f04"
+      },
+      "date": "2026-07-28",
+      "notes": "56x56, 1 frame. Spare (not yet in data/sprites.json).",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/pickups/money.png (record: pickups/ai_provenance.json)"
+    },
+    {
+      "file": "equipment.png",
+      "tool": "pixellab",
+      "method": "same pickups review pack as money.png (candidate promoted via select_object_frames); frame cropped to content bbox.",
+      "prompt": "(per-item description for the equipment pickup — exact wording not recorded in the source file)",
+      "ids": {
+        "object_id": "6c47dd5c-d327-423b-8bf5-49dd6e727390",
+        "review_object": "619fc25d-e55f-40c1-9841-b02fb0857f04"
+      },
+      "date": "2026-07-28",
+      "notes": "60x56, 1 frame. Spare.",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/pickups/equipment.png (record: pickups/ai_provenance.json)"
+    },
+    {
+      "file": "chest.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object 64px sidescroller review pack with 2 descriptions (review object 98322adf-9329-4b2a-9cd2-cf6d11ef97b7); candidate 0 (wood/brass) promoted via select_object_frames; frame cropped to content bbox.",
+      "prompt": "(chest description: a wood-and-brass treasure chest — exact wording not recorded in the source file)",
+      "ids": {
+        "object_id": "2b2f97d5-0ab3-4a82-b0c9-16a5f32c3be1",
+        "review_object": "98322adf-9329-4b2a-9cd2-cf6d11ef97b7"
+      },
+      "date": "2026-07-28",
+      "notes": "58x46, 1 frame. data/sprites.json objects.chest.",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/pickups/chest.png (record: pickups/ai_provenance.json)"
+    },
+    {
+      "file": "chest_cache.png",
+      "tool": "pixellab",
+      "method": "same chests review pack as chest.png; candidate 1 (soul-white cache) promoted via select_object_frames; frame cropped to content bbox.",
+      "prompt": "(chest description: a soul-white cache chest — exact wording not recorded in the source file)",
+      "ids": {
+        "object_id": "671e9460-9ed2-4104-9311-99b4d1f5f4b1",
+        "review_object": "98322adf-9329-4b2a-9cd2-cf6d11ef97b7"
+      },
+      "date": "2026-07-28",
+      "notes": "60x47, 1 frame. Spare.",
+      "origin": "copied from dungeon-platformer assets/ai_placeholder/sprites/pickups/chest_cache.png (record: pickups/ai_provenance.json)"
+    }
+  ]
+}
