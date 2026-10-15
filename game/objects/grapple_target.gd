@@ -12,3 +12,10 @@ func grapple_hit(player: Node2D) -> String:
 	if target != null and target.has_method("grapple_hit"):
 		return target.grapple_hit(player)
 	return "none"
+
+
+## What grapple_hit would answer, without side effects (the aim reticle).
+func grapple_mode(player: Node2D) -> String:
+	if target != null and target.has_method("grapple_mode"):
+		return target.grapple_mode(player)
+	return "none"

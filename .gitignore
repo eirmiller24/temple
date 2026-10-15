@@ -33,3 +33,7 @@ raw_assets/
 
 # Local editor state
 .claude/settings.local.json
+
+# Godot Terminal dock: a local editor tool (GDExtension with Linux-only
+# binaries installed). Not part of the game. See CLAUDE.md.
+addons/terminal/

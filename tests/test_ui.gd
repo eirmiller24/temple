@@ -187,8 +187,9 @@ func _run() -> int:
 	# Verbs: use (heal), assign prompt, drop.
 	items.highlight(items._ids.find("dried_fruit"))
 	await _ticks(1)
-	_check(items.verb_hint("dried_fruit").contains("B use"), "usable item lists B use")
-	_check(not items.verb_hint("small_key").contains("B use"), "key item hides B use")
+	var use_verb := Controls.glyph("attack") + " use"
+	_check(items.verb_hint("dried_fruit").contains(use_verb), "usable item lists '%s'" % use_verb)
+	_check(not items.verb_hint("small_key").contains(use_verb), "key item hides the use verb")
 	var fruit0 := GameState.count("dried_fruit")
 	var hp0 := GameState.hp
 	await _tap("menu_use")
@@ -216,7 +217,7 @@ func _run() -> int:
 	Data.items.items["_test_fang"] = {"name": "Test Fang", "kind": "key", "hide_use": true, "description": "", "stack": 1}
 	GameState.add_item("_test_fang")
 	await _ticks(2)
-	_check(not items.verb_hint("_test_fang").contains("B use"), "hide_use item lists no Use verb")
+	_check(not items.verb_hint("_test_fang").contains(use_verb), "hide_use item lists no Use verb")
 	items.highlight(items._ids.find("_test_fang"))
 	await _ticks(1)
 	await _tap("menu_use")
@@ -254,6 +255,84 @@ func _run() -> int:
 	await _ticks(1)
 	_check(is_equal_approx(float(SaveManager.settings.sfx_volume), 0.35), "slider applies SaveManager.set_setting")
 	SaveManager.set_setting("sfx_volume", sfx0)
+
+	# Controls: the stick-swap toggle and button remapping.
+	var swap0 := bool(SaveManager.settings.aim_swap_sticks)
+	pause.options._swap.pressed.emit()
+	await _ticks(1)
+	_check(bool(SaveManager.settings.aim_swap_sticks) != swap0, "aim_swap_sticks toggles from the options row")
+	SaveManager.set_setting("aim_swap_sticks", swap0)
+	pause.options._controls_btn.pressed.emit()
+	await _ticks(2)
+	var ctl: UiControlsPanel = pause.options._controls
+	_check(ctl.visible and not pause.options._box.visible, "Controls… opens the remap panel")
+	_check(get_viewport().gui_get_focus_owner() == ctl._rows[0].pad, "first pad binding is focused")
+	var bindings0: Dictionary = (SaveManager.settings.bindings as Dictionary).duplicate(true)
+	# Eir's pad: B jump, Y attack, A/X items.
+	var b_btn := InputEventJoypadButton.new()
+	b_btn.button_index = JOY_BUTTON_B
+	var y_btn := InputEventJoypadButton.new()
+	y_btn.button_index = JOY_BUTTON_Y
+	var a_btn := InputEventJoypadButton.new()
+	a_btn.button_index = JOY_BUTTON_A
+	var x_btn := InputEventJoypadButton.new()
+	x_btn.button_index = JOY_BUTTON_X
+	_check(Controls.set_binding("jump", "pad", b_btn) and Controls.set_binding("attack", "pad", y_btn)
+			and Controls.set_binding("item_x", "pad", a_btn) and Controls.set_binding("item_y", "pad", x_btn),
+			"set_binding accepts pad buttons")
+	_check(Controls.glyph("jump", "pad") == "B" and Controls.glyph("attack", "pad") == "Y"
+			and Controls.glyph("item_x", "pad") == "A" and Controls.glyph("item_y", "pad") == "X", "glyphs follow the remap")
+	_check(Controls.glyph("jump", "key") == "Space", "keyboard binding untouched by a pad remap (%s)" % Controls.glyph("jump", "key"))
+	var jump_events := InputMap.action_get_events("jump")
+	var has_b := false
+	var has_a := false
+	for ev in jump_events:
+		if ev is InputEventJoypadButton:
+			has_b = has_b or ev.button_index == JOY_BUTTON_B
+			has_a = has_a or ev.button_index == JOY_BUTTON_A
+	_check(has_b and not has_a, "InputMap 'jump' now has B and not A")
+	var use_pad := ""
+	for ev in InputMap.action_get_events("menu_use"):
+		if ev is InputEventJoypadButton:
+			use_pad = Controls.event_name(ev)
+	_check(use_pad == "Y", "menu_use mirrors the remapped attack button (%s)" % use_pad)
+	var slot_pad := ""
+	for ev in InputMap.action_get_events("menu_slot_x"):
+		if ev is InputEventJoypadButton:
+			slot_pad = Controls.event_name(ev)
+	_check(slot_pad == "A", "menu_slot_x mirrors item 1 (%s)" % slot_pad)
+	_check(Controls.conflicts("jump", "pad").is_empty(), "jump on B clashes with nothing (menu back on B is resolved by priority)")
+	var b2 := InputEventJoypadButton.new()
+	b2.button_index = JOY_BUTTON_B
+	Controls.set_binding("dash", "pad", b2)
+	_check(Controls.conflicts("jump", "pad").has("dash") and Controls.conflicts("dash", "pad").has("jump"),
+			"two gameplay verbs on B are marked against each other")
+	ctl.refresh()
+	_check((ctl._rows[0].pad as Button).text == "B" and (ctl._rows[0].mark as Label).text == "!",
+			"panel row shows the new glyph and the clash mark")
+	ctl._show_row_status("jump")
+	_check(ctl._status.text.contains("Dash"), "focusing the row explains the clash (%s)" % ctl._status.text)
+	_check(hud._slot_keys["item_x"].text == Controls.glyph("item_x"), "HUD slot glyphs refreshed")
+	# Keyboard rebind through the capture path.
+	ctl._listen("dash", "key", ctl._rows[5].key)
+	var k := InputEventKey.new()
+	k.physical_keycode = KEY_F
+	k.pressed = true
+	ctl._input(k)
+	await _ticks(1)
+	_check(Controls.glyph("dash", "key") == "F" and ctl._listening.is_empty(), "captured key rebinds dash to F")
+	_check(ctl.poll(), "panel swallows the frame after a capture")
+	await _ticks(2)
+	# Persistence: the settings file round-trips the bindings.
+	SaveManager.load_settings()
+	SaveManager.apply_settings()
+	_check(Controls.glyph("jump", "pad") == "B" and Controls.glyph("dash", "key") == "F", "bindings survive a settings reload")
+	Controls.reset_all()
+	_check(Controls.glyph("jump", "pad") == "A" and Controls.glyph("dash", "key") == "Shift" and Controls.is_default("jump"),
+			"reset restores the project defaults")
+	SaveManager.set_setting("bindings", bindings0)
+	await _tap("menu_back")
+	_check(not ctl.visible and pause.options._box.visible, "menu_back leaves Controls for the options rows")
 	await _tap("menu_back")
 	_check(not pause.options.visible and pause.is_open, "menu_back closes options, menu stays open")
 	await _tap("pause")

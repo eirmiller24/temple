@@ -2,11 +2,12 @@ class_name UiItemsTab
 extends Control
 ## The pause menu's ITEMS tab (design_v2 §7.2): the inventory as a focusable
 ## list, a detail panel for the highlighted item, a status line and the
-## verb hint. Verbs (UiItemVerbs): A select, B use, Y drop, LB assign → the
-## next X/Y press picks the slot. Items with "hide_use" never list the Use
+## verb hint. Verbs (UiItemVerbs): accept selects, the attack button uses,
+## item 2's button drops, interact assigns → the next item-button press
+## picks the slot. Button names in the UI are the live bindings (Controls). Items with "hide_use" never list the Use
 ## verb but menu_use still works on them (the Fang trick, §9.2). With
-## SaveManager.settings.hold_to_assign, holding X/Y on an item for HOLD_MS
-## assigns it (a Y tap still drops). The owner calls poll() every frame the
+## SaveManager.settings.hold_to_assign, holding an item button on an item
+## for HOLD_MS assigns it (a tap of item 2's button still drops). The owner calls poll() every frame the
 ## tab is active.
 
 signal rebuilt
@@ -68,6 +69,7 @@ func _ready() -> void:
 	add_child(_hint)
 	GameState.inventory_changed.connect(refresh)
 	GameState.slots_changed.connect(refresh)
+	Controls.bindings_changed.connect(refresh)
 	refresh()
 
 
@@ -135,14 +137,20 @@ func _row(id: String) -> Button:
 	return b
 
 
-## "B" for the equipped weapon, "X"/"Y" for the slots, else "".
+## The live glyph of the button an item sits on — the weapon's attack
+## button, an item slot's button — else "".
 static func _mark(id: String) -> String:
+	var action := _mark_action(id)
+	return Controls.glyph(action) if action != "" else ""
+
+
+static func _mark_action(id: String) -> String:
 	if GameState.weapon == id:
-		return "B"
+		return "attack"
 	if GameState.slot_x == id:
-		return "X"
+		return "item_x"
 	if GameState.slot_y == id:
-		return "Y"
+		return "item_y"
 	return ""
 
 
@@ -203,11 +211,14 @@ func _show_details() -> void:
 		_name.text = ""
 		_kind.text = ""
 		_desc.text = ""
-		_hint.text = "B back"
+		_hint.text = Controls.hint([["menu_back", "back"]])
 		return
 	var def := GameState.item_def(id)
 	_name.text = String(def.get("name", id))
-	var where: String = {"B": "  ·  equipped on B", "X": "  ·  on X", "Y": "  ·  on Y", "": ""}[_mark(id)]
+	var where := ""
+	match _mark_action(id):
+		"attack": where = "  ·  equipped on " + Controls.glyph("attack")
+		"item_x", "item_y": where = "  ·  on " + _mark(id)
 	var n := GameState.count(id)
 	_kind.text = String(def.get("kind", "")) + ("  ·  ×%d" % n if n > 1 else "") + where
 	_desc.text = String(def.get("description", ""))
@@ -235,7 +246,8 @@ func _begin_assign(id: String) -> void:
 		return
 	_assigning = true
 	Sfx.play("menu_accept")
-	_say("Assign %s to:  X  or  Y    (B cancels)" % name)
+	_say("Assign %s to:  %s  or  %s    (%s cancels)" % [name, Controls.glyph("item_x"), Controls.glyph("item_y"),
+			Controls.glyph("menu_back")])
 
 
 func _cancel_assign() -> void:
@@ -293,7 +305,7 @@ func _poll_hold(action: String, slot: String, id: String, drop_on_tap: bool) -> 
 	var down := Input.is_action_pressed(action)
 	if Input.is_action_just_pressed(action):
 		_hold[slot] = now
-		_say("hold to assign to %s…" % slot.to_upper())
+		_say("hold to assign to %s…" % Controls.glyph("item_" + slot))
 	elif since >= 0 and down and now - since >= HOLD_MS:
 		_assign(slot, id)
 		_hold[slot] = -2

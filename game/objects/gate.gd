@@ -1,11 +1,16 @@
 @tool
 class_name Gate
 extends RoomObject
-## A wired portcullis: a `w` x `h` tile slab that is solid while closed
-## and slides up out of the way while any button/lever on its `channel`
-## is active (`inverted` flips that). Author it over EMPTY Collision
-## cells — it supplies its own StaticBody2D. Position is the slab's
-## bottom-centre (FEET of the slab).
+## A wired portcullis: a `w` x `h` tile slab that slides up `h` tiles
+## while any button/lever on its `channel` is active (`inverted` flips
+## that), opening the gap beneath it. The slab is solid the whole time,
+## lowered, raised and in between. It is an AnimatableBody2D, so it carries
+## whatever stands on it as it rises. Author it over EMPTY Collision cells,
+## with the `h` cells above it clear too, since that is where the raised slab
+## sits. Position is the slab's bottom-centre (FEET of the slab), lowered.
+##
+## Like any moving solid it can crush whoever it squeezes (design §7.6);
+## that's handled on the squeezed side (Crush), not here.
 
 @export var w: int = 1:
 	set(v):
@@ -19,14 +24,15 @@ extends RoomObject
 @export var inverted: bool = false
 
 var is_open := false
-var _body: StaticBody2D
+var _body: AnimatableBody2D   # the moving slab: shape + drawing, offset in y
 var _shape: CollisionShape2D
 var _slab: Node2D
 var _target_y := 0.0
+var _snap := false
 
 
 func _setup_runtime() -> void:
-	_body = StaticBody2D.new()
+	_body = AnimatableBody2D.new()
 	_body.name = "Body"
 	_body.collision_layer = LAYER_WORLD
 	_body.collision_mask = 0
@@ -38,7 +44,7 @@ func _setup_runtime() -> void:
 	_slab = Node2D.new()
 	_slab.name = "Slab"
 	_slab.draw.connect(_draw_slab)
-	add_child(_slab)
+	_body.add_child(_slab)
 	var wiring := Game.wiring()
 	if wiring != null:
 		wiring.channel_changed.connect(_on_channel)
@@ -49,7 +55,8 @@ func _setup_runtime() -> void:
 
 func _on_channel(ch: int, active: bool) -> void:
 	if ch == channel:
-		_apply(active)
+		# While the room settles into its saved state, snap — no slide, no sound.
+		_apply(active, Game.wiring().is_settling())
 
 
 func _apply(active: bool, instant: bool = false) -> void:
@@ -57,20 +64,26 @@ func _apply(active: bool, instant: bool = false) -> void:
 	if open == is_open and not instant:
 		return
 	is_open = open
-	_shape.disabled = open
 	_target_y = -h * Room.TILE if open else 0.0
 	if not instant:
 		sfx("gate_open" if open else "gate_close")
 		Game.juice().shake(1.5, 0.15)
 	else:
-		_slab.position.y = _target_y
+		# Moved in _physics_process, not here: this can run inside a
+		# button's body_entered (Wiring.drive → channel_changed), i.e. while
+		# the physics server is flushing queries.
+		_snap = true
 
 
-func _process(delta: float) -> void:
-	if Engine.is_editor_hint() or _slab == null:
+func _physics_process(delta: float) -> void:
+	if Engine.is_editor_hint() or _body == null:
+		return
+	if _snap:
+		_snap = false
+		_body.position.y = _target_y
 		return
 	var speed := cfg_num("gate", "open_speed")
-	_slab.position.y = move_toward(_slab.position.y, _target_y, speed * delta)
+	_body.position.y = move_toward(_body.position.y, _target_y, speed * delta)
 
 
 func _draw_slab() -> void:

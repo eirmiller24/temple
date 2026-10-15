@@ -21,6 +21,9 @@ var _transitioning := false
 var _toast: Label
 var _toast_time := 0.0
 var debug_view := false
+## Where the player came into the current room: {pos, facing}. A void-out
+## reloads the room and puts them back here.
+var _arrival := {}
 
 
 func _ready() -> void:
@@ -96,8 +99,9 @@ func _ensure_player() -> void:
 # --- room loading -----------------------------------------------------------------------------
 
 ## Load `name`; arrive at `entry_id` (teleport) or keep the world position
-## (seam) when `seam_exit` is given.
-func load_room(name: String, entry_id: String = "", seam_exit: RoomExit = null) -> void:
+## (seam) when `seam_exit` is given, or land exactly on `arrive`
+## ({pos, facing}, a void-out going back to the last entrance).
+func load_room(name: String, entry_id: String = "", seam_exit: RoomExit = null, arrive: Dictionary = {}) -> void:
 	var path := RoomRegistry.scene_path(name)
 	if path == "":
 		push_error("World: no room scene named '%s'" % name)
@@ -107,7 +111,7 @@ func load_room(name: String, entry_id: String = "", seam_exit: RoomExit = null) 
 	if packed == null:
 		push_error("World: cannot load %s" % path)
 		return
-	var keep_pos := seam_exit != null
+	var keep_pos := seam_exit != null and arrive.is_empty()
 	var prev_pos := player.global_position
 	var prev_facing := player.facing
 	var travel := Vector2.ZERO
@@ -128,11 +132,17 @@ func load_room(name: String, entry_id: String = "", seam_exit: RoomExit = null) 
 	add_child(room)
 	move_child(room, 0)
 	player.room = room
-	if keep_pos:
-		# Keep the world position, nudged past the doorway and clamped at
-		# least half a tile inside the new room's painted rect so the body
-		# never straddles the seam over nothing.
-		var pos := prev_pos + travel * Room.TILE * 0.75
+	if not arrive.is_empty():
+		player.spawn_at(arrive.pos, arrive.facing)
+		player.lock_exits(0.4)
+	elif keep_pos:
+		# Keep the world position along the seam; along the travel axis,
+		# land just clear of the new room's matching exit trigger (the one
+		# that leads back), body fully inside the painted rect. That way
+		# nothing is locked for long: turning straight around re-enters the
+		# trigger and goes back, and standing still stays put. The fade is
+		# still black while this happens, so the shift is invisible.
+		var pos := prev_pos
 		var r := room.rect_px()
 		var inset := Room.TILE * 0.5
 		var lo := room.position + r.position + Vector2(inset, inset)
@@ -141,9 +151,10 @@ func load_room(name: String, entry_id: String = "", seam_exit: RoomExit = null) 
 			pos.x = clampf(pos.x, lo.x, hi.x)
 		if travel.y != 0.0:
 			pos.y = clampf(pos.y, lo.y, hi.y)
+		pos = _clear_of_arrival_exit(pos, travel)
 		player.global_position = pos
 		player.facing = prev_facing
-		player.lock_exits(0.6)
+		player.lock_exits(FADE_TIME + 0.05)
 		player.camera.reset_smoothing()
 	else:
 		var entry := room.entry_node(entry_id)
@@ -159,11 +170,60 @@ func load_room(name: String, entry_id: String = "", seam_exit: RoomExit = null) 
 			var pos: Vector2 = entry.spawn_position() if entry.has_method("spawn_position") else entry.global_position
 			player.spawn_at(pos, face)
 			player.lock_exits(0.4)
+	_arrival = {"pos": player.global_position, "facing": player.facing}
 	_apply_camera_limits()
 	_apply_debug_view()
 	GameState.visit(name)
 	room_changed.emit(name)
 	await _fade_to(0.0)
+
+
+## Push a seam arrival position past the inner edge of the exit the
+## player just came through from the other side (the new room's exit whose
+## direction opposes `travel` and whose trigger spans the arrival point).
+## Falls back to 1.5 tiles inside the painted rect when no exit matches.
+func _clear_of_arrival_exit(pos: Vector2, travel: Vector2) -> Vector2:
+	const MARGIN := 3.0
+	var half_w: float = player.body_width() / 2.0
+	var height: float = player.body_height()
+	var back := Vector2i(-int(travel.x), -int(travel.y))
+	var best: RoomExit = null
+	var best_d := INF
+	var exits := room.get_node_or_null("Exits")
+	if exits != null:
+		for e in exits.get_children():
+			if not (e is RoomExit) or not (e as RoomExit).is_seam() or (e as RoomExit).travel() != back:
+				continue
+			var tr: Rect2i = (e as RoomExit).trigger_rect_tiles()
+			var wr := Rect2(room.position + Vector2(tr.position) * Room.TILE, Vector2(tr.size) * Room.TILE)
+			# Distance along the seam axis from the arrival point to the trigger.
+			var d := 0.0
+			if travel.x != 0.0:
+				d = maxf(0.0, maxf(wr.position.y - pos.y, (pos.y - height) - wr.end.y))
+			else:
+				d = maxf(0.0, maxf(wr.position.x - (pos.x + half_w), (pos.x - half_w) - wr.end.x))
+			if d < best_d:
+				best_d = d
+				best = e
+	if best == null:
+		var r := room.rect_px()
+		var inset := Room.TILE * 1.5
+		if travel.x != 0.0:
+			pos.x = clampf(pos.x, room.position.x + r.position.x + inset, room.position.x + r.end.x - inset)
+		else:
+			pos.y = clampf(pos.y, room.position.y + r.position.y + inset, room.position.y + r.end.y - inset)
+		return pos
+	var inner := Rect2i(best.rect_tiles())
+	var zone := Rect2(room.position + Vector2(inner.position) * Room.TILE, Vector2(inner.size) * Room.TILE)
+	if travel.x > 0.0:
+		pos.x = maxf(pos.x, zone.end.x + half_w + MARGIN)
+	elif travel.x < 0.0:
+		pos.x = minf(pos.x, zone.position.x - half_w - MARGIN)
+	elif travel.y > 0.0:
+		pos.y = maxf(pos.y, zone.end.y + height + MARGIN)
+	else:
+		pos.y = minf(pos.y, zone.position.y - MARGIN)
+	return pos
 
 
 func _apply_camera_limits() -> void:
@@ -199,6 +259,20 @@ func transition(exit: RoomExit) -> void:
 	await _fade_to(1.0)
 	get_tree().paused = false
 	await load_room(exit.to_room, exit.to_entry, exit if exit.to_entry == "" else null)
+	_transitioning = false
+
+
+## Void out (e.g. a closing gate with nowhere to knock the player): fade, reload the current
+## room and put the player back where they last came in. Damage, if any,
+## was already dealt by whatever caused it.
+func void_out() -> void:
+	if _transitioning or room_name == "":
+		return
+	_transitioning = true
+	get_tree().paused = true
+	await _fade_to(1.0)
+	get_tree().paused = false
+	await load_room(room_name, "", null, _arrival)
 	_transitioning = false
 
 

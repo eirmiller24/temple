@@ -81,17 +81,18 @@ static func assign(slot: String, id: String) -> String:
 		return ""
 	GameState.assign(slot, id)
 	Sfx.play("item_equip")
-	return "%s → %s" % [String(GameState.item_def(id).get("name", id)), slot.to_upper()]
+	return "%s → %s" % [String(GameState.item_def(id).get("name", id)), Controls.glyph("item_" + slot)]
 
 
-## "A select  B use  Y drop  LB assign", minus "B use" for items that hide
-## it or cannot be used (design §9.2: a Fang lists only Drop).
+## "A select  B use  Y drop  LB assign" with the LIVE glyphs (Controls),
+## minus "use" for items that hide it or cannot be used (design §9.2: a
+## Fang lists only Drop).
 static func verb_hint(id: String) -> String:
 	var def := GameState.item_def(id)
-	var verbs := ["A select"]
+	var verbs := [["menu_accept", "select"]]
 	var usable := String(def.get("kind", "")) == "weapon" or bool(def.get("usable", false))
 	if usable and not bool(def.get("hide_use", false)):
-		verbs.append("B use")
-	verbs.append("Y drop")
-	verbs.append("LB assign")
-	return "  ".join(verbs)
+		verbs.append(["attack", "use"])
+	verbs.append(["item_y", "drop"])
+	verbs.append(["interact", "assign"])
+	return Controls.hint(verbs)

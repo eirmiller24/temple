@@ -23,6 +23,7 @@ var slot_x := ""         # item id on X
 var slot_y := ""         # item id on Y
 var flags := {}          # permanent flags: name -> true
 var visited := {}        # room name -> true (map reveal)
+var room_objects := {}   # room name -> {object path in the room: saved value} (puzzle state)
 var current_room := ""
 var respawn_room := ""   # last save shrine (or the start room)
 var respawn_entry := ""
@@ -51,6 +52,7 @@ func new_game() -> void:
 	slot_y = ""
 	flags = {}
 	visited = {}
+	room_objects = {}
 	playtime = 0.0
 	lantern_on = false
 	slot_index = -1
@@ -105,6 +107,12 @@ func add_item(id: String, n: int = 1) -> void:
 			slot_y = id
 			slots_changed.emit()
 	inventory_changed.emit()
+
+
+## Every item in data/items.json at a full stack (the DebugBoot loadout).
+func grant_all_items() -> void:
+	for id: String in Data.items.get("items", {}):
+		add_item(id, int(item_def(id).get("stack", 1)))
 
 
 func remove_item(id: String, n: int = 1) -> void:
@@ -164,6 +172,25 @@ func visit(room: String) -> void:
 		room_visited.emit(room)
 
 
+## What a puzzle object (push block, lever, latching button) last stored
+## about itself in `room`, keyed by its node path there; null if never.
+func object_state(room: String, key: String) -> Variant:
+	return room_objects.get(room, {}).get(key)
+
+
+## null forgets the entry (the object reverts to its authored state).
+func set_object_state(room: String, key: String, value: Variant) -> void:
+	if value == null:
+		if room_objects.has(room):
+			room_objects[room].erase(key)
+			if room_objects[room].is_empty():
+				room_objects.erase(room)
+		return
+	if not room_objects.has(room):
+		room_objects[room] = {}
+	room_objects[room][key] = value
+
+
 func set_respawn(room: String, entry: String) -> void:
 	respawn_room = room
 	respawn_entry = entry
@@ -199,6 +226,7 @@ func to_dict() -> Dictionary:
 		"inventory": inventory.duplicate(),
 		"weapon": weapon, "slot_x": slot_x, "slot_y": slot_y,
 		"flags": flags.keys(), "visited": visited.keys(),
+		"room_objects": room_objects.duplicate(true),
 		"respawn_room": respawn_room, "respawn_entry": respawn_entry,
 		"playtime": playtime, "lantern_on": lantern_on,
 		"saved_at": Time.get_datetime_string_from_system(),
@@ -220,6 +248,7 @@ func from_dict(d: Dictionary) -> void:
 	visited = {}
 	for r: String in d.get("visited", []):
 		visited[r] = true
+	room_objects = (d.get("room_objects", {}) as Dictionary).duplicate(true)
 	respawn_room = String(d.get("respawn_room", ""))
 	respawn_entry = String(d.get("respawn_entry", ""))
 	playtime = float(d.get("playtime", 0.0))

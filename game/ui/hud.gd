@@ -1,6 +1,6 @@
 extends Control
-## In-game overlay: hearts top-left, the X/Y item slots and the B weapon
-## bottom-left, a small minimap top-right, and the room's display name
+## In-game overlay: hearts top-left, the two item slots and the weapon
+## bottom-left (each fronted by its live button glyph), a small minimap top-right, and the room's display name
 ## fading in for a moment on World.room_changed. Thin, semi-transparent
 ## panels; everything is driven by GameState signals after bind(world).
 ## Also hosts the F1 tuning panel (game/debug) so it exists whenever a
@@ -17,6 +17,7 @@ var minimap: UiMinimap
 var _slot_x: Label
 var _slot_y: Label
 var _weapon: Label
+var _slot_keys := {}   # action -> the glyph Label in front of each slot
 var _room_label: Label
 var _room_tween: Tween
 
@@ -39,9 +40,11 @@ func _ready() -> void:
 	slots.offset_top = -MARGIN - 30
 	slots.offset_bottom = -MARGIN
 	add_child(slots)
-	_slot_x = _slot(slots, "X")
-	_slot_y = _slot(slots, "Y")
-	_weapon = _slot(slots, "B")
+	_slot_x = _slot(slots, "item_x")
+	_slot_y = _slot(slots, "item_y")
+	_weapon = _slot(slots, "attack")
+	Controls.bindings_changed.connect(_refresh_glyphs)
+	_refresh_glyphs()
 
 	minimap = UiMinimap.new()
 	minimap.tile_px = 3.0
@@ -82,7 +85,7 @@ func _panel(at: Vector2) -> PanelContainer:
 	return p
 
 
-func _slot(parent: Control, key: String) -> Label:
+func _slot(parent: Control, action: String) -> Label:
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", UiTheme.panel(UiTheme.PANEL_THIN, Color(UiTheme.DIM, 0.6), 6))
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -92,8 +95,9 @@ func _slot(parent: Control, key: String) -> Label:
 	row.add_theme_constant_override("separation", 8)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	p.add_child(row)
-	var k := UiTheme.label(key, UiTheme.SIZE_LABEL, UiTheme.ACCENT)
+	var k := UiTheme.label(Controls.glyph(action), UiTheme.SIZE_LABEL, UiTheme.ACCENT)
 	row.add_child(k)
+	_slot_keys[action] = k
 	var name_label := UiTheme.label("—", UiTheme.SIZE_LABEL)
 	row.add_child(name_label)
 	return name_label
@@ -106,6 +110,11 @@ func bind(w: World) -> void:
 		w.room_changed.connect(_on_room_changed)
 	if w.room_name != "":
 		_on_room_changed(w.room_name)
+
+
+func _refresh_glyphs() -> void:
+	for action: String in _slot_keys:
+		(_slot_keys[action] as Label).text = Controls.glyph(action)
 
 
 func _refresh_slots() -> void:

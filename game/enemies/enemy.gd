@@ -32,6 +32,9 @@ extends EnemyBody
 ## hitboxes. Species hooks: _species_ready, _think (per frame while not
 ## staggered/dead), _hurt_ended, _interrupted, _on_damaged, _on_died,
 ## _hit_interrupts, _knockback_resist.
+##
+## Crushing (design §7.6, Crush): squeezed by a moving solid, an enemy is
+## displaced and takes on_hit(); with nowhere to go it dies.
 
 signal died(enemy: Enemy)
 ## Emitted at the end of every physics frame this enemy processes.
@@ -59,6 +62,7 @@ var _hurt_time := 0.0
 var _flash_time := 0.0
 var _death_time := 0.0
 var _rearm_time := 0.0
+var _crush_ledge := NAN  ## one-way ledge stood on last frame (Crush)
 
 
 func _ready() -> void:
@@ -137,6 +141,8 @@ func _physics_process(delta: float) -> void:
 	if room != null and global_position.y > room.global_position.y + room.rect_px().end.y + FELL_OUT_MARGIN:
 		queue_free()   # hopped into a pit with no floor: gone, no corpse
 		return
+	if state != State.DEAD and state != State.HIDDEN:
+		_check_crush()
 	hitbox.facing = facing
 	var want := contact_enabled and state != State.HURT and state != State.DEAD and state != State.HIDDEN
 	_rearm_time -= delta
@@ -254,6 +260,18 @@ func die() -> void:
 	_interrupted()
 	_on_died()
 	died.emit(self)
+
+
+## Design §7.6: squeezed by a moving solid, an enemy is displaced and
+## hurt, or (nowhere to go) dies.
+func _check_crush() -> void:
+	var out := {}
+	match Crush.resolve(self, room, out, _crush_ledge):
+		Crush.DISPLACED:
+			on_hit(Crush.hit_info(self, out.offset))
+		Crush.TRAPPED:
+			die()
+	_crush_ledge = Crush.ledge_under(self, room, _crush_ledge)
 
 
 func debug_label() -> String:

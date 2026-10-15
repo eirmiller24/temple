@@ -7,22 +7,41 @@ extends Node
 ## Sources register by object instance so two momentary buttons on one
 ## channel don't fight: the channel is active while the set of drivers is
 ## non-empty. State is per room: World.load_room() calls reset().
+##
+## For a few physics frames after reset() the room is SETTLING: objects
+## restored from the save (a block put back on its plate, a lever left on)
+## drive their channels, and listeners should snap to the result rather
+## than animate it — the player wasn't there to see it happen.
 
 signal channel_changed(channel: int, active: bool)
 
 const MAX_CHANNELS := 32
+## Long enough for a restored block's plate to see it (body_entered lands
+## on the second physics frame after the room enters the tree).
+const SETTLE_FRAMES := 4
 
 var _drivers: Array[Dictionary] = []  # channel -> {source_id: true}
+var _settle := 0
 
 
 func _ready() -> void:
 	reset()
 
 
+func _physics_process(_delta: float) -> void:
+	if _settle > 0:
+		_settle -= 1
+
+
 func reset() -> void:
 	_drivers.clear()
 	for i in MAX_CHANNELS:
 		_drivers.append({})
+	_settle = SETTLE_FRAMES
+
+
+func is_settling() -> bool:
+	return _settle > 0
 
 
 func drive(channel: int, source: Object, on: bool) -> void:

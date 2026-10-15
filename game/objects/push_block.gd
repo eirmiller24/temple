@@ -7,6 +7,12 @@ extends CharacterBody2D
 ## can be pulled with the grappling hook when its `material` is one the
 ## hook grabs (design §10: "grabs items made of certain materials").
 ##
+## Persistence (the Zelda rule): a block resting on a KEY SPOT (any node
+## in group "key_spot" that answers holds(block), i.e. a floor button)
+## saves its position and is still there on the next visit. Anywhere else
+## the saved position is forgotten and the block resets to where it was
+## authored.
+##
 ## Position is FEET (bottom-centre). Numbers: data/objects.json push_block.
 
 const LAYER_WORLD := 1 << 0
@@ -25,11 +31,22 @@ var _push_dir := 0.0
 var _pull_from: Node2D = null
 var _pull_time := 0.0
 var _sprite: AnimatedSprite2D
+var _stored_pos := Vector2.ZERO
+var _parked := false   # resting on a key spot, position saved
 
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
+	var n := get_parent()
+	while n != null and not (n is Room):
+		n = n.get_parent()
+	room = n
+	var saved: Variant = room.saved_state(self) if room != null else null
+	if saved is Array and (saved as Array).size() == 2:
+		position = Vector2(saved[0], saved[1])
+		_parked = true
+	_stored_pos = position
 	collision_layer = LAYER_PUSHABLE | LAYER_GRAPPLE
 	collision_mask = LAYER_WORLD | LAYER_PUSHABLE
 	floor_snap_length = 4.0
@@ -56,11 +73,16 @@ func push(dir: float, _delta: float) -> void:
 
 ## Grapple contract: returns "pull" and gets dragged toward the player.
 func grapple_hit(player: Node2D) -> String:
-	if block_material == "stone":
+	if grapple_mode(player) != "pull":
 		return "none"
 	_pull_from = player
 	_pull_time = 0.9
 	return "pull"
+
+
+## What grapple_hit would answer, without doing it (the aim reticle asks).
+func grapple_mode(_player: Node2D) -> String:
+	return "none" if block_material == "stone" else "pull"
 
 
 func _physics_process(delta: float) -> void:
@@ -88,6 +110,27 @@ func _physics_process(delta: float) -> void:
 	velocity.x = vx
 	_push_dir = 0.0
 	move_and_slide()
+	_update_saved()
+
+
+## Save the position while parked on a key spot; forget it when the block
+## leaves one. Skipped while the room settles: a restored block's plate
+## hasn't seen it yet, and it must not be forgotten for that.
+func _update_saved() -> void:
+	var w := Game.wiring()
+	if room == null or (w != null and w.is_settling()):
+		return
+	var parked := false
+	for spot in get_tree().get_nodes_in_group("key_spot"):
+		if spot.holds(self):
+			parked = true
+			break
+	if parked and (not _parked or position != _stored_pos):
+		_stored_pos = position
+		room.store_state(self, [position.x, position.y])
+	elif not parked and _parked:
+		room.store_state(self, null)
+	_parked = parked
 
 
 func _draw() -> void:

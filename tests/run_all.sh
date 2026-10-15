@@ -79,6 +79,15 @@ for t in "${tests[@]}"; do
         grep -A3 "SCRIPT ERROR" "$log" | head -40
         code=1
     fi
+    # Engine-side errors (physics state changed during a flush, bad
+    # set_shape calls, …) are not SCRIPT ERRORs but are still bugs. The
+    # exit-time "resources still in use" line comes from UiTheme's static
+    # Theme and is tolerated.
+    if grep -E "^(USER )?ERROR:" "$log" | grep -v -E "still in use at exit|leaked" | grep -q .; then
+        echo "   engine errors:"
+        grep -E -A3 "^(USER )?ERROR:" "$log" | grep -v -E "still in use at exit|leaked" | head -40
+        code=1
+    fi
     grep -E "CHECK FAILED|failures" "$log" | sed 's/^/   /'
     if [ "$code" -ne 0 ]; then
         echo "FAILED: $t (exit $code)"

@@ -141,14 +141,14 @@ func _show(page: int) -> void:
 	match page:
 		Page.MAIN:
 			_refresh_main()
-			_hint.text = "up/down move   A select   B back to title"
+			_hint.text = "up/down move   " + Controls.hint([["menu_accept", "select"], ["menu_back", "back to title"]])
 		Page.SLOTS_NEW, Page.SLOTS_LOAD:
 			_refresh_slots(page == Page.SLOTS_LOAD)
-			_hint.text = "up/down move   A choose   B back"
+			_hint.text = "up/down move   " + Controls.hint([["menu_accept", "choose"], ["menu_back", "back"]])
 		Page.CONFIRM:
 			_confirm_label.text = "Overwrite slot %d?" % (_pending_slot + 1)
 			_confirm_no.grab_focus()
-			_hint.text = "left/right move   A confirm   B back"
+			_hint.text = "left/right move   " + Controls.hint([["menu_accept", "confirm"], ["menu_back", "back"]])
 		Page.OPTIONS:
 			_options.refresh()
 			_options.focus_first()

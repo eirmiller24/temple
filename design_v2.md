@@ -1,6 +1,6 @@
 # The Temple of Rhys — Design Document v2
 
-*Working title. Supersedes `design.md`, which stays in the repo as the raw idea log. Script art: `script.xcf`. Last updated 2026-10-13.*
+*Working title. Supersedes `design.md`, which stays in the repo as the raw idea log. Script art: `script.xcf`. Last updated 2026-10-15.*
 
 ## How to read this document
 
@@ -166,7 +166,7 @@ flowchart TD
 ### 7.1 Moment to moment
 2D side-scrolling exploration through an interconnected temple with item-gated progress. You descend floor by floor, solve room and region puzzles in the spirit of OoT's adult dungeons, and fight enemies that always feel dangerous.
 
-**Movement verbs across the game:** run, jump, crouch/**bow**, climb ropes, swim, double jump (Life Fang), dash (Quality Boots), grapple (Grappling Hook).
+**Movement verbs across the game:** run, jump, crouch/**bow**, crouch jump (jumping while crouched keeps you crouched in the air), drop through a one-way platform (hold down + jump), climb ropes, swim, double jump (Life Fang), dash (Quality Boots), grapple (Grappling Hook).
 
 ### 7.2 Controls & the pause menu
 - The pause menu handles items: **A** selects, **B** uses, **Y** drops.
@@ -194,6 +194,12 @@ The notebook is required for "all sorts of information":
 The lantern lights dark areas until its batteries die just before the Knowledge Fang. That creates a stretch of limited vision, which the Fang's passive then fixes.
 
 **Open:** the distance for each visibility band, and how the lantern changes them; whether there are dark areas earlier that need the lantern; whether the lantern has any other use.
+
+### 7.6 Crushing and voiding out
+Anything solid that moves can crush, such as a closing gate or a block. Whenever a moving solid pushes a character somewhere it can't move out of:
+- **The player** is displaced to the nearest open spot and takes damage. If there is no open spot, they **void out**: they take the damage, the room reloads, and they reappear where they last entered it.
+- **Enemies** are displaced and take damage the same way. If they can't be displaced, they die.
+- **One-way platforms** count as solid for anyone standing on them. The only way down through one is an intentional drop: hold down and press jump. A moving solid pressing down on someone standing on one pushes them sideways, never down through.
 
 ---
 
@@ -365,6 +371,7 @@ Consonants come in pairs. The second consonant of each pair is the first plus a 
 - **One null glyph, two roles.** The null consonant ' and the null vowel are the same character, and its slot decides which it is:
   - In a consonant slot, it's the null consonant, the placeholder that lets a word begin with a vowel sound: *over* = '·o·V·e·R.
   - In a vowel slot, it's the null vowel: *Rhys* = [R/H]·|·S.
+- **The null vowel is never written at either end of a word.** A word-initial one takes its null consonant with it: *is* ('·|·Z) is written Z, and *the* (Dh·|) is written Dh. Inside a word it stays: *question* = [K/W]·e·[S/Ch]·|·N. The one exception is a word that is nothing but the null vowel, such as *a*: it is written in full, '·|.
 
 ### 11.4 Spaces and punctuation
 
@@ -379,12 +386,13 @@ Word breaks are written with the slots themselves, using two marks:
 | Cluster → cluster | An underscore slot between the words | …[C/C]·_·[C/C]… |
 | Vowel → vowel | An underscore slot between the words | …V·_·V… |
 | Consonant → vowel | An underscore slot, then the null consonant that starts the vowel-initial word | …C·_·'·V… (*Games over* = G·e·[M/S]·_·'·o·V·e·R) |
-| Vowel → consonant | The null consonant fills the consonant slot after the vowel, then an underscore slot | …V·'·_·C… |
+| Vowel → single consonant | The next word's first consonant takes the **bottom half** of its slot | …V·[∅/C]… (*to be* = T·u·[∅/B]·i) |
+| Vowel → cluster | The null consonant fills the consonant slot after the vowel, then an underscore slot *(assumed: a cluster has no free half)* | …V·'·_·[C/C]… |
 
 - **The position rule survives word breaks.** An underscore always fills the slot type the alternation needs. A half-empty slot marks where one word's chain ends and the next word's chain begins with its own consonant slot.
 - **Implied size rule.** In a cluster, each consonant takes half the slot's height, and a lone consonant fills the whole slot. That size difference is what makes a half-empty slot readable as a word break.
 
-**Open:** punctuation (sentence ends, pauses, numbers) isn't defined yet. The glyph printer also needs exactly one form per case. Does single consonant → single consonant always use the end-of-word half, as in *train tracks*? Is the start-of-word half used only after a cluster? Should consonant → vowel ever use a half-empty slot instead of the underscore?
+**Open:** punctuation (sentence ends, pauses, numbers) isn't defined yet. The glyph printer also needs exactly one form per case. Does single consonant → single consonant always use the end-of-word half, as in *train tracks*? Should consonant → vowel ever use a half-empty slot instead of the underscore?
 
 ### 11.5 Sample words in `script.xcf`
 
@@ -404,7 +412,7 @@ All of these sketches are in the **decorative** register: their letters are conn
 **Rhys'sthylceras.** The "c" is soft (S), the "th" uses the new Th glyph, and each "y" is the null vowel.
 
 - **Slots:** [R/H]·|·S·|·[S/Th]·|·[L/S]·e·R·a·S (11 slots). By the position rule, the apostrophe falls in a vowel slot, so it's the null vowel, the same glyph as each "y."
-- **Pillar syllables** (four Fangs, four syllables): **Rhys' · sthyl · ce · ras**. As separate inscriptions they are [R/H]·|·S·| — [S/Th]·|·L — S·e — R·a·S. Splitting the name this way divides the stacked [L/S] slot between *sthyl* and *ce*.
+- **Pillar syllables** (four Fangs, four syllables): **Rhys' · sthyl · ce · ras**. As separate inscriptions they are [R/H]·|·S — [S/Th]·|·L — S·e — R·a·S (the apostrophe's null vowel is not written at the end of *Rhys'*, §11.3). Splitting the name this way divides the stacked [L/S] slot between *sthyl* and *ce*.
 
 **Open:** the Th/Dh glyph design.
 

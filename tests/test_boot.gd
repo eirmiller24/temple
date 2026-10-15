@@ -76,13 +76,35 @@ func _run() -> int:
 	Input.action_release("move_right")
 	_check(world.player.global_position.x > x0 + 50.0, "player ran right (%.0f px)" % (world.player.global_position.x - x0))
 
-	# Jump.
+	# Jump: a held jump must reach jump_height_tiles (the room has ~13 tiles
+	# of headroom here), a tapped one must not.
+	await _ticks(10)
 	var y0 := world.player.global_position.y
+	var want := float(Data.player.jump_height_tiles) * Room.TILE
 	Input.action_press("jump")
-	await _ticks(12)
+	var apex := y0
+	for i in 70:
+		await _ticks(1)
+		apex = minf(apex, world.player.global_position.y)
+		if world.player.is_on_floor() and i > 10:
+			break
 	Input.action_release("jump")
-	_check(world.player.global_position.y < y0 - 20.0, "player jumped")
-	await _ticks(60)
+	var h := (y0 - apex) / Room.TILE
+	_check(h >= float(Data.player.jump_height_tiles) - 0.05 and h < float(Data.player.jump_height_tiles) + 0.5,
+			"full jump peaks at %.2f tiles (jump_height_tiles = %.1f)" % [h, float(Data.player.jump_height_tiles)])
+	await _ticks(20)
+	y0 = world.player.global_position.y
+	Input.action_press("jump")
+	await _ticks(3)
+	Input.action_release("jump")
+	apex = y0
+	for i in 60:
+		await _ticks(1)
+		apex = minf(apex, world.player.global_position.y)
+		if world.player.is_on_floor() and i > 10:
+			break
+	_check((y0 - apex) < want * 0.75, "tapped jump is cut short (%.2f tiles)" % ((y0 - apex) / Room.TILE))
+	await _ticks(10)
 
 	# Attack and item use don't error.
 	Input.action_press("attack")

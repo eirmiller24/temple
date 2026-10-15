@@ -20,6 +20,12 @@ extends Node2D
 
 const TILE := 32
 const UNSET := -99999
+## Seam exits get a runtime collision apron this many tiles past the room
+## edge (see _build_seam_aprons); must exceed RoomExit.OUTSIDE_TILES.
+const APRON_TILES := 3
+## Rows/columns of edge geometry copied either side of a seam's span.
+const APRON_MARGIN := 2
+const APRON_SOLID := ["solid", "fortified", "breakable", "ramp_r", "ramp_l"]
 
 @export_group("Identity")
 ## Shown on the map and the save slot. Defaults to the scene name.
@@ -62,6 +68,9 @@ const UNSET := -99999
 	set(v):
 		preview_skin = v
 		_preview_dirty = true
+## Run Current Scene (F6) starts the real game in this room with every
+## item (DebugBoot). The RoomEntry id to start on; empty = the first.
+@export var test_entry: String = ""
 
 var collision: TileMapLayer
 var skin_layer: SkinLayer
@@ -78,6 +87,11 @@ func _ready() -> void:
 	collision = get_node_or_null("Collision") as TileMapLayer
 	if Engine.is_editor_hint():
 		set_process(true)
+		return
+	if get_tree().current_scene == self:
+		# Run Current Scene (F6): hand over to Main, which loads this room
+		# into a World with the player.
+		DebugBoot.play_room(get_tree(), registry_name(), test_entry)
 		return
 	_build_runtime()
 
@@ -109,6 +123,30 @@ func room_name() -> String:
 	return display_name if display_name != "" else name
 
 
+## The registry name (the scene file's stem) — what World, RoomRegistry
+## and the save file call this room.
+func registry_name() -> String:
+	return scene_file_path.get_file().get_basename() if scene_file_path != "" else String(name)
+
+
+# --- puzzle-object persistence --------------------------------------------------------
+
+## What `node` (a push block, lever, latching button under this room) last
+## stored in the save, or null if it never has. Keyed by its node path in
+## the room, so renaming an object orphans its saved state.
+func saved_state(node: Node) -> Variant:
+	var state := Game.state()
+	if state == null:
+		return null
+	return state.object_state(registry_name(), String(get_path_to(node)))
+
+
+func store_state(node: Node, value: Variant) -> void:
+	var state := Game.state()
+	if state != null:
+		state.set_object_state(registry_name(), String(get_path_to(node)), value)
+
+
 ## Kind string of the Collision cell at a local pixel position ("" if empty).
 func kind_at(local_px: Vector2) -> String:
 	if collision == null:
@@ -118,6 +156,15 @@ func kind_at(local_px: Vector2) -> String:
 	if td == null:
 		return ""
 	return String(td.get_custom_data("kind"))
+
+
+## True if the Collision cell at a local pixel position has a physics
+## shape (solid, ramps, breakables, one-way — not water or hazard).
+func collides_at(local_px: Vector2) -> bool:
+	if collision == null:
+		return false
+	var td := collision.get_cell_tile_data(collision.local_to_map(local_px))
+	return td != null and td.get_collision_polygons_count(0) > 0
 
 
 func kind_at_cell(cell: Vector2i) -> String:
@@ -199,7 +246,69 @@ func _build_runtime() -> void:
 	modulate_node.color = Color.WHITE.lerp(ambient_color, darkness)
 	add_child(modulate_node)
 	_spawn_breakables()
+	_build_seam_aprons()
 	Game.music().play_track(music)
+
+
+## Only one room is loaded at a time, so the world ends at the painted
+## rect: a player who steps through a seam before the transition fires (or
+## turns straight back after arriving) would fall through the unloaded
+## neighbour. For every seam exit, copy the edge column/row's solid cells
+## APRON_TILES outward across the exit's span (± APRON_MARGIN), as plain
+## StaticBody2D shapes on the world layer. One-way ledges stay one-way.
+## The exit trigger reaches OUTSIDE_TILES past the edge, so it fires while
+## the player is still on apron.
+func _build_seam_aprons() -> void:
+	var exits := get_node_or_null("Exits")
+	if exits == null:
+		return
+	var body: StaticBody2D = null
+	for e in exits.get_children():
+		if not (e is RoomExit) or not (e as RoomExit).is_seam():
+			continue
+		var exit: RoomExit = e
+		var r := exit.rect_tiles()
+		var t := exit.travel()
+		# [apron cell, edge cell it copies] pairs.
+		var pairs: Array = []
+		if t.x != 0:
+			var edge_col := r.end.x - 1 if t.x > 0 else r.position.x
+			for row in range(r.position.y - APRON_MARGIN, r.end.y + APRON_MARGIN):
+				for i in range(1, APRON_TILES + 1):
+					pairs.append([Vector2i(edge_col + i * t.x, row), Vector2i(edge_col, row)])
+		else:
+			var edge_row := r.end.y - 1 if t.y > 0 else r.position.y
+			for col in range(r.position.x - APRON_MARGIN, r.end.x + APRON_MARGIN):
+				for i in range(1, APRON_TILES + 1):
+					pairs.append([Vector2i(col, edge_row + i * t.y), Vector2i(col, edge_row)])
+		var painted := rect_tiles()
+		for pair in pairs:
+			var cell: Vector2i = pair[0]
+			if painted.has_point(cell):
+				continue   # never shadow the room's own cells (L-shaped rooms)
+			var kind := kind_at_cell(pair[1])
+			if kind == "":
+				continue
+			var is_oneway := kind == "oneway"
+			if not is_oneway and not APRON_SOLID.has(kind):
+				continue
+			if body == null:
+				body = StaticBody2D.new()
+				body.name = "SeamAprons"
+				body.collision_layer = 1 << 0
+				body.collision_mask = 0
+				add_child(body)
+			var shape := CollisionShape2D.new()
+			var rect := RectangleShape2D.new()
+			if is_oneway:
+				rect.size = Vector2(TILE, 4)
+				shape.position = Vector2(cell) * TILE + Vector2(TILE / 2.0, 2.0)
+				shape.one_way_collision = true
+			else:
+				rect.size = Vector2(TILE, TILE)
+				shape.position = Vector2(cell) * TILE + Vector2(TILE, TILE) / 2.0
+			shape.shape = rect
+			body.add_child(shape)
 
 
 ## Every breakable/fortified cell gets a BreakableTile area so attacks can
@@ -263,6 +372,7 @@ func _refresh_preview() -> void:
 
 func _validate_property(property: Dictionary) -> void:
 	var hint := ""
+	var kind := PROPERTY_HINT_ENUM
 	match property.name:
 		"skin":
 			hint = "none," + _json_keys("res://data/skins.json", "")
@@ -270,11 +380,24 @@ func _validate_property(property: Dictionary) -> void:
 			hint = _json_keys("res://data/backgrounds.json", "")
 		"music":
 			hint = _json_keys("res://data/music.json", "tracks")
+		"test_entry":
+			kind = PROPERTY_HINT_ENUM_SUGGESTION
+			hint = ",".join(_entry_ids())
 		_:
 			return
 	if hint != "":
-		property.hint = PROPERTY_HINT_ENUM
+		property.hint = kind
 		property.hint_string = hint
+
+
+func _entry_ids() -> PackedStringArray:
+	var out := PackedStringArray()
+	var entries := get_node_or_null("Entries")
+	if entries != null:
+		for e in entries.get_children():
+			if e is RoomEntry and String(e.id) != "":
+				out.append(String(e.id))
+	return out
 
 
 func _get_configuration_warnings() -> PackedStringArray:

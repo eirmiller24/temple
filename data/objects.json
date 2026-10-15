@@ -12,6 +12,12 @@
   "gate": {
     "open_speed": 120.0
   },
+  "crush": {
+    "_comment": "Design §7.6, game/combat/crush.gd. A character a moving solid squeezes is displaced up to max_displace px to the nearest free spot and hit (player and enemies alike); with no spot the player voids out and an enemy dies.",
+    "damage": 1,
+    "knockback": [220.0, -120.0],
+    "max_displace": 64.0
+  },
   "slingshot": {
     "speed": 540.0,
     "damage": 1,

@@ -137,6 +137,16 @@ static func validate(reg: Dictionary) -> PackedStringArray:
 						back = true
 				if not back:
 					problems.append("%s: exit → %s has no exit back (wire both ways, or use a to_entry teleport for a one-way drop)" % [name, to])
+			# Exits poll the player every frame, so an entry inside an exit's
+			# footprint would send a freshly spawned player straight out again.
+			var footprint := Rect2i(int(ex.x), int(ex.y), int(ex.w), int(ex.h))
+			for eid: String in r.entries:
+				var en: Dictionary = r.entries[eid]
+				var feet := Vector2(float(en.x), float(en.y))
+				# The body stands on the entry: ~0.5 tile wide, 1.3 tiles tall above the feet.
+				var body := Rect2(feet.x - 0.25, feet.y - 1.3, 0.5, 1.3)
+				if body.intersects(Rect2(footprint.position, footprint.size)):
+					problems.append("warning: %s: entry '%s' stands inside exit → %s; the player would leave on arrival" % [name, eid, to])
 	# Overlaps between rooms are legal (secret alcoves) but usually a mistake.
 	var names := reg.keys()
 	for i in names.size():

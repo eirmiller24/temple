@@ -160,6 +160,7 @@ and falls back to greybox, an unknown track warns and plays silence.
 | Field | Default | Meaning |
 |---|---|---|
 | `preview_skin` | `true` | Draw the skin in the editor as you paint Collision. The kind tiles are faded to 35 % over it, so you see both what you painted and how it reads. No runtime effect. |
+| `test_entry` | `""` | Where **Run Current Scene** (F6) starts you (§9.9). Suggests the room's entry ids; empty = the first entry. Only affects F6. |
 
 #### The house rule and `@export`
 
@@ -217,7 +218,7 @@ flat tiles are never drawn in play — and dressed by the `SkinLayer` (§5).
 | Atlas | `kind` | Physics | Looks like (palette) | What it does |
 |---|---|---|---|---|
 | 1st | `solid` | full square | dark slate `#46464f` | Blocks everything. |
-| 2nd | `oneway` | **top-quarter lip**, one-way, 4 px margin | tan lip, only the top quarter is drawn | Stand on it, jump up through it from below, **crouch + jump** drops through (the player samples the kind 2 px under its feet). The tile being mostly transparent is deliberate: what you see is what it does. |
+| 2nd | `oneway` | **top-quarter lip**, one-way, 4 px margin | tan lip, only the top quarter is drawn | Stand on it, jump up through it from below, **down + jump** drops through (the player samples the kind 2 px under its feet, then nudges itself 5 px down, past the 4 px margin). That drop is the only way down through it: a moving solid pressing on someone standing on it **crushes** them sideways instead (design §7.6). The tile being mostly transparent is deliberate: what you see is what it does. |
 | 3rd | `breakable` | full square + a `BreakableTile` area | brown-grey with a regular speckle | A secret wall. Any attack that reaches it (`take_hit`, tier 0 or better) erases the cell with a puff and a shake, and the skin re-fits its neighbours. |
 | 4th | `fortified` | full square + a `BreakableTile` area | dark with a brick pattern | **Keystone-grade** wall: only a `tier` 1 hit breaks it; anything less clinks. This is the "Power Fang breaks certain walls" tile (design §9.1). |
 | 5th | `water` | **none** | blue, 60 % alpha, bright top edge | Swimming. The player samples the kind at its **body centre**: inside, gravity is cut to `swim_gravity_mult`, horizontal speed is `swim_speed`, holding jump rises at `swim_up_velocity`, crouch and dash are disabled. |
@@ -328,27 +329,43 @@ never saved — the scene holds only the authored fields.
 footprint with a tick line back to the node so the rounding is visible
 while you place it. If the tick is long, the rect is not where you think.
 
-**Seam** (`to_entry == ""`): the player keeps its world position,
-nudged 0.75 tile in `direction`, and the far room's exits are locked for
-0.6 s so the matching exit on the other side doesn't bounce it straight
-back. This is the normal metroidvania door, and it only works if the two
-rooms **line up on the grid**: the doorway gap in this room's border and
-the gap in the neighbour's border must occupy the *same world rows* (or
-columns, for a vertical seam), and the neighbour's painted rect must begin
-where this one's ends. The registry validator checks that the exit rect,
-grown by one tile, touches the neighbour's painted rect — adjacency. It
-does **not** check that the rows line up; your eye does, and the play test
-does (you arrive inside a wall if they don't).
+**Seam** (`to_entry == ""`): the player keeps its world position along
+the seam. This is the normal metroidvania door, and it only works if the
+two rooms **line up on the grid**: the doorway gap in this room's border
+and the gap in the neighbour's border must occupy the *same world rows*
+(or columns, for a vertical seam), and the neighbour's painted rect must
+begin where this one's ends. The registry validator checks that the exit
+rect, grown by one tile, touches the neighbour's painted rect —
+adjacency. It does **not** check that the rows line up; your eye does,
+and the play test does (you arrive inside a wall if they don't).
 
-> **Check seams in play, not just in the validator.** The exit rect sits
-> over this room's own border column, so the trigger fires while the
-> player is still inside *this* room's doorway, and a 0.75-tile nudge
-> (`World.load_room`) leaves the feet roughly over the column that just
-> unloaded — by the numbers, a few pixels short of the neighbour's floor.
-> `tests/test_boot.gd` loads every room by teleport and never walks a
-> seam, so as of this writing nothing automated has crossed one. If the
-> player drops on arrival, that is the nudge distance (a code tunable),
-> not your room.
+Three runtime details make seams robust, and you get them for free by
+putting the exit over the doorway (paint nothing special):
+
+- **The trigger reaches outside.** At runtime a seam's trigger extends
+  `RoomExit.OUTSIDE_TILES` (2) past the room edge in its `direction`; the
+  gizmo draws that reach faintly. Triggers are **polled** every physics
+  frame while the player overlaps them, not edge-triggered, so a request
+  that lands during a transition is simply repeated next frame.
+- **A collision apron continues the edge.** Only one room is loaded at a
+  time, so the world would end at the painted rect. `Room` lays a
+  `SeamAprons` StaticBody2D beyond every seam: the edge column (or row)
+  of the kind layer, copied `Room.APRON_TILES` (3) outward across the
+  exit's span ± `APRON_MARGIN` (2) — solids stay solid, one-way ledges
+  stay one-way. A player who steps through the doorway before the trigger
+  fires, or who turns straight around after arriving, stands on floor.
+  You can see the apron in the F2 debug view.
+- **Arrival lands clear of the door.** `World.load_room` places a seam
+  arrival just past the inner edge of the *matching* exit in the new
+  room (the one that leads back, found by opposite `direction`), body
+  fully inside the painted rect, and only locks exits for the fade. So
+  turning around at once re-enters that trigger and goes back; standing
+  still stays put. The fade is still black while this happens.
+
+`tests/test_objects.gd` walks the hall → shaft seam, turns straight
+around, and crosses it again. A `RoomEntry` standing inside an exit's
+footprint gets a validator warning — a player spawned there would leave
+on the first frame.
 
 **Teleport** (`to_entry` named): the player is placed at that `RoomEntry`
 in the target room, feet on the marker, facing its `facing`. Use it for
@@ -624,10 +641,10 @@ about `Data`/`GameState` at parse time.
 
 | Scene | Exported fields | Does |
 |---|---|---|
-| `push_block.tscn` (`PushBlock`) | `block_material` (stone / iron / wood) | A one-tile crate. The player walking into it calls `push(dir, delta)` and it slides at `objects.push_block.push_speed`; it falls, weighs buttons, carries the player. The grappling hook pulls **iron** and **wood** blocks toward the player (`grapple_hit()` returns `"pull"`); stone is too heavy. Layers `pushable` + `grapple`. |
-| `floor_button.tscn` (`FloorButton`) | `channel`, `latching` | A pressure plate. Pressed by standing weight — player, push block, enemy. Drives its channel while pressed; a latching one stays down forever and also takes a hit (a slingshot stone). Sprite: the `button` manifest entry, `raised`/`pressed` clips. |
-| `lever.tscn` (`Lever`) | `channel`, `flag`, `starts_on` | Toggled by any hit (sword, whip reach, slingshot) on its `switch`-layer area. Drives its channel while on. A `flag` is set the first time it lands on and restores the lever to on in later visits. |
-| `gate.tscn` (`Gate`) | `channel`, `w`, `h`, `inverted` | A `w`×`h` portcullis: a StaticBody on the `world` layer while closed, slid up out of the way (at `objects.gate.open_speed`) while any source drives its channel (`inverted` opens on *inactive*). Author it over **empty** Collision cells. Position = the slab's bottom-centre. |
+| `push_block.tscn` (`PushBlock`) | `block_material` (stone / iron / wood) | A one-tile crate. The player walking into it calls `push(dir, delta)` and it slides at `objects.push_block.push_speed`; it falls, weighs buttons, carries the player. A block resting on a key spot (any floor button) saves its position and is still there next visit; left anywhere else it resets to where it was authored. The grappling hook pulls **iron** and **wood** blocks toward the player (`grapple_hit()` returns `"pull"`); stone is too heavy. Layers `pushable` + `grapple`. |
+| `floor_button.tscn` (`FloorButton`) | `channel`, `latching` | A pressure plate. Pressed by standing weight — player, push block, enemy. Drives its channel while pressed; a latching one stays down forever (saved: it is still down on the next visit) and also takes a hit (a slingshot stone). A momentary one saves nothing and re-reads its weight on arrival. Sprite: the `button` manifest entry, `raised`/`pressed` clips. |
+| `lever.tscn` (`Lever`) | `channel`, `flag`, `starts_on` | Toggled by any hit (sword, whip reach, slingshot) on its `switch`-layer area. Drives its channel while on. Its on/off position is saved per room and restored on every visit, whichever way it was left; `starts_on` only sets the first visit. A `flag` is set the first time it lands on, for anything else to test. It does **not** hold the lever on. |
+| `gate.tscn` (`Gate`) | `channel`, `w`, `h`, `inverted` | A `w`×`h` portcullis that slides up `h` tiles (at `objects.gate.open_speed`) while any source drives its channel (`inverted` opens on *inactive*), opening the gap beneath it. The slab is an AnimatableBody on the `world` layer and is **solid all the time**: lowered, raised and mid-slide, and it carries what stands on it. Like every moving solid it **crushes** (design §7.6, `game/combat/crush.gd`, `objects.crush`): anyone it squeezes is displaced to the nearest free spot and hit. With nowhere to go, the player **voids out** (`World.void_out()`: the room reloads and they're back where they last entered it) and an enemy dies. Author it over **empty** Collision cells, with the `h` cells above clear for the raised slab. Position = the slab's bottom-centre. |
 | `locked_door.tscn` (`LockedDoor`) | `needs_item`, `consumes`, `w`, `h` | A solid door in a doorway. Interact (LB / E) in front of it: with the item it opens (consuming a key), without it a toast says what it needs. Opening sets the permanent flag `door_<room>_<node>` so it stays open in that save. |
 | `pickup.tscn` (`Pickup`) | `item_id`, `count`, `flag`, `appearance` | An item on the floor; walk over it. `flag` makes it once-ever (naming the flag IS the suppression). `appearance` `"chest"` draws the chest sprite instead of the floating gem. Dropped items from the pause menu are Pickups made with `setup(id, n)` and a 1 s re-collect grace. |
 | `save_shrine.tscn` (`SaveShrine`) | *(none)* | Interact to save: sets the respawn point to **this shrine** (`GameState.set_respawn(room, node name)`), heals if `objects.save_shrine.heal_on_save`, writes the current slot (slot 1 if the run was never saved). `World.load_room()` accepts a shrine's node name as an entry id, so death and Continue land on it. |
@@ -646,16 +663,31 @@ latching button is a permanent open; a momentary button plus a gate is a
 hold-the-door puzzle; a push block parked on the button is the solution.
 State is **per room**: `World.load_room()` calls `Wiring.reset()`, so a
 gate held open by a button in another room closes the moment you leave.
-Persistent state (a door that stays unlocked) goes through
-`GameState.set_flag()` — permanent flags are the only cross-room memory,
-and they are saved.
+
+**Puzzle objects remember where they were left.** Lever on/off, latched
+buttons, and push blocks *parked on a key spot* (a floor button; group
+`key_spot`, `holds(body)`) are written to
+`GameState.room_objects` (in the save file) via `Room.store_state()` /
+`Room.saved_state()`, keyed by room and the object's node path. **Renaming
+or reparenting an object forgets its saved state.** Come back to a room
+and the restored objects re-drive their channels. For
+`Wiring.SETTLE_FRAMES` after a room loads, wiring changes are the room
+settling into that state, not the player acting. Gates snap straight to
+position and buttons stay quiet, so nothing visibly slides on arrival.
+A block anywhere other than a key spot is not saved and resets on
+re-entry (the Ocarina of Time rule), so a block pushed into a dead end
+comes back. Other state (a door that stays unlocked, a pickup taken) goes
+through `GameState.set_flag()`, and flags are saved too.
 
 **The player's side of these contracts** is already in
 `game/player/player.gd` and is what the objects are written against:
 `_handle_pushes` calls `push()` on anything it slides into sideways that
 has the method; `_interact` calls `interact(self)` on the nearest `Area2D`
 on layer 8 within 28 px; `_fire_grapple` raycasts against world + pushable
-+ grapple layers and calls `grapple_hit(self)` on the collider; the
++ grapple layers and calls `grapple_hit(self)` on the collider (and,
+while aiming, `grapple_mode(self)` every frame: the same answer —
+`"anchor"`, `"pull"` or `"none"` — with no side effects, which turns the
+aim reticle red for anything but `"none"`; implement both); the
 attack `Hitbox` calls `take_hit(info)` on anything on layers 5, 10 or 13.
 The hit info dict is `{damage, knockback, source, origin, kind, tier,
 hitstop}`; `tier` 1 is keystone-grade.
@@ -841,7 +873,7 @@ right, both from 0; the room is 20 × 20 tiles — 640 × 640 px.
 5. **Step and shelf**: `solid` at row 16 column 8 (a one-tile step), then
    `oneway` at row 15 columns 3–7 (a shelf one tile higher). One-tile
    steps, because a jump clears about two tiles and two is the limit
-   (§3). Jump onto the step, then up *through* the shelf; crouch + jump
+   (§3). Jump onto the step, then up *through* the shelf; down + jump
    drops you back through; standing under it is fine, the lip is 8 px.
 6. **Secret**: `solid` at rows 11–12 columns 1–3 (a roof), `solid` at row
    15 columns 1–2 (a floor — solid, not one-way, or the shelf would be a
@@ -907,7 +939,14 @@ godot --headless --path . -s res://tools/build_room_registry.gd
 godot --headless --path . res://tests/test_boot.tscn
 ```
 
-To play: `godot --path .`, start a new game, press **F4** until the toast
+To play: with the room open, press **F6** (Run Current Scene). The room
+hands over to `main.tscn` (`game/debug_boot.gd`), which skips the menus,
+starts a fresh run with **every item at a full stack**, and loads the
+room at its `test_entry` (empty = first entry); dying respawns there.
+From a shell, the same thing is
+`godot --path . -- --room test_reliquary [--entry main]`. No save slot is
+picked, so a save shrine writes to slot 1. The long way also works:
+`godot --path .`, start a new game, press **F4** until the toast
 says `debug: → test_reliquary`. Walk right through the door into the
 vault and back (if you fall on arrival, read the seam note in §4.2 — it is
 the arrival nudge, not your room). Then toggle **F2**: the kinds appear

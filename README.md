@@ -85,7 +85,7 @@ the autoloads exist and cannot name `Data` or `GameState`, so tests are
 `tests/test_*.tscn` scenes whose script runs in `_ready()` and quits with
 an exit code. `tests/test_boot.tscn` validates the room registry, starts a
 game, loads every room and exercises the player. `tests/run_all.sh` runs
-them all (planned alongside the asset-boundary test).
+them all and fails on engine errors as well as on failed checks.
 
 ## Quick start
 
@@ -103,11 +103,17 @@ The game opens on a title screen, then a slot picker; a new game starts in
 the test entry hall with a debug loadout (sword, slingshot, grappling hook,
 lantern) that the design will replace with "nothing".
 
-**Controls.** Movement is analog: how far you push the left stick picks
-walk or run (`walk_threshold` in `data/player.json`); on a keyboard, hold
-Ctrl to walk. Crouching is the bow from the design (§9.2), so it has its
-own button rather than stick-down. Free aim is a hold: while held, the
-left stick (or the mouse) aims and the right stick moves.
+**Controls** (the defaults — every button below is remappable in
+Options → Controls, pad and keyboard separately, and the HUD and menus
+show whatever is bound). Movement is analog: how far you push the left
+stick picks walk or run (`walk_threshold` in `data/player.json`); on a
+keyboard, hold Ctrl to walk. Crouching is the bow from the design (§9.2),
+so it has its own button rather than stick-down. Free aim is a hold;
+*Aiming swaps sticks* in Options decides what the sticks do while it is
+held: on (default), the left stick aims and the right stick moves —
+one-stick play; off, the left stick keeps moving and the right stick
+aims, for claw-grip players who shoot while running. A full jump clears
+`jump_height_tiles` (4) tiles; a tap is cut short.
 
 | Action | Pad | Keyboard / mouse |
 |---|---|---|
@@ -115,7 +121,7 @@ left stick (or the mouse) aims and the right stick moves.
 | Walk | stick magnitude | hold Ctrl |
 | Jump (variable height) | A | Space |
 | Attack (equipped weapon) | B | J |
-| Item slot X / Y | X / Y | K / L |
+| Item 1 / Item 2 | X / Y | K / L |
 | Crouch, crawl, bow | RT | S, Down |
 | Dash | RB | Shift |
 | Free aim (hold) | LT | right mouse button |
@@ -123,15 +129,22 @@ left stick (or the mouse) aims and the right stick moves.
 | Pause / items | Start | Esc |
 | Map | Back | Tab |
 | Menu: accept / back | A / B | Enter / Esc |
-| Menu: use / drop / assign | B / Y / LB | J / L / E |
-| Menu: tabs | LB / RB | Q / R |
+| Menu: use / drop / assign | = attack / item 2 / interact | = attack / item 2 / interact |
+| Menu: tabs | = interact / dash | Q / R |
+
+The menu verbs mirror the gameplay buttons (B uses an item because B is
+attack), so they follow a remap; *Menu: accept* and *Menu: back* are their
+own rows. Remaps live in `user://settings.json`; "Reset to defaults" in
+the panel forgets them.
 
 Debug keys in play: **F1** tuning panel (edits any `player`, `objects` or
 `weapons` number in place, unsaved — copy what works into the JSON),
-**F2** debug view (kinds, hitboxes, exit rects, enemy state), **F3**
-reload all data from disk, **F4** jump to the next room in the registry.
-The input map is generated from the table in `tools/gen_project_godot.py`;
-edit the table, re-run it, never `project.godot` by hand.
+**F2** debug view (kinds, hitboxes, exit rects and seam aprons, enemy
+state), **F3** reload all data from disk, **F4** jump to the next room in
+the registry. The default input map is generated from the table in
+`tools/gen_project_godot.py`; edit the table, re-run it, never
+`project.godot` by hand. At runtime `game/autoload/controls.gd` owns the
+InputMap.
 
 ## Adding a room in five steps
 
@@ -172,7 +185,8 @@ data/                   every tunable and manifest (JSON); rooms.json is generat
 assets/                 licensed art/audio, one SOURCES.md per class, licenses/
 assets/ai_placeholder/  EVERYTHING AI-generated, by class, with ai_provenance.json
 raw_assets/             gitignored source packs (zips, PSDs)
-tools/                  headless scripts (registry build, kind-tileset generator, input map)
+tools/                  headless scripts (registry build, kind-tileset generator, input map,
+                        ASCII room dump, room/UI screenshots)
 tests/                  headless test scenes + run_all.sh
 docs/                   room_authoring.md, authoring/ai_art.md, implementation_log.md
 ```

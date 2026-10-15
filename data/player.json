@@ -20,11 +20,12 @@
   "decel": 2200.0,
   "air_accel": 1000.0,
   "crouch_speed": 55.0,
+  "drop_through_down": 0.4,
 
   "gravity": 1500.0,
   "fall_gravity_mult": 1.35,
   "terminal_velocity": 640.0,
-  "jump_velocity": -440.0,
+  "jump_height_tiles": 4.0,
   "jump_cut_mult": 0.45,
   "coyote_time": 0.1,
   "jump_buffer": 0.12,
@@ -44,6 +45,7 @@
   "swim_speed": 105.0,
   "swim_up_velocity": -190.0,
   "swim_terminal": 110.0,
+  "swim_exit_jump_tiles": 2.0,
 
   "aim_move_mult": 1.0,
   "aim_indicator_length": 44.0,

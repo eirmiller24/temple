@@ -5,6 +5,12 @@ extends RoomObject
 ## block, an enemy. Momentary buttons release when the weight leaves;
 ## latching ones stay pressed forever (and can also be pressed by an
 ## attack). Drives `channel` while pressed. Position is FEET.
+##
+## Persistence: a latched button is saved and comes back pressed. A
+## momentary one saves nothing, and re-reads its weight on arrival. Every
+## button is a KEY SPOT (group "key_spot"): a push block resting on one
+## saves its position and is still there next visit, so it presses the
+## button again.
 
 @export var latching: bool = false:
 	set(v):
@@ -30,6 +36,9 @@ func _setup_runtime() -> void:
 	_area.body_entered.connect(func(_b: Node) -> void: _refresh())
 	_area.body_exited.connect(func(_b: Node) -> void: _refresh())
 	_sprite = add_sprite("button", 1.0)
+	add_to_group("key_spot")
+	if latching and room != null and room.saved_state(self) == true:
+		_set_pressed(true, true)
 	_show_state()
 
 
@@ -37,6 +46,11 @@ func _setup_runtime() -> void:
 func take_hit(_info: Dictionary) -> void:
 	if latching and not pressed:
 		_set_pressed(true)
+
+
+## Key-spot contract (PushBlock): is `body` resting on the plate?
+func holds(body: Node2D) -> bool:
+	return _area != null and _area.overlaps_body(body)
 
 
 func _refresh() -> void:
@@ -51,12 +65,17 @@ func _refresh() -> void:
 			_set_pressed(weight)
 
 
-func _set_pressed(on: bool) -> void:
+func _set_pressed(on: bool, silent: bool = false) -> void:
 	pressed = on
 	var w := Game.wiring()
 	if w != null:
 		w.drive(channel, self, on)
-	sfx("button_press" if on else "button_release")
+		# A restored block landing on the plate as the room loads.
+		silent = silent or w.is_settling()
+	if latching and on and room != null:
+		room.store_state(self, true)
+	if not silent:
+		sfx("button_press" if on else "button_release")
 	_show_state()
 
 

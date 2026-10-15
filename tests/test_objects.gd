@@ -73,8 +73,25 @@ func _run() -> int:
 	p.spawn_at(world.room.global_position + _tile(2.5, 14), 1)
 	await _ticks(5)
 	var bx0 := block.global_position.x
-	await _press("move_right", 150)
+	# While leaning on the block the clip must settle on "push" and stay
+	# there — it used to flicker push/walk every frame.
+	Input.action_press("move_right")
+	var anims := {}
+	var flips := 0
+	var last_anim := ""
+	for i in 100:   # ~1.5 s at push_speed lands the block on the plate
+		await _ticks(1)
+		if i >= 20:
+			var a := String(p.sprite.animation)
+			anims[a] = anims.get(a, 0) + 1
+			if last_anim != "" and a != last_anim:
+				flips += 1
+			last_anim = a
+	Input.action_release("move_right")
 	_check(block.global_position.x > bx0 + 40.0, "walking into the block pushed it (%.0f px)" % (block.global_position.x - bx0))
+	_check(anims.get("push", 0) >= 70 and flips <= 2,
+			"push clip holds while pushing (push frames %d of 80, %d clip changes, seen %s)" % [anims.get("push", 0), flips, str(anims)])
+	await _ticks(10)
 	_check(plate.pressed, "the block weighs the plate")
 	_check(Wiring.is_active(0) and gate.is_open, "the plate opens the gate on channel 0")
 
@@ -140,6 +157,43 @@ func _run() -> int:
 	var hall_rect := RoomRegistry.rect("test_entry_hall")
 	_check(not hall_rect.has_point(Vector2i(int(p.global_position.x / Room.TILE), int(p.global_position.y / Room.TILE) - 1)),
 			"player left the hall's rect")
+	# The arrival is clear of the shaft's own exit trigger (col 44, 1 tile
+	# deep): body fully past x = 45 tiles.
+	_check(p.global_position.x - p.body_width() / 2.0 >= 45 * Room.TILE, "arrival body is clear of the back exit (x=%.1f tiles)" % (p.global_position.x / Room.TILE))
+	_check(world.room.get_node_or_null("SeamAprons") != null, "the shaft built seam collision aprons")
+
+	# --- turn straight around: must go back, never fall ---------------------------------------
+	# The bug: a time-locked exit plus body_entered-only triggering meant
+	# walking back out crossed into the unloaded hall and fell forever.
+	var floor_y := p.global_position.y
+	Input.action_press("move_left")
+	waited = 0
+	var lowest := floor_y
+	while world.room_name == "test_shaft" and waited < 240:
+		await _ticks(1)
+		lowest = maxf(lowest, p.global_position.y)
+		waited += 1
+	Input.action_release("move_left")
+	await _ticks(30)
+	_clear_enemies()
+	_check(world.room_name == "test_entry_hall", "turning straight around re-enters the hall (%d ticks)" % waited)
+	_check(lowest <= floor_y + 2.0, "the player never dropped below the floor on the way back (max +%.0f px)" % (lowest - floor_y))
+	_check(p.is_on_floor(), "player stands on the hall floor after turning back")
+	# And straight back again, standing still for a moment first (the
+	# arrival must not bounce).
+	await _ticks(40)
+	_check(world.room_name == "test_entry_hall", "standing still after arrival does not bounce back")
+	Wiring.drive(0, self, true)
+	await _ticks(2)
+	Input.action_press("move_right")
+	waited = 0
+	while world.room_name == "test_entry_hall" and waited < 240:
+		await _ticks(1)
+		waited += 1
+	Input.action_release("move_right")
+	await _ticks(30)
+	_check(world.room_name == "test_shaft" and p.is_on_floor(), "and through the seam a second time")
+	_clear_enemies()
 
 	# --- teleport exit: vault pit → cistern --------------------------------------------
 	await world.load_room("test_vault", "main")

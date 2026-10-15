@@ -11,10 +11,12 @@ const DEFAULT_SETTINGS := {
 	"music_volume": 0.8,
 	"sfx_volume": 1.0,
 	"fullscreen": false,
-	"hold_to_assign": false,   # hold X/Y in the item menu to assign (off by default)
+	"hold_to_assign": false,   # hold the item buttons in the item menu to assign (off by default)
+	"aim_swap_sticks": true,   # free-aim: left stick aims, right stick moves (off = claw grip: right stick aims)
+	"bindings": {},            # Controls overrides, {action: {"pad": [...], "key": [...]}}
 }
 
-var settings := DEFAULT_SETTINGS.duplicate()
+var settings := DEFAULT_SETTINGS.duplicate(true)
 
 
 func _ready() -> void:
@@ -78,10 +80,10 @@ func format_playtime(seconds: float) -> String:
 # --- settings -------------------------------------------------------------------
 
 func load_settings() -> void:
-	settings = DEFAULT_SETTINGS.duplicate()
+	settings = DEFAULT_SETTINGS.duplicate(true)
 	var d := _read(SETTINGS_PATH)
 	for k: String in d:
-		if settings.has(k):
+		if settings.has(k) and typeof(d[k]) == typeof(settings[k]):
 			settings[k] = d[k]
 
 
@@ -96,6 +98,7 @@ func apply_settings() -> void:
 			else DisplayServer.WINDOW_MODE_WINDOWED
 	if DisplayServer.get_name() != "headless":
 		DisplayServer.window_set_mode(mode)
+	Controls.apply(settings.bindings)
 
 
 func set_setting(key: String, value: Variant) -> void:

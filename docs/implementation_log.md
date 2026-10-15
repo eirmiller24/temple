@@ -290,4 +290,376 @@ merged and the remaining pieces landed.
   test_skins, test_ui — all green, no engine script errors.
 
 Open items from the list above that this addendum closes: objects,
-`run_all.sh`, findings 8 and 9. Still open: everything else listed.
+`run_all.sh` and the two asset tests (`test_assets`, `test_skins`),
+findings 8 and 9, and the `ai_provenance.json` back-fill (one per
+`ai_placeholder/<class>/`, schema per `docs/authoring/ai_art.md` §3; the
+empty `sprites/` folder was never committed). Still open: everything
+else listed — above all the Forest Monsters and 400 Sounds Pack
+licenses, which block any public build.
+
+## 2026-10-13 — First playtest fixes
+
+Eir played the build and reported: the jump was ~2.5 tiles; the push
+clip flickered against a block every frame; walking through a seam and
+turning straight around dropped the player off the world; a claw-grip
+player wants the sticks NOT swapped while aiming; the pad layout should
+be remappable (theirs: B jump, Y attack, A and X items); and two engine
+errors — `gate.gd:60 Can't change this state while flushing queries` and
+a one-time `shader_rd _load_from_cache header` mismatch.
+
+### What changed
+
+- **Jump height is a tile count.** `data/player.json` `jump_velocity`
+  became `jump_height_tiles` (4.0); `Player.jump_velocity()` derives the
+  take-off speed from it and `gravity`, with half a physics tick of
+  compensation for the semi-implicit integrator. Gravity now applies on
+  the jump frame too (it used to be skipped, which added a free frame of
+  travel and made the derivation lie by a third of a tile).
+  `tests/test_boot.gd` measures a held jump (4.08 tiles) and a tapped one.
+- **Push detection** is a 2 px `test_move` toward the stick instead of
+  reading the last `move_and_slide` collisions — the block moves too, so
+  contact was reported on alternating frames. The clip is also held
+  `PUSH_HOLD` (0.1 s) after the last contact. `test_objects` counts clip
+  changes over 80 frames of pushing: 0.
+- **Seams** (docs/room_authoring.md §4.2, rewritten): the root cause was
+  a time lock (0.6 s) on arrival plus `body_entered`-only triggering. The
+  arriving body sat inside the far room's own exit trigger; the one
+  `body_entered` was swallowed by the lock; walking back out never
+  re-entered anything and crossed into the unloaded neighbour. Now:
+  `RoomExit` polls overlapping bodies every physics frame and a seam
+  trigger reaches `OUTSIDE_TILES` (2) past the edge; `Room` builds a
+  `SeamAprons` StaticBody2D that copies the edge column/row of the kind
+  layer `APRON_TILES` (3) outward across the exit's span (± 2), one-way
+  ledges as one-way; `World.load_room` places a seam arrival just clear
+  of the matching exit that leads back (`_clear_of_arrival_exit`) and
+  locks exits only for the fade. The registry validator warns when a
+  `RoomEntry` stands inside an exit footprint. `test_objects` now walks
+  hall → shaft, turns straight around (18 ticks to be back in the hall,
+  never below the floor), waits, and crosses again.
+- **`aim_swap_sticks` setting** (default on = design behaviour): off,
+  the left stick keeps moving and the right stick aims while aim is
+  held. `Player._aim_from_pad()` now asks `Controls.pad_pressed("aim")`
+  instead of reading the raw LT axis, so a remapped aim button still
+  counts as pad aim. Aim direction resets to facing on each aim press.
+- **Button remapping.** New autoload `Controls` (game/autoload/controls.gd)
+  captures the project.godot defaults at boot and owns the InputMap:
+  `SaveManager.settings.bindings` overrides any of 13 actions (the
+  gameplay verbs, pause, map, Menu: accept, Menu: back) per device; the
+  menu actions that are the same physical control as a gameplay one
+  (`menu_use` ← attack, `menu_slot_x/y` and `menu_drop` ← items,
+  `menu_assign`/`menu_tab_prev` ← interact, `menu_tab_next` ← dash) and
+  Godot's `ui_accept`/`ui_cancel` (← Menu accept/back) are rebuilt as
+  mirrors. Options → Controls… (`UiControlsPanel`) lists Pad and
+  Keyboard per action, captures the next press, marks two gameplay verbs
+  (or accept/back) on one pad button with "!" and explains on focus,
+  resets to defaults. Every UI string that named a button (HUD slots,
+  item marks, verb hints, assign prompt, menu hints, tab hint) now reads
+  `Controls.glyph` / `Controls.hint`, pad glyphs while a joypad is
+  connected and keyboard ones otherwise. `menu_accept` lost its stray
+  default `J` (it made the keyboard attack key select instead of use).
+  `test_ui` applies Eir's layout, checks the InputMap, the mirrors, the
+  glyphs, a captured keyboard rebind, persistence across a settings
+  reload, and reset.
+- **Gate shape toggling is deferred** (`_shape.set_deferred("disabled")`):
+  it runs inside the button's `body_entered` → `Wiring.drive` →
+  `channel_changed` chain, i.e. during the physics flush. The locked door
+  already did this. `tests/run_all.sh` now fails on engine `ERROR:` lines
+  (the exit-time "resources still in use", from `UiTheme`'s static Theme,
+  is tolerated).
+- **Shader cache message**: `.godot/` was never shipped; the cache that
+  mismatched was written by a different Godot build on Eir's machine and
+  is rebuilt once. Nothing to do; delete `.godot/shader_cache/` if it
+  repeats every launch.
+- New tools: `tools/dump_rooms.tscn` (every room as ASCII with exits,
+  entries, objects, enemies and a column ruler — how this session read
+  the geometry headlessly) and `tools/screenshot_ui.tscn` (title, start
+  menu, options, controls, HUD, pause tabs under Xvfb).
+- **Puzzle state persists per room, in the save.** Before this, re-entering
+  the entry hall put the block back home and the plate came up. The
+  lever's `flag` also forced it back ON even if it had been switched off.
+  Together that meant both gates were down after any return. Now
+  `GameState.room_objects` (room → node path → value, in `to_dict`)
+  holds push-block positions, lever on/off and latched buttons, through
+  `Room.store_state()`/`saved_state()`. Momentary plates save nothing and
+  re-read their weight. The lever's flag now only records "has been
+  pulled once". `Wiring.reset()` opens a `SETTLE_FRAMES` window in which
+  gates snap and buttons stay quiet, so a restored room arrives already
+  in position. Blocks persist only while parked on a key spot (any
+  floor button, group `key_spot`); left anywhere else they reset on
+  re-entry, per Eir (the Ocarina of Time rule).
+  `tests/test_room_state.tscn` covers leave/return both ways plus a JSON
+  save round trip.
+- **Gates are solid raised and mid-slide.** The slab is now an
+  AnimatableBody2D that moves (in `_physics_process`), not a StaticBody
+  whose shape was switched off while open. A raised gate is a solid
+  block hanging `h` tiles up that carries anyone standing on it.
+- **Crushing is a general physics rule (design §7.6, Eir's rule).**
+  `game/combat/crush.gd`: after the player or an enemy moves, if it is
+  still overlapping solid geometry by more than 2 px, a moving solid has
+  squeezed it somewhere it can't get out of. Overlap is tested with the
+  real collision shapes shrunk by 2 px. The first cut used bounding rects,
+  and walking (not running) off a raised gate cost hp: the capsule's
+  rounded bottom rolling over the corner put the rect's corner about
+  2.3 px into the slab, on whichever frame happened to land there. A
+  landing spot must clear the full-size shapes, because a body landed
+  even slightly inside something is depenetrated during the crush hit's
+  hitstop (time_scale 0) and ends up with a NaN position.
+  One-way ledges (Eir: "the only way down through a one-way platform is
+  to intentionally drop through"): the engine ignores a one-way shape a
+  body is inside, so a crusher pressing someone 1–2 px into one dropped
+  them through, depending on frame timing. Player and Enemy now keep
+  `_crush_ledge` (`Crush.ledge_under`). It's held while still over the
+  ledge and not above it, because pressure from above clears is_on_floor
+  a frame before the body sinks. While it's held, the ledge's lips are
+  solid to the crush check and the escape search, and a body pushed
+  below the ledge is put back on top and crushed sideways. The player's
+  down + jump drop clears it.
+- **Drop-through fixed, and moved to down + jump (Eir).** The old drop
+  (crouch + jump on a one-way ledge) nudged the player 2 px down, inside
+  the tiles' 4 px one-way margin, so the engine pushed them straight back
+  up and it never worked. It's now `DROP_THROUGH_NUDGE` = 5 px, triggered
+  by jump while the move input points mostly down, at least
+  `player.drop_through_down` (0.4, placeholder; below the walk
+  modifier's 0.45 cap). **Crouch + jump is now a crouch jump** (Eir): same
+  height, and the crouched collider is kept in the air while crouch is
+  held. Crouch now persists airborne once started, and still only starts
+  on the floor. **Keyboard crouch moved from S/Down to C** (placeholder
+  key, remappable), because S/Down are `move_down` and the two inputs had
+  to be told apart. On pad it stays RT. `test_crush` covers the drop and the ledge
+  squeeze at 9 positions under the shelf gate (verified to fail with the
+  ledge memory disabled). Solids are the room's
+  Collision kinds (solid, fortified, breakable; not one-way or ramps) plus
+  any other body on its mask, minus one-way shapes. It is displaced to the
+  nearest free spot within `objects.crush.max_displace` (searched
+  sideways with small lifts, then up/down with small sideways nudges,
+  never ACROSS a solid: the path may touch only solids the body is already
+  in, and must not go from wholly one side of them to wholly the other.
+  The first version exempted already-overlapped solids outright, which
+  let a player pressed 3 px into the room's wall be displaced through it
+  and out of the room) and takes on_hit(`crush.damage`, `crush.knockback`).
+  With no spot the player is hit and voids out, and an enemy dies (this
+  includes bosses). `World.void_out()` fades, reloads the room and puts
+  the player at `_arrival`, the spot `load_room` recorded on entry (an
+  entry or a seam). The gate has no crush code of its own.
+  `tests/test_crush.tscn` covers a gate on the player (escape / void), a
+  gate on a slime (escape / death), and a bare moving body pinning the
+  player to a wall. Numbers (1 damage, [220, -120], 64 px) are
+  placeholders. Side effects: a character teleported INTO a wall (a test
+  spawning at a fixed offset) now gets displaced and hit instead of
+  quietly depenetrated. And anything that moves a solid outside `speed *
+  delta` during hitstop (time_scale 0) gives anything riding it a NaN
+  position; every current mover is delta-scaled. Not reproduced: Eir's "both columns up
+  with no collision on first load". Headless, a fresh hall has the exit
+  gate closed and blocking (player stops at its face) and only the
+  inverted shelf gate raised, which is intended.
+
+### Still open
+
+Everything in the bootstrap list above, plus: `move_*`/`rs_*` (sticks,
+d-pad, WASD) are not remappable yet; the Controls panel has no
+per-action "clear" (bind something else or reset all); with aim-swap off,
+running while aiming is still allowed (Eir may want it off later).
+Broken walls
+still don't persist.
+
+## 2026-10-14 — Aim reticle
+
+Asked for by Eir: a reticle on free aim, out at the weapon's range,
+pulled in to whatever the shot would hit, red when the hook can latch.
+
+- **`AimReticle`** (`game/player/aim_reticle.gd`), placed by
+  `Player._update_reticle()` after the body moves each physics frame,
+  only while aim is held. One reticle, for **the last aimable thing used**
+  (slingshot, grapple, or an `aimable` weapon); until one is used, or if
+  the last one is unequipped, slot X, then slot Y, then the weapon (Eir's
+  choice). Nothing aimable equipped → no reticle.
+- **Each trace runs the real shot's query.** Grapple: `_grapple_ray()`,
+  now shared with `_fire_grapple`. Slingshot: the stone's own per-tick
+  integration through `Projectile.sweep()` until its lifetime ends, so
+  the reticle follows the arc (gravity 300 drops a level shot ~250 px
+  over its life) and in open air can sit off-screen at the end of the
+  arc. Aimable melee: the far edge of the hitbox, or the first
+  hurtbox/switch/breakable on the swing line, through walls, because the
+  hitbox ignores walls.
+- **Red = the hook catches it**: anchors and iron/wood blocks (Eir's
+  choice). Targets answer a new side-effect-free `grapple_mode(player)`
+  (`GrappleAnchor`, `PushBlock`, `GrappleTarget`); `grapple_hit` goes
+  through it.
+- **Bug fixed on the way: projectiles went through walls.** Godot merges
+  TileMapLayer collision into hollow outlines per physics quadrant. A
+  stone (6 px across, ~9 px per tick) hops the outline and is never
+  inside anything that reports an overlap, so `body_entered` never fired
+  and stones flew out of the room. The same was true for every enemy
+  `Projectile` (guardian rocks, orbs, shockwaves). Walls are now found by
+  `Projectile.sweep()`, a ray per step reaching `radius` ahead. Hurtboxes
+  and switches still go through the Area's overlap.
+- **Placeholder rule: projectiles follow the player's one-way rule.** A
+  ledge stops a projectile coming down onto its top and lets anything
+  else through, so stones can be shot up through a ledge. Never decided
+  in the design; a raw ray would stop at the underside instead.
+- Placeholders: reticle look (10 px ring + ticks, centre dot when it sits
+  on a hit, red `#ff3326` for latch), and its colours are constants in
+  the script, not data, like the aim line's.
+- `Room.collides_at()` added (the cell has a physics shape) so the sweep
+  doesn't keep its own list of solid kinds.
+- `tests/test_reticle.tscn`: the reticle matches where real stones stop
+  (5 angles, through and onto a one-way ledge) to within 1.5 px; red on
+  the anchor and the iron block, not on the floor or a stone block;
+  previewing doesn't fire the hook or pull the block; range in open air;
+  last-used switching; hidden when not aiming.
+
+## 2026-10-14 — Script of Rhys: glyph composer
+
+Asked for by Eir, now that every character (Th and Dh included) is
+drawn in `script.xcf`: a tool that writes arbitrary text in the script,
+for baking textures and for writing on walls. Eir chose phonetic input,
+a Godot composer with a bake CLI and a room node, and cleaned-up glyph
+shapes. How to use it: `docs/authoring/script.md`.
+
+- **`data/script.json`**: the 24 consonants, 7 vowels, the null glyph
+  and the underscore, as stroke polylines on a 12-unit grid, transcribed
+  from `script.xcf` and cleaned up (snapped, mirror pairs symmetric,
+  base strokes and stems aligned). Also the spacing and the render
+  defaults. Redesigning a glyph is an edit here (§11.9 process step 1).
+  Every key is required, and a stroke point outside its glyph's box is a
+  load error.
+- **`RhysScript`** (`game/script/rhys_script.gd`, a plain class, so the
+  `-s` tools and `@tool` nodes can use it). `compose(text)` reads the
+  sounds into slots: consonants and vowels alternate, two consonants
+  stack, a vowel-initial word gets the null consonant, and the §11.4
+  word-break table goes between words. The design doc's chain notation
+  is valid input and reads back unchanged. `render(text, opts)` draws
+  Bresenham pixel strokes (ink on transparent, any stroke width) right
+  to left; `ttb` turns the image 90° counterclockwise. `render_chart()`
+  draws every glyph at full and half height.
+- **`ScriptText`** (`game/script/script_text.gd`): a `@tool` `Sprite2D`
+  for rooms. You type into the inspector and it redraws live; it shows
+  the chain read-only and lists refusals and guesses as scene-tree
+  warnings. The texture is generated and never saved into the `.tscn`.
+  F3 and an inspector button reload the glyph data.
+- **`tools/bake_script.gd`**: headless PNG baker with single, batch,
+  `--chart` and `--chain` modes. It writes to `user://script/` unless
+  given `--out`.
+- **`tests/test_script.tscn`**: every chain example in design §11, each
+  §11.4 row, refusals (c/q/x, punctuation, bad brackets), the two
+  guesses, every glyph drawing inside its slot at 25 and 13 px, ttb as
+  the rotation of rtl, and the node. 52 checks, green on Godot 4.7.
+- **Found:** a static `reload()` on a `class_name` script calls
+  `Script.reload()` instead (it returned OK = 0 = false and reset the
+  statics). The method is `reload_data()`.
+- **Found (§11.9 rule 4):** at 25 px, half-height Ch/Kh, Th/Dh, Sh/J and
+  M lose their inner strokes. At 13 px only S/Z, T/D, K/G and H/W
+  survive at half height. Stacked clusters need ~37 px or simpler
+  half-size shapes. Run `--chart` to see it.
+- **Doc vs file:** `script.xcf` labels the Th pair "Dth" while
+  design_v2 §11.2 says "Dh". The tool prints Dh and accepts both `dh`
+  and `dth`. design_v2 §11.2/§11.6 still call Th/Dh "to draw". Not
+  edited; it's Eir's document.
+- **Placeholders** (all listed in docs/authoring/script.md §6): the
+  cleaned glyph geometry itself; spacing (slot gap 3, cluster gap 1,
+  line gap 6 units, underscore 6 wide); stacks centred; a third
+  consonant gets a null vowel after the first stack; two vowels get a
+  null consonant; single consonant → stack uses the top half-slot; no
+  wrapping, and ttb lines become left-to-right columns; 25 px / 1 px /
+  black defaults.
+
+### Still open
+
+Grapheme-to-phoneme and the per-language pipeline (§14.2 steps 1–4);
+the decorative register and sigil sets; punctuation and wrapping (§11.4,
+§17); the automated collision checker and the LLM decipherment harness
+(§11.9 steps 2–3), which can build on `RhysScript.render_lines` and
+`render_chart`.
+
+### Follow-up, 2026-10-15 — Eir's review
+
+- **Slingshot reticle shows the aim, not the landing.** It's now a straight
+  line along the aim with no gravity, out to `speed × lifetime` (702 px)
+  or the first thing in the way. The real stone drops below it, which is
+  intended. This replaces the arc trace above.
+- **Solid objects stop stones.** `Projectile.solid_mask` decides what a
+  shot stops at. The slingshot's is `SLINGSHOT_SOLIDS` (world +
+  pushable), so crates stop stones; enemy shots stay world-only. `sweep()`
+  also catches a body sitting right on top of a ledge the shot came up
+  through.
+- **Bug (old): the slingshot only worked in rooms at world (0, 0).**
+  `_fire_slingshot` set the stone's `global_position` before adding it to
+  the room. Outside the tree that's just `position`, so the stone appeared
+  at the room's world offset, thousands of px away. Now it's added first,
+  like `EnemyBody.spawn_in_room` does. `test_reticle` fires in the
+  cistern to cover it.
+
+## 2026-10-15 — Jumping out of water
+
+Bug (old): the player couldn't get out of a pool. Holding jump swims up
+at `swim_up_velocity` (190 px/s, clamped to 1.5 × `swim_terminal`). Once
+the water sample point (0.45 × body height above the feet) clears the
+surface, full gravity takes over, and that speed buys about 9 px. The feet
+topped out 10 px below the surface, so even a bank level with the water
+was out of reach. Now, on the frame the sample point surfaces, with jump
+held and moving up, the player leaps. Take-off speed is computed from the
+real surface (the bottom of the cell the sample point just entered) so the
+feet clear it by `player.swim_exit_jump_tiles` (2.0, Eir's number). The
+leap is an ordinary jump from there: releasing jump cuts it. No jump held
+→ no leap. `tests/test_swim.tscn` checks the 2-tile height (exactly
+64 px), no leap without jump, and climbing out onto the hall's bank; it
+fails both movement checks with the fix removed.
+
+## 2026-10-15 — Script: vowel → consonant word break
+
+Eir's decision after seeing the Hamlet sample: when a word ends in a
+vowel and the next starts with a single consonant, the consonant takes
+the bottom half of its slot and the top half stays empty. So *to be* is
+T·u·[∅/B]·i, not T·u·'·_·B·i. Changed in `RhysScript._join`, with tests
+for both the new form and the stack case. A stack has no free half, so
+vowel → stack keeps V·'·_·[C/C] (a placeholder, in
+docs/authoring/script.md §6). design_v2 §11.4's table row still shows
+the old V·'·_·C and needs Eir's edit.
+
+Then, same day: **the null vowel is dropped at either end of a word**
+(Eir). *Is* ('·|·Z) is Z and *the* (Dh·|) is Dh, so *that is the
+question* is [∅/Dh]·a·[T/∅]·[Z/∅]·[Dh/∅]·[K/W]·e·[S/Ch]·|·N. A leading
+null vowel takes its null consonant with it, and null vowels inside a
+word stay. Placeholders: a word that is only the null vowel (*a*) keeps
+'·| rather than vanishing. The pillar syllable *Rhys'* ([R/H]·|·S·| in
+§11.6) now prints without its final null vowel, which is open for Eir.
+Also fixed: a null glyph in a half-slot printed as `[null/∅]` in chains.
+Tests: 61 checks.
+
+Eir confirmed both: *a* stays '·| (decided, no longer a placeholder),
+and the pillar syllable *Rhys'* is [R/H]·|·S. §11.6 said
+[R/H]·|·S·|, which Eir called wrong. design_v2 is updated to match the
+composer: §11.3 has the end-of-word rule and the *a* exception, §11.4
+has the vowel → single consonant row (vowel → cluster kept as
+*(assumed)*), and §11.6 has the pillar chain. Tests: 62 checks.
+
+**First machine read (Eir, 2026-10-15).** Eir gave GPT Astra sample bakes
+(the soliloquy, *safe / place / safe place*, the Lovecraft couplet, *jump
+and shout*). It translated the couplet and *jump and shout*. It stalled on
+the half-slot word start: the small Sh in [∅/Sh]·au·T read as a different
+letter until it saw the empty top half as the space. At Eir's request,
+design_v2 §11.8 now requires two explicit clues (word forms change at
+word breaks; the script is a transliteration, not a cipher), with a
+Proposal block of ways to give them. docs/authoring/script.md §7 repeats
+both for whoever places inscriptions.
+
+## 2026-10-15 — Play one room (DebugBoot)
+
+**Asked for (Eir):** run any room straight from the editor, with the
+player and every item.
+
+**What landed.** `game/debug_boot.gd` holds a one-shot room request; Main
+takes it in `_ready` and skips the menus: new game, `grant_all_items()`
+(every `items.json` id at its full `stack`), respawn set to the room,
+`world.load_room`. There are two ways in. A `Room` that is the
+`current_scene` at runtime (F6, Run Current Scene) requests itself and
+swaps to `main.tscn`. The scene change is deferred, because the root is
+still busy adding the room at boot. The shell form is
+`godot --path . -- --room <name> [--entry <id>]`. The new editor-only
+export `Room.test_entry` picks the entry for F6; it suggests the room's
+entry ids, and empty means the first. Test: `tests/test_room_boot.tscn`.
+
+**Placeholders chosen without a brief.** "All items" means full stacks
+(99 small keys, 9 dried fruit, 3 climbing gear). The equipped weapon and
+slots come from `add_item`'s first-come rule: sword, slingshot on X,
+grapple on Y. No save slot is picked, so a shrine saves to slot 1.

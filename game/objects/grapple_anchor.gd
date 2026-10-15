@@ -23,7 +23,12 @@ func _setup_runtime() -> void:
 
 
 ## Grapple contract (the player raycasts and calls this on what it hit).
-func grapple_hit(_player: Node2D) -> String:
+func grapple_hit(player: Node2D) -> String:
+	return grapple_mode(player)
+
+
+## What grapple_hit would answer, without doing it (the aim reticle asks).
+func grapple_mode(_player: Node2D) -> String:
 	return "anchor"
 
 

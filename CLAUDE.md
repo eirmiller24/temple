@@ -18,6 +18,9 @@ the process rules below are the point of this file.
   tutorial for building one.
 - [docs/authoring/ai_art.md](docs/authoring/ai_art.md) — how placeholder
   art is generated with PixelLab, recorded, and kept in quarantine.
+- [docs/authoring/script.md](docs/authoring/script.md) — writing in the
+  Script of Rhys: what to type, the `ScriptText` room node, baking PNGs,
+  and where the glyph shapes live (`data/script.json`).
 
 ## Environment & commands
 
@@ -26,11 +29,23 @@ Godot **4.7-stable** on PATH as `godot` (headless-capable). No build step.
 ```bash
 godot --headless --path . --import                     # once per checkout: build the .godot cache
 godot --path .                                          # play
+godot --path . -- --room test_shaft [--entry from_hall] # play one room, all items (= F6 on a room)
 godot --headless --path . -s res://tools/build_room_registry.gd   # after any room change → data/rooms.json
 godot --headless --path . res://tests/test_boot.tscn    # one test (tests are SCENES, see below)
-tests/run_all.sh                                        # all of them
+tests/run_all.sh                                        # all of them (fails on engine ERROR lines too)
 python3 tools/gen_project_godot.py                     # after editing the input-map table
+godot --headless --path . res://tools/dump_rooms.tscn  # every room as ASCII (-- <name> for one)
+xvfb-run -a godot --path . --rendering-driver opengl3 --rendering-method gl_compatibility \
+    res://tools/screenshot_rooms.tscn                   # rooms → user://screenshots (-- <name> --debug)
+xvfb-run -a godot ... res://tools/screenshot_ui.tscn   # title, menus, HUD, options, controls panel
+godot --headless --path . -s res://tools/bake_script.gd -- "rh's" [--out res://…png] [--chart]
+                                                        # Script of Rhys text → PNG (docs/authoring/script.md)
 ```
+
+**Seeing a room without the editor:** `dump_rooms` prints the kind layer
+with exits (E), entries (@), objects (o) and enemies (!) and a column
+ruler, which is enough to reason about geometry; the screenshot tools
+render the real thing under Xvfb (llvmpipe is fine) — read the PNGs.
 
 **Tests and tool scripts.** A script run with `-s` is compiled before the
 autoloads exist, so it cannot name `Data`, `GameState`, etc. — the parse
@@ -82,11 +97,15 @@ game/rooms/nodes/       Room, RoomExit, RoomEntry, SkinLayer, Backdrop, GreyboxL
                         BreakableTile, RoomRegistryBuilder  (@tool, editor-safe)
 game/objects/           push block, button, lever, gate, locked door, pickup, shrine, anchor
 game/enemies/           Enemy base + species scripts; bosses
-game/combat/            Hitbox, Hurtbox, Projectile
+game/combat/            Hitbox, Hurtbox, Projectile, Crush (squeezed by a moving solid: displace / void out / die)
 game/ui/                title, start menu, HUD, pause menu (items/map), options, minimap
-game/autoload/          Data, Wiring, SpriteDb, Music, Sfx, Juice, SaveManager, GameState,
-                        RoomRegistry
+game/script/            RhysScript (glyph composer + pixel renderer), ScriptText (inscription node)
+game/autoload/          Data, Wiring, SpriteDb, Music, Sfx, Juice, Controls (remapping, owns
+                        the InputMap; UI button names come from Controls.glyph), SaveManager,
+                        GameState, RoomRegistry
 addons/room_tools/      Project > Tools > New Room… / Rebuild Room Registry; room_template.tscn
+addons/godot_ai/        Godot AI MCP plugin (editor tooling, signed upstream release; see below)
+addons/terminal/        Godot Terminal dock (editor GDExtension), gitignored, local only
 data/                   every tunable and manifest (JSON); rooms.json is generated
 assets/                 licensed art/audio, one SOURCES.md per class, licenses/
 assets/ai_placeholder/  EVERYTHING AI-generated, by class, with ai_provenance.json
@@ -115,6 +134,16 @@ art is a manifest edit.
 **Autoload access:** runtime scripts use the names (`Data.player`,
 `GameState.add_item`, `Music.play_track`, `Sfx.play`, `Juice.hitstop`).
 
+**Input:** never hard-code a button name in UI text — `Controls.glyph(action)`
+/ `Controls.hint(pairs)` give the live binding. `tools/gen_project_godot.py`
+holds the defaults; `Controls.MIRRORS` says which menu actions follow which
+gameplay button. New remappable actions go in both tables.
+
+**Physics callbacks:** anything reached from `body_entered` / `area_entered`
+(buttons → `Wiring.drive` → gates, hitboxes → `take_hit` → levers) runs
+while the physics server is flushing; change shapes/monitoring there with
+`set_deferred`, never directly.
+
 ## Tuning data
 
 All gameplay numbers live in JSON under `data/` and reload live (F3; F1
@@ -142,6 +171,27 @@ that, filling placeholders only where the brief is silent and
 **reporting every placeholder it filled**. "Make me twenty rooms" is the
 failure mode these rules exist to prevent. When code and a doc disagree,
 flag it — don't silently pick one.
+
+## Live editor (Godot AI)
+
+When the editor is open with the Godot AI plugin enabled, the `godot-ai`
+MCP server (`.mcp.json`) drives that editor directly.
+
+- A scene open in the editor is changed through the godot-ai tools (they
+  go through the editor's undo stack), not by rewriting its `.tscn` on
+  disk underneath the editor.
+- Building what the author describes in conversation is drafting under
+  direction: "Agents draft, they never design" still applies, including
+  reporting every placeholder filled.
+- `addons/godot_ai/` is a vendored signed release. Never edit it; update
+  from its dock. Temple-specific tools go in our own addon and register
+  through godot-ai's custom-tools registry (`McpToolRegistry`).
+- Enabling the plugins edits project.godot (`[editor_plugins]`, plus
+  godot-ai's `_mcp_game_helper` autoload, which its export plugin strips
+  from exports). Fold those into `tools/gen_project_godot.py`.
+- "No GDExtension" means the game itself is GDScript, not a C++ sim like
+  dungeon-platformer; editor-tool extensions are fine. `addons/terminal/`
+  is one (local, gitignored, Linux binaries only, never part of the game).
 
 ## Git
 

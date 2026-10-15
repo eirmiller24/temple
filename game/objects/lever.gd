@@ -2,17 +2,18 @@
 class_name Lever
 extends RoomObject
 ## A switch toggled by hitting it — sword, whip (which reaches it from a
-## distance), slingshot stone. Drives `channel` while on. A named `flag`
-## is set permanently the first time it lands on, and restores the lever
-## to "on" in later visits (how a lever-gated secret stays solved).
-## Position is FEET.
+## distance), slingshot stone. Drives `channel` while on. Its on/off
+## position is saved and restored on every visit, whichever way it was
+## left. A named `flag` is set permanently the first time it lands on, for
+## anything else that wants to know it has ever been pulled; the flag does
+## not hold the lever on. Position is FEET.
 
 ## Permanent flag set when first switched on ("" = none).
 @export var flag: String = "":
 	set(v):
 		flag = v
 		queue_redraw()
-## Start switched on.
+## Start switched on (first visit; afterwards the saved position wins).
 @export var starts_on: bool = false
 
 var on := false
@@ -33,11 +34,8 @@ func _setup_runtime() -> void:
 	_area.add_child(shape)
 	add_child(_area)
 	_sprite = add_sprite("lever", 1.0)
-	var state := Game.state()
-	var start := starts_on
-	if flag != "" and state != null and state.has_flag(flag):
-		start = true
-	_set_on(start, true)
+	var saved: Variant = room.saved_state(self) if room != null else null
+	_set_on(bool(saved) if saved != null else starts_on, true)
 
 
 ## Any hit toggles the lever (the SwitchArea child forwards here).
@@ -56,6 +54,8 @@ func _set_on(v: bool, silent: bool = false) -> void:
 	var w := Game.wiring()
 	if w != null:
 		w.drive(channel, self, on)
+	if room != null:
+		room.store_state(self, on)
 	if on and flag != "":
 		var state := Game.state()
 		if state != null:

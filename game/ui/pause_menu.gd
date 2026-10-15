@@ -7,9 +7,9 @@ extends Control
 ## to GameState.slot_index when >= 0, then emits quit_to_title) and Resume.
 ##
 ## Input is polled once per frame here and handed down (options → items →
-## tabs → back), which resolves the shared gamepad buttons (B is use in the
-## list and back everywhere else; LB is assign in the list and prev-tab
-## elsewhere) in one place.
+## tabs → back), which resolves the shared gamepad buttons (the attack
+## button is use in the list and back everywhere else by default; interact
+## is assign in the list and prev-tab elsewhere) in one place.
 
 signal quit_to_title
 
@@ -29,6 +29,7 @@ var is_open := false
 var _tab_buttons: Array = []
 var _bottom: Array = []
 var _room_label: Label
+var _tab_hint: Label
 var _last_focus: Control
 
 
@@ -68,13 +69,20 @@ func _build_header() -> void:
 		b.pressed.connect(_set_tab.bind(int(t[1])))
 		row.add_child(b)
 		_tab_buttons.append(b)
-	row.add_child(UiTheme.label("  Q/LB  ◂  ▸  R/RB", UiTheme.SIZE_SMALL, UiTheme.DIM))
+	_tab_hint = UiTheme.label("", UiTheme.SIZE_SMALL, UiTheme.DIM)
+	row.add_child(_tab_hint)
+	Controls.bindings_changed.connect(_refresh_tab_hint)
+	_refresh_tab_hint()
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(spacer)
 	_room_label = UiTheme.label("", UiTheme.SIZE_LABEL, UiTheme.DIM)
 	row.add_child(_room_label)
+
+
+func _refresh_tab_hint() -> void:
+	_tab_hint.text = "  %s  ◂  ▸  %s" % [Controls.glyph("menu_tab_prev"), Controls.glyph("menu_tab_next")]
 
 
 func _build_body() -> void:

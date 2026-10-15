@@ -21,7 +21,11 @@ func _ready() -> void:
 	ui.name = "UI"
 	ui.layer = 10
 	add_child(ui)
-	show_title()
+	var boot := DebugBoot.take()
+	if boot.is_empty():
+		show_title()
+	else:
+		_test_room(boot.room, boot.entry)
 
 
 func _clear_screen() -> void:
@@ -66,6 +70,16 @@ func _on_load_slot(slot: int) -> void:
 	_clear_screen()
 	_setup_world()
 	await world.continue_game()
+
+
+## DebugBoot: straight into one room with every item. No save slot is
+## picked; dying respawns here.
+func _test_room(room_name: String, entry: String) -> void:
+	_setup_world()
+	GameState.new_game()
+	GameState.grant_all_items()
+	GameState.set_respawn(room_name, entry)
+	await world.load_room(room_name, entry)
 
 
 func _setup_world() -> void:

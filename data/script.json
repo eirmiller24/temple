@@ -1,0 +1,59 @@
+{
+  "_comment": "The Script of Rhys, plain register (design_v2 §11). Glyph shapes transcribed from script.xcf and cleaned up; redesigning a glyph is an edit here, nothing else (§11.9). Read by game/script/rhys_script.gd; docs/authoring/script.md explains every field. Missing keys are hard errors.",
+
+  "_grid_comment": "Glyph coordinates are in grid units: y runs 0 (top of the slot) to grid (bottom). x starts at 0 on the glyph's left and runs to w. A stroke is a polyline [x0,y0, x1,y1, ...]. Full-height glyphs map grid units to (height_px - 1) / grid pixels, so heights of 12k+1 (13, 25, 37) land every grid point on a whole pixel.",
+  "grid": 12,
+
+  "_layout_comment": "In grid units of the full slot. slot_gap: blank columns between slots. cluster_gap: blank rows between the two halves of a stacked slot (each half gets what is left, halved). line_gap: blank rows between lines. All four are placeholders, not decided design.",
+  "layout": {
+    "slot_gap": 3,
+    "cluster_gap": 1,
+    "line_gap": 6,
+    "padding_px": 1
+  },
+
+  "_render_comment": "Defaults for the bake tool and the ScriptText node when they are not given a value. ink is RRGGBB or RRGGBBAA.",
+  "render": {
+    "height_px": 25,
+    "stroke_px": 1,
+    "ink": "000000"
+  },
+
+  "_glyphs_comment": "class: consonant | vowel | null | space. input: what you type for it (lower case; longest match wins, '.' or '·' splits a digraph). pair_of: the consonant this one is built on with a base stroke (§11.2) — information only. The ids 'null' (' and |) and '_' (underscore space) are fixed; every other id is also how the glyph prints in a chain.",
+  "glyphs": {
+    "S":  {"class": "consonant", "input": ["s"],  "w": 6, "strokes": [[0,0, 0,12], [0,0, 6,12]]},
+    "Z":  {"class": "consonant", "input": ["z"],  "w": 6, "pair_of": "S", "strokes": [[0,0, 0,12], [0,0, 6,12], [0,12, 6,12]]},
+    "T":  {"class": "consonant", "input": ["t"],  "w": 7, "strokes": [[0,0, 0,12], [0,12, 7,0]]},
+    "D":  {"class": "consonant", "input": ["d"],  "w": 7, "pair_of": "T", "strokes": [[0,0, 0,12], [0,12, 7,0], [0,12, 7,12]]},
+    "K":  {"class": "consonant", "input": ["k"],  "w": 5, "strokes": [[5,0, 0,6, 5,12], [0,6, 4,6]]},
+    "G":  {"class": "consonant", "input": ["g"],  "w": 5, "pair_of": "K", "strokes": [[5,0, 0,6, 5,12], [0,6, 4,6], [0,12, 5,12]]},
+    "P":  {"class": "consonant", "input": ["p"],  "w": 6, "strokes": [[4,0, 1,6, 6,6, 6,4, 2,4], [6,6, 3,12]]},
+    "B":  {"class": "consonant", "input": ["b"],  "w": 6, "pair_of": "P", "strokes": [[4,0, 1,6, 6,6, 6,4, 2,4], [6,6, 3,12], [0,12, 6,12]]},
+    "H":  {"class": "consonant", "input": ["h"],  "w": 6, "strokes": [[6,0, 0,6, 6,12]]},
+    "W":  {"class": "consonant", "input": ["w"],  "w": 6, "pair_of": "H", "strokes": [[6,0, 0,6, 6,12], [0,12, 6,12]]},
+    "Y":  {"class": "consonant", "input": ["y"],  "w": 6, "pair_of": "null", "strokes": [[6,0, 6,12, 0,12]]},
+    "R":  {"class": "consonant", "input": ["r"],  "w": 6, "strokes": [[0,0, 0,12], [0,0, 6,12], [0,12, 6,0]]},
+    "L":  {"class": "consonant", "input": ["l"],  "w": 6, "pair_of": "R", "strokes": [[0,0, 0,12], [0,0, 6,12], [0,12, 6,0], [0,12, 6,12]]},
+    "F":  {"class": "consonant", "input": ["f"],  "w": 4, "strokes": [[4,0, 0,6, 4,12, 4,0]]},
+    "V":  {"class": "consonant", "input": ["v"],  "w": 4, "pair_of": "F", "strokes": [[4,0, 0,6, 4,12, 4,0], [0,12, 4,12]]},
+    "N":  {"class": "consonant", "input": ["n"],  "w": 7, "strokes": [[3,0, 3,12], [3,0, 0,5, 7,5, 3,12]]},
+    "M":  {"class": "consonant", "input": ["m"],  "w": 7, "pair_of": "N", "strokes": [[3,0, 3,12], [3,0, 0,5, 7,5, 3,12], [0,12, 6,12]]},
+    "Sh": {"class": "consonant", "input": ["sh"], "w": 6, "strokes": [[0,0, 0,12], [6,0, 6,12], [0,0, 6,12], [0,12, 6,0]]},
+    "J":  {"class": "consonant", "input": ["j"],  "w": 6, "pair_of": "Sh", "strokes": [[0,0, 0,12], [6,0, 6,12], [0,0, 6,12], [0,12, 6,0], [0,12, 6,12]]},
+    "Ch": {"class": "consonant", "input": ["ch"], "w": 4, "strokes": [[4,0, 0,6, 4,12, 4,0], [2,3, 2,9]]},
+    "Kh": {"class": "consonant", "input": ["kh"], "w": 4, "pair_of": "Ch", "strokes": [[4,0, 0,6, 4,12, 4,0], [2,3, 2,9], [0,12, 4,12]]},
+    "Th": {"class": "consonant", "input": ["th"], "w": 6, "strokes": [[6,0, 0,6, 6,12], [0,0, 6,6, 0,12], [3,3, 3,9]]},
+    "Dh": {"class": "consonant", "input": ["dh", "dth"], "w": 6, "pair_of": "Th", "strokes": [[6,0, 0,6, 6,12], [0,0, 6,6, 0,12], [3,3, 3,9], [0,12, 6,12]]},
+
+    "a":  {"class": "vowel", "input": ["a"],  "w": 6, "strokes": [[3,0, 3,12], [0,4, 3,0, 6,4]]},
+    "i":  {"class": "vowel", "input": ["i"],  "w": 8, "strokes": [[0,0, 8,0], [1,6, 4,0, 7,6]]},
+    "u":  {"class": "vowel", "input": ["u"],  "w": 6, "strokes": [[3,0, 3,12], [0,8, 3,12, 6,8]]},
+    "e":  {"class": "vowel", "input": ["e"],  "w": 8, "strokes": [[0,0, 8,0], [1,6, 4,12, 7,6]]},
+    "o":  {"class": "vowel", "input": ["o"],  "w": 8, "strokes": [[0,0, 8,0], [4,0, 4,12]]},
+    "ai": {"class": "vowel", "input": ["ai"], "w": 8, "strokes": [[0,0, 8,0], [1,6, 1,10, 7,10], [1,8, 7,8, 7,12]]},
+    "au": {"class": "vowel", "input": ["au"], "w": 8, "strokes": [[0,0, 8,0], [0,0, 0,6, 7,6], [0,3, 7,3, 7,9]]},
+
+    "null": {"class": "null",  "input": ["'", "|", "’"], "w": 0, "strokes": [[0,0, 0,12]]},
+    "_":    {"class": "space", "input": ["_"],           "w": 6, "strokes": [[0,12, 6,12]]}
+  }
+}
