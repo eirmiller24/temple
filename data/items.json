@@ -1,5 +1,5 @@
 {
-  "_comment": "Every item the inventory can hold (design_v2 §10). kind: weapon (B button), tool (assignable to X/Y), consumable (usable from the menu), key, passive. hide_use is the Fang trick (§9.2): Use still works but the menu never lists it.",
+  "_comment": "Every item the inventory can hold (design_v2 §10). kind: weapon (B button), tool (assignable to X/Y), consumable (usable from the menu), key, passive. hide_use is the Fang trick (§9.2): Use still works but the menu never lists it. ammo: the count is ammunition — it stays in the inventory at ×0 and its cap is stack plus every ammo_for upgrade owned (count × ammo_bonus). replaces: owning this item removes that one (Quality Boots → Ratty Boots). dash: owning it allows the dash.",
   "items": {
     "sword": {
       "name": "Bandit's Sword",
@@ -12,7 +12,7 @@
       "name": "Whip",
       "kind": "weapon",
       "weapon": "whip",
-      "description": "Short-range melee with extra reach, freely aimed. Pulls distant levers.",
+      "description": "Short-range melee with extra reach, freely aimed. Pulls distant levers; wraps round beams to swing from.",
       "stack": 1
     },
     "slingshot": {
@@ -28,7 +28,7 @@
       "kind": "tool",
       "assignable": true,
       "use": "grapple",
-      "description": "Free-fired. Pulls you to an anchored object, or the object to you if it isn't.",
+      "description": "Free-fired. Pulls you to an anchored object, or the object to you if it isn't. Works switches and levers.",
       "stack": 1
     },
     "lantern": {
@@ -47,6 +47,50 @@
       "hazard_protect": true,
       "description": "Taken off a dead bandit. Faster, and the ground hurts a little less.",
       "stack": 1
+    },
+    "quality_boots": {
+      "name": "Quality Boots",
+      "kind": "passive",
+      "replaces": "ratty_boots",
+      "dash": true,
+      "speed_mult": 1.15,
+      "hazard_protect": true,
+      "description": "Proper boots at last. Dash, on the ground or once in the air.",
+      "stack": 1
+    },
+    "explosive": {
+      "name": "Explosive Charge",
+      "kind": "tool",
+      "assignable": true,
+      "use": "explosive",
+      "ammo": true,
+      "description": "Use once to set a charge at your feet, again to set it off. Mind the blast.",
+      "stack": 10
+    },
+    "darts": {
+      "name": "Wooden Darts",
+      "kind": "tool",
+      "assignable": true,
+      "use": "darts",
+      "ammo": true,
+      "description": "Fly fast and dead straight. Through a flame, one catches and sets alight what it hits.",
+      "stack": 20
+    },
+    "explosive_upgrade": {
+      "name": "Charge Satchel",
+      "kind": "passive",
+      "ammo_for": "explosive",
+      "ammo_bonus": 5,
+      "description": "Room for more charges.",
+      "stack": 2
+    },
+    "darts_upgrade": {
+      "name": "Dart Quiver",
+      "kind": "passive",
+      "ammo_for": "darts",
+      "ammo_bonus": 10,
+      "description": "Room for more darts.",
+      "stack": 2
     },
     "small_key": {
       "name": "Small Key",

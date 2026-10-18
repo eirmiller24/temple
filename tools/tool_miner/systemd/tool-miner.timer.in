@@ -1,0 +1,11 @@
+[Unit]
+Description=Nightly tool miner run for The Temple of Rhys
+
+[Timer]
+OnCalendar=*-*-* @AT@:00
+# Asleep or off at that time? Run at the next boot/wake instead.
+Persistent=true
+RandomizedDelaySec=10min
+
+[Install]
+WantedBy=timers.target

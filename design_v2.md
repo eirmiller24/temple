@@ -286,12 +286,12 @@ Design rule: **no single-use key items.** Small keys and boss keys are the only 
 | **Notebook** | Map, lore log, rope manager | Replaces v1's cartographer's tools |
 | **Lantern** | Light | Batteries die before the Knowledge Fang |
 | **Climbing Gear ×3** *(number pending)* | Descend shafts (§8) | Can be cloned with Wealth |
-| **Whip** | Short-range melee, freely aimed; pulls distant levers; swings from hooks | Castlevania/Indy style |
+| **Whip** | Short-range melee, freely aimed; pulls distant levers; wraps round thin things (beams) and swings from them. Swing only: the player can't climb the whip, and jump lets go | Castlevania/Indy style |
 | **Slingshot** | Long range, freely aimed, infinite ammo, low damage; hits distant switches | Recovered early |
 | **Axe** | Strong melee; cuts ropes, vines, and wooden barricades | |
-| **Wooden Darts** | Free-fired; light one from a fire source such as a torch (like arrows in OoT) to set distant objects alight | Refilled from certain enemies |
-| **Explosive Charge** | Place it, then detonate remotely; for puzzles and damage | Recovered from certain enemies' remains |
-| **Grappling Hook** | Free-fired; pulls you to an object or the object to you, depending on what it is | |
+| **Wooden Darts** | Free-fired; faster than the slingshot and dead straight (no drop). One that flies through a flame such as a torch catches fire (like arrows in OoT) and sets what it hits alight. Ammo: 20, raised by upgrades | Refilled from certain enemies |
+| **Explosive Charge** | First use places it at your feet; second use detonates it. Small blast that also hurts the player; for puzzles and damage. Ammo: 10, raised by upgrades | Recovered from certain enemies' remains |
+| **Grappling Hook** | Free-fired; pulls you to an object or the object to you, depending on what it is; activates switches and levers | |
 | **Gun** | 6 rounds total; 10× slingshot damage | Optional. Your own stolen gun, found at the very bottom of the temple via cloned ropes. Reloads only through Wealth. Required for the Best ending. |
 | **Small keys / Boss keys** | Zelda-style keys | |
 | **The four Fangs** | See §9 | |
@@ -299,7 +299,9 @@ Design rule: **no single-use key items.** Small keys and boss keys are the only 
 
 **Hunger and food** are story flavor only (the bandits take your food in the prologue). They aren't a mechanic.
 
-**Open:** whether the darts need a launcher (a blowgun?); how swinging on the whip differs from the grappling hook, since both now move the player using hook points.
+**Open:** whether the darts need a launcher (a blowgun?).
+
+**Whip vs. hook (decided 2026-10-17):** they latch onto different things. The hook needs something wooden or soft to bite its barb into; the whip's end wraps round something thin, like a beam. Whether a thing takes one is its own flag, never tied to the other. The hook pulls; the whip only swings.
 
 ---
 
@@ -371,7 +373,7 @@ Consonants come in pairs. The second consonant of each pair is the first plus a 
 - **One null glyph, two roles.** The null consonant ' and the null vowel are the same character, and its slot decides which it is:
   - In a consonant slot, it's the null consonant, the placeholder that lets a word begin with a vowel sound: *over* = '·o·V·e·R.
   - In a vowel slot, it's the null vowel: *Rhys* = [R/H]·|·S.
-- **The null vowel is never written at either end of a word.** A word-initial one takes its null consonant with it: *is* ('·|·Z) is written Z, and *the* (Dh·|) is written Dh. Inside a word it stays: *question* = [K/W]·e·[S/Ch]·|·N. The one exception is a word that is nothing but the null vowel, such as *a*: it is written in full, '·|.
+- **The null vowel is never written at either end of a word.** A word-initial one takes its null consonant with it: *is* ('·|·Z) is written Z, and *the* (Dh·|) is written Dh. Inside a word it stays: *question* = [K/W]·e·[S/Ch]·|·N. A word that is nothing but the null vowel, such as *a*, keeps only its null consonant: a single vertical stroke, a one-glyph word like *is* = Z, and it takes the word breaks of §11.4 like any single consonant.
 
 ### 11.4 Spaces and punctuation
 
@@ -574,7 +576,6 @@ The systems this design implies, roughly from most to least risky:
 - Scan input and UI.
 - Whether shooting an unpurified Rhys uses up rounds.
 - How many sets of climbing gear.
-- How swinging on the whip differs from the grappling hook.
 - Whether darts need a launcher.
 - Darkness: the distance for each visibility band, and how the lantern changes them.
 - Lantern uses beyond lighting dark areas, and whether earlier areas need it.

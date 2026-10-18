@@ -55,6 +55,11 @@
     "lash": {"stream": "res://assets/sfx/swipe.wav", "volume_db": -2.0, "pitch": 0.75, "pitch_var": 0.06},
     "hit_stone": {"stream": "res://assets/sfx/metal_blunt_tap.wav", "volume_db": -2.0, "pitch": 0.7, "pitch_var": 0.08},
     "boss_charge": {"stream": "res://assets/sfx/stone_push_long.wav", "volume_db": 0.0, "pitch": 1.2, "pitch_var": 0.0},
+    "explosive_set": {"stream": "res://assets/sfx/wood_small_hollow.wav", "volume_db": -4.0, "pitch": 0.7, "pitch_var": 0.0},
+    "explosive_blast": {"stream": "res://assets/sfx/crunch.wav", "volume_db": 2.0, "pitch": 0.45, "pitch_var": 0.05},
+    "dart": {"stream": "res://assets/sfx/swipe.wav", "volume_db": -4.0, "pitch": 1.9, "pitch_var": 0.05},
+    "ignite": {"stream": "res://assets/sfx/fire_lighting.wav", "volume_db": -4.0, "pitch": 1.2, "pitch_var": 0.05},
+    "whip_latch": {"stream": "res://assets/sfx/metal_blunt_tap.wav", "volume_db": -4.0, "pitch": 0.8, "pitch_var": 0.05},
     "boss_blink": {"stream": "res://assets/sfx/toggle_off.wav", "volume_db": -4.0, "pitch": 0.6, "pitch_var": 0.0}
   }
 }

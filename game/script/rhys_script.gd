@@ -292,10 +292,11 @@ static func _slot_word(items: Array, word: String, res: Dictionary) -> Array:
 	# The null vowel is never written at either end of a word (Eir,
 	# 2026-10-15): '·|·Z ("is") is just Z, Dh·| ("the") is just Dh. A
 	# leading one takes its null consonant with it. A word that is nothing
-	# but the null vowel ("a") stays '·| (Eir, 2026-10-15).
+	# but the null vowel ("a") keeps only its null consonant: one vertical
+	# stroke, a one-glyph word like "is" = Z (Eir, 2026-10-15).
 	if slots.size() > 2 and _is_null_consonant(slots[0]) and _is_null_vowel(slots[1]):
 		slots = slots.slice(2)
-	if slots.size() >= 2 and _is_null_vowel(slots[-1]) and not (slots.size() == 2 and _is_null_consonant(slots[0])):
+	if slots.size() >= 2 and _is_null_vowel(slots[-1]):
 		slots.pop_back()
 	return slots
 
@@ -314,14 +315,14 @@ static func _join(line: Array, word: Array) -> void:
 	if _is_space(prev) or _is_space(first) or _is_half(prev) or _is_half(first):
 		pass                                                # the author wrote this break by hand
 	elif prev.t == "V":
-		if _is_null_consonant(first):
+		if _starts_with_vowel(word):
 			word[0] = {"t": "C", "one": SPACE_ID}           # V·_·V
 		elif first.has("one"):
 			word[0] = {"t": "C", "top": "", "bot": first.one}   # V·[∅/C] (Eir, 2026-10-15)
 		else:
 			line.append({"t": "C", "one": NULL_ID})         # V·'·_·[C/C]: a stack has no free half
 			line.append({"t": "V", "one": SPACE_ID})
-	elif _is_null_consonant(first):
+	elif _starts_with_vowel(word):
 		line.append({"t": "V", "one": SPACE_ID})            # C·_·'·V
 	elif prev.has("one"):
 		line[-1] = {"t": "C", "top": prev.one, "bot": ""}   # [C/∅]·C
@@ -342,6 +343,13 @@ static func _is_half(s: Dictionary) -> bool:
 
 static func _is_null_consonant(s: Dictionary) -> bool:
 	return s.t == "C" and s.get("one") == NULL_ID
+
+
+## A vowel-initial word opens with the null consonant. The word "a", which
+## is nothing but the null consonant, is not one: it joins like any
+## one-consonant word.
+static func _starts_with_vowel(word: Array) -> bool:
+	return word.size() > 1 and _is_null_consonant(word[0])
 
 
 static func _is_null_vowel(s: Dictionary) -> bool:

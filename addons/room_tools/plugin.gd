@@ -11,9 +11,15 @@ extends EditorPlugin
 ## Project > Tools > Rebuild Room Registry runs tools/build_room_registry.gd
 ## in-editor (same code path: RoomRegistryBuilder.build_from_scenes + validate)
 ## and prints the problems to the Output panel.
+##
+## It also registers the godot-ai MCP tool `new_room` (mcp_new_room.gd) —
+## "give me a 30x20 room" from a chat — whenever godot-ai's tool registry is
+## up, including after godot-ai reloads.
 
-const TEMPLATE := "res://addons/room_tools/room_template.tscn"
-const ROOMS_DIR := "res://game/rooms"
+const RoomFactory := preload("res://addons/room_tools/room_factory.gd")
+const NEW_ROOM_TOOL := "res://addons/room_tools/mcp_new_room.gd"
+const NewRoomTool := preload(NEW_ROOM_TOOL)
+const PLUGIN_CFG := "res://addons/room_tools/plugin.cfg"
 const MENU_NEW := "New Room..."
 const MENU_REGISTRY := "Rebuild Room Registry"
 
@@ -23,6 +29,8 @@ var _folder_edit: LineEdit
 var _wx: SpinBox
 var _wy: SpinBox
 var _status: Label
+## Instance id of the godot-ai registry `new_room` is registered with (0 = none).
+var _mcp_registry_id := 0
 
 
 func _enter_tree() -> void:
@@ -30,7 +38,37 @@ func _enter_tree() -> void:
 	add_tool_menu_item(MENU_REGISTRY, _rebuild_registry)
 
 
+## godot-ai may load before or after this plugin and replaces its registry
+## when it reloads, so watch for a new one rather than registering once.
+func _process(_delta: float) -> void:
+	var reg := McpToolRegistry.get_instance()
+	var id := reg.get_instance_id() if reg != null else 0
+	if id == _mcp_registry_id:
+		return
+	_mcp_registry_id = id
+	if reg != null:
+		_register_mcp_tools(reg)
+
+
+func _register_mcp_tools(reg: McpToolRegistry) -> void:
+	var spec := McpCustomToolSpec.new()
+	spec.name = "new_room"
+	spec.description = NewRoomTool.DESCRIPTION
+	spec.params_schema = NewRoomTool.SCHEMA
+	spec.script_path = NEW_ROOM_TOOL
+	spec.method = &"new_room"
+	spec.source_path = PLUGIN_CFG
+	spec.promoted = true
+	spec.requires_writable = true
+	spec.timeout_ms = 30000
+	reg.register(spec)
+
+
 func _exit_tree() -> void:
+	var reg := McpToolRegistry.get_instance()
+	if reg != null:
+		reg.unregister_source(PLUGIN_CFG)
+	_mcp_registry_id = 0
 	remove_tool_menu_item(MENU_NEW)
 	remove_tool_menu_item(MENU_REGISTRY)
 	if is_instance_valid(_dialog):
@@ -102,23 +140,11 @@ func _build_dialog() -> void:
 
 
 func _target_path() -> String:
-	var n := _name_edit.text.strip_edges()
-	var folder := _folder_edit.text.strip_edges().trim_prefix("/").trim_suffix("/")
-	return "%s/%s%s.tscn" % [ROOMS_DIR, folder + "/" if folder != "" else "", n]
+	return RoomFactory.target_path(_name_edit.text.strip_edges(), _folder_edit.text)
 
 
 func _validate() -> String:
-	var n := _name_edit.text.strip_edges()
-	if n == "":
-		return "Enter a name."
-	if not n.is_valid_filename() or n != n.to_lower() or n.contains(" ") or n.contains("."):
-		return "Use lower-case snake_case with no spaces or dots."
-	if n == "nodes":
-		return "'nodes' is the node-class folder."
-	for p in RoomRegistryBuilder.scene_paths():
-		if p.get_file().get_basename() == n:
-			return "A room named %s already exists (%s)." % [n, p]
-	return ""
+	return RoomFactory.validate_name(_name_edit.text.strip_edges())
 
 
 func _refresh_status() -> void:
@@ -135,52 +161,11 @@ func _refresh_status() -> void:
 
 
 func _create() -> void:
-	if _validate() != "":
-		return
-	var room_name := _name_edit.text.strip_edges()
-	var path := _target_path()
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
-	var template: PackedScene = load(TEMPLATE)
-	if template == null:
-		push_error("New Room: cannot load %s" % TEMPLATE)
-		return
-	var root: Node = template.instantiate()
-	root.name = room_name
-	root.set("world_x", int(_wx.value))
-	root.set("world_y", int(_wy.value))
-	var packed := PackedScene.new()
-	if packed.pack(root) != OK:
-		push_error("New Room: cannot pack %s" % room_name)
-		root.free()
-		return
-	var err := ResourceSaver.save(packed, path)
-	root.free()
-	if err != OK:
-		push_error("New Room: cannot write %s (error %d)" % [path, err])
-		return
-	EditorInterface.get_resource_filesystem().scan()
-	EditorInterface.open_scene_from_path(path)
-	print("New Room: created %s" % path)
+	var problem := RoomFactory.create(_name_edit.text.strip_edges(), _target_path(),
+			Vector2i(int(_wx.value), int(_wy.value)))
+	if problem != "":
+		push_error("New Room: " + problem)
 
 
 func _rebuild_registry() -> void:
-	var reg := RoomRegistryBuilder.build_from_scenes()
-	var problems := RoomRegistryBuilder.validate(reg)
-	for p in problems:
-		if p.begins_with("warning:"):
-			print("rooms: ", p)
-		else:
-			push_error("rooms: " + p)
-	var out := {
-		"_comment": RoomRegistryBuilder.REGISTRY_COMMENT,
-		"rooms": {},
-	}
-	var names := reg.keys()
-	names.sort()
-	for n in names:
-		out.rooms[n] = reg[n]
-	var f := FileAccess.open("res://data/rooms.json", FileAccess.WRITE)
-	f.store_string(JSON.stringify(out, "  "))
-	f.close()
-	print("rooms.json rebuilt: %d rooms, %d problems" % [reg.size(), problems.size()])
-	EditorInterface.get_resource_filesystem().scan()
+	RoomFactory.rebuild_registry()

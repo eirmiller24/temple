@@ -80,8 +80,24 @@ func item_def(id: String) -> Dictionary:
 	return items[id]
 
 
+## Ammo items stay owned at ×0 (the slot keeps them; a refill tops them up).
 func has_item(id: String) -> bool:
-	return inventory.get(id, 0) > 0
+	return inventory.get(id, 0) > 0 or (inventory.has(id) and is_ammo(id))
+
+
+func is_ammo(id: String) -> bool:
+	return bool(item_def(id).get("ammo", false))
+
+
+## The most of `id` the inventory holds: its stack, plus, for ammo, every
+## owned upgrade naming it (ammo_for) × that upgrade's ammo_bonus.
+func capacity(id: String) -> int:
+	var cap := int(item_def(id).get("stack", 1))
+	for up: String in inventory:
+		var d := item_def(up)
+		if String(d.get("ammo_for", "")) == id:
+			cap += count(up) * int(d.get("ammo_bonus", 0))
+	return cap
 
 
 func count(id: String) -> int:
@@ -92,8 +108,13 @@ func add_item(id: String, n: int = 1) -> void:
 	var def := item_def(id)
 	if def.is_empty():
 		return
-	var cap := int(def.get("stack", 1))
-	inventory[id] = mini(count(id) + n, cap)
+	inventory[id] = mini(count(id) + n, capacity(id))
+	if def.has("replaces") and inventory.has(String(def.replaces)):
+		inventory.erase(String(def.replaces))
+	# An ammo upgrade fills what it upgrades (if it's owned).
+	var ammo_for := String(def.get("ammo_for", ""))
+	if ammo_for != "" and inventory.has(ammo_for):
+		inventory[ammo_for] = capacity(ammo_for)
 	# First weapon picked up equips itself; first tool fills an empty slot.
 	var kind := String(def.get("kind", ""))
 	if kind == "weapon" and weapon == "":
@@ -110,16 +131,23 @@ func add_item(id: String, n: int = 1) -> void:
 
 
 ## Every item in data/items.json at a full stack (the DebugBoot loadout).
+## Ammo goes last so it fills to the upgraded capacity.
 func grant_all_items() -> void:
+	var ammo: Array[String] = []
 	for id: String in Data.items.get("items", {}):
-		add_item(id, int(item_def(id).get("stack", 1)))
+		if is_ammo(id):
+			ammo.append(id)
+		else:
+			add_item(id, int(item_def(id).get("stack", 1)))
+	for id in ammo:
+		add_item(id, capacity(id))
 
 
 func remove_item(id: String, n: int = 1) -> void:
 	if not inventory.has(id):
 		return
-	inventory[id] = count(id) - n
-	if inventory[id] <= 0:
+	inventory[id] = maxi(count(id) - n, 0)
+	if inventory[id] <= 0 and not is_ammo(id):
 		inventory.erase(id)
 		if weapon == id:
 			weapon = ""

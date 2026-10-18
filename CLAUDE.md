@@ -10,6 +10,10 @@ the process rules below are the point of this file.
 - [design_v2.md](design_v2.md) — the design document. Plain text is decided,
   `> Proposal:` blocks aren't, §17 is the open-question list. `design.md`
   is the raw idea log it supersedes.
+- [lore_bible.md](lore_bible.md) — who is real in-world: which fictional
+  characters lived, which real writers never existed, where the mythos may
+  appear, and easter-egg lines vs attributed lore texts. Check any quote or
+  attribution against it.
 - [README.md](README.md) — the principles: AI art ships but stays
   quarantined, agents draft and never design, rooms are hand-authored,
   nothing generates scenes, the kind layer is the only playable truth.
@@ -38,8 +42,14 @@ godot --headless --path . res://tools/dump_rooms.tscn  # every room as ASCII (--
 xvfb-run -a godot --path . --rendering-driver opengl3 --rendering-method gl_compatibility \
     res://tools/screenshot_rooms.tscn                   # rooms → user://screenshots (-- <name> --debug)
 xvfb-run -a godot ... res://tools/screenshot_ui.tscn   # title, menus, HUD, options, controls panel
+godot --headless --path . res://tools/probe.tscn -- probe.gd [--room R] [--all-items]
+godot --headless --path . res://tools/probe.tscn -- -e 'p.spawn_at(5, 8); await p.ticks(30); print(p.player.velocity)'
+                                                        # run a throwaway snippet in a booted World (enemies freed);
+                                                        # helpers + options in tools/probe.gd; xvfb-run it for p.shot()
 godot --headless --path . -s res://tools/bake_script.gd -- "rh's" [--out res://…png] [--chart]
                                                         # Script of Rhys text → PNG (docs/authoring/script.md)
+python3 tools/tool_miner/mine.py run                   # mine Claude sessions for tool ideas → .tool_miner/PROPOSALS.md
+                                                        # (also /mine-tools, and a nightly timer: tools/tool_miner/README.md)
 ```
 
 **Seeing a room without the editor:** `dump_rooms` prints the kind layer
@@ -103,7 +113,8 @@ game/script/            RhysScript (glyph composer + pixel renderer), ScriptText
 game/autoload/          Data, Wiring, SpriteDb, Music, Sfx, Juice, Controls (remapping, owns
                         the InputMap; UI button names come from Controls.glyph), SaveManager,
                         GameState, RoomRegistry
-addons/room_tools/      Project > Tools > New Room… / Rebuild Room Registry; room_template.tscn
+addons/room_tools/      Project > Tools > New Room… / Rebuild Room Registry; room_template.tscn;
+                        godot-ai tool `new_room` (sized, walled, entry-hall look)
 addons/godot_ai/        Godot AI MCP plugin (editor tooling, signed upstream release; see below)
 addons/terminal/        Godot Terminal dock (editor GDExtension), gitignored, local only
 data/                   every tunable and manifest (JSON); rooms.json is generated
@@ -111,17 +122,22 @@ assets/                 licensed art/audio, one SOURCES.md per class, licenses/
 assets/ai_placeholder/  EVERYTHING AI-generated, by class, with ai_provenance.json
 raw_assets/             gitignored source packs (zips, PSDs)
 tools/                  headless scripts (registry build, generators)
+tools/tool_miner/       session-transcript miner: SessionEnd hook + nightly timer → tool proposals
 tests/                  headless test scenes + run_all.sh
 ```
 
 **Physics layers** (project.godot `[layer_names]`): 1 world, 2 player,
 3 enemy, 4 player_hurtbox, 5 enemy_hurtbox, 6 player_hitbox,
 7 enemy_hitbox, 8 interact, 9 pushable, 10 switch, 11 grapple,
-12 projectile, 13 breakable, 14 room_exit. A `Hitbox` (Area2D) calls
+12 projectile, 13 breakable, 14 room_exit, 15 whip (whip points),
+16 fire (flames: lit torches, burning barriers).
+
+A `Hitbox` (Area2D) calls
 `take_hit(info)` on anything it overlaps that has the method while
 `active`; `Hurtbox` forwards to its owner's `on_hit(info)`. The info
 dict: `damage, knockback (Vector2), source, origin, kind, tier, hitstop`.
-`tier` 1 is keystone-grade (breaks fortified walls).
+`tier` 1 is keystone-grade (breaks fortified walls). A burning dart's
+hit adds `fire: true`.
 
 **Puzzle wiring:** `Wiring.drive(channel, source, on)`; gates listen to
 `Wiring.channel_changed`. Reset per room.

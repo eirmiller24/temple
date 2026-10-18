@@ -1,0 +1,10 @@
+[Unit]
+Description=Temple of Rhys tool miner (mine Claude Code sessions for tool ideas)
+Documentation=file://@REPO@/tools/tool_miner/README.md
+
+[Service]
+Type=oneshot
+WorkingDirectory=@REPO@
+ExecStart=@EXEC@
+Nice=10
+TimeoutStartSec=2h

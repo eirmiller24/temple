@@ -12,6 +12,17 @@
   "gate": {
     "open_speed": 120.0
   },
+  "boulder": {
+    "_comment": "game/objects/boulder.gd: wired trap that drops and rolls at the player. Rolling into the player faster than impact_speed (px/s along the contact) hits them; pinned against a wall it crushes (objects.crush). friction = Coulomb coefficient on its sides (player.json surface_max_press caps the press).",
+    "gravity": 1500.0,
+    "terminal_velocity": 900.0,
+    "roll_speed": 220.0,
+    "roll_accel": 600.0,
+    "friction": 0.6,
+    "impact_speed": 40.0,
+    "impact_damage": 1,
+    "impact_knockback": [240.0, -260.0]
+  },
   "crush": {
     "_comment": "Design §7.6, game/combat/crush.gd. A character a moving solid squeezes is displaced up to max_displace px to the nearest free spot and hit (player and enemies alike); with no spot the player voids out and an enemy dies.",
     "damage": 1,
@@ -26,8 +37,36 @@
     "knockback": [120.0, -60.0],
     "hitstop": 0.0
   },
+  "explosive": {
+    "_comment": "game/combat/explosive.gd. The charge drops to the floor under gravity; the second use detonates it. Blast: a radius px circle; damage to enemies, switches and breakable walls in it (tier 0 — fortified walls hold); player_damage to the player if their body centre is inside.",
+    "gravity": 1400.0,
+    "radius": 40.0,
+    "damage": 3,
+    "player_damage": 1,
+    "knockback": [260.0, -220.0],
+    "hitstop": 0.06,
+    "cooldown": 0.25
+  },
+  "darts": {
+    "_comment": "Wooden darts: straight (no gravity), stop at the first thing they hit. Passing through anything on the fire layer sets one burning; a burning dart's hit carries fire: true.",
+    "speed": 820.0,
+    "damage": 1,
+    "lifetime": 0.9,
+    "knockback": [100.0, -40.0],
+    "hitstop": 0.0,
+    "cooldown": 0.22
+  },
+  "fire": {
+    "_comment": "Burning. An enemy hit by fire burns for enemy_burn_time s, losing enemy_burn_damage HP every enemy_burn_tick s (no stagger). A burnable barrier burns for barrier_burn_time s, then is gone for good.",
+    "enemy_burn_time": 3.0,
+    "enemy_burn_tick": 1.0,
+    "enemy_burn_damage": 1,
+    "barrier_burn_time": 1.2
+  },
   "grapple": {
+    "_comment": "assist_deg: a shot that would hit nothing to latch or pull aims itself at the nearest grapple anchor (the dedicated latch points only — never a pullable block or a switch) within this many degrees of the aim, in range and in sight.",
     "range": 240.0,
+    "assist_deg": 5.0,
     "shot_speed": 1100.0,
     "pull_speed": 560.0,
     "arrive_distance": 14.0,

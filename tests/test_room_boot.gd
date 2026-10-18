@@ -50,8 +50,16 @@ func _run() -> int:
 	if entry != null:
 		var d := world.player.global_position.distance_to(entry.global_position)
 		_check(d < Room.TILE * 2, "player starts at '%s' (%.0f px away)" % [ENTRY, d])
+	var replaced := {}
 	for id: String in Data.items.items:
-		var full := int(Data.items.items[id].get("stack", 1))
+		if Data.items.items[id].has("replaces"):
+			replaced[String(Data.items.items[id].replaces)] = id
+	for id: String in Data.items.items:
+		if replaced.has(id):
+			_check(not GameState.has_item(id), "%s replaced by %s" % [id, replaced[id]])
+			continue
+		# Full: the stack, or for ammo the cap with every upgrade.
+		var full := GameState.capacity(id)
 		_check(GameState.count(id) == full, "has %s x%d" % [id, full])
 	_check(GameState.weapon != "", "a weapon is equipped (%s)" % GameState.weapon)
 	_check(GameState.respawn_room == ROOM and GameState.respawn_entry == ENTRY, "respawns in the test room")

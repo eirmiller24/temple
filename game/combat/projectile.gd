@@ -1,7 +1,8 @@
 class_name Projectile
 extends Hitbox
-## A moving hitbox: slingshot stones, enemy bolts, boss rocks. Despawns
-## on the first thing it hits or when its lifetime ends. The layer/mask
+## A moving hitbox: slingshot stones, darts, enemy bolts, boss rocks. The
+## player's shots stop at the first thing they hit (pierce = false); all
+## of them stop at solids and when their lifetime ends. The layer/mask
 ## is set by the setup_* helper for whichever side fired it.
 ##
 ## Walls are found by sweeping each step with a ray (sweep()), not by the
@@ -17,6 +18,7 @@ const SLINGSHOT_MASK := (1 << 4) | (1 << 9) | (1 << 12) | LAYER_WORLD
 ## What stops a stone dead: the world and every solid object (push blocks).
 const SLINGSHOT_SOLIDS := LAYER_WORLD | LAYER_PUSHABLE
 const SLINGSHOT_RADIUS := 3.0
+const LAYER_FIRE := 1 << 15
 
 var velocity := Vector2.ZERO
 var grav := 0.0
@@ -25,6 +27,14 @@ var radius := 4.0
 var color := Color(0.9, 0.85, 0.7)
 ## Bodies the projectile stops at, found by sweep() each step.
 var solid_mask := LAYER_WORLD
+## False: stops at the first thing it hits (the player's stones and darts).
+## True: passes through what it hits and stops only at solids (enemy shots).
+var pierce := true
+## Catches fire passing through anything on the fire layer (a dart).
+var catches_fire := false
+## Burning: its hits carry `fire: true` (Enemy burns, Torch lights, a
+## BurnableBarrier goes up).
+var burning := false
 var _body_shape: CollisionShape2D
 var _room: Room
 
@@ -60,6 +70,29 @@ func setup_slingshot(cfg: Dictionary, shooter: Node2D, dir: Vector2) -> void:
 	facing = 1 if dir.x >= 0.0 else -1
 	radius = SLINGSHOT_RADIUS
 	color = Color(0.85, 0.8, 0.65)
+	pierce = false
+
+
+## Wooden dart: straight (no gravity), fast, stops at the first thing it
+## hits, and catches fire flying through a flame.
+func setup_dart(cfg: Dictionary, shooter: Node2D, dir: Vector2) -> void:
+	source_node = shooter
+	collision_layer = LAYER_PROJECTILE
+	collision_mask = SLINGSHOT_MASK
+	solid_mask = SLINGSHOT_SOLIDS
+	velocity = dir.normalized() * Data.num(cfg, "speed", "objects.darts")
+	grav = 0.0
+	lifetime = Data.num(cfg, "lifetime", "objects.darts")
+	damage = Data.inum(cfg, "damage", "objects.darts")
+	var kb: Array = Data.req(cfg, "knockback", "objects.darts")
+	knockback = Vector2(float(kb[0]), float(kb[1]))
+	hitstop = float(cfg.get("hitstop", 0.0))
+	kind = "projectile"
+	facing = 1 if dir.x >= 0.0 else -1
+	radius = SLINGSHOT_RADIUS
+	color = Color(0.75, 0.6, 0.4)
+	pierce = false
+	catches_fire = true
 
 
 ## Enemy-fired bolt: damages the player, blocked by walls.
@@ -86,11 +119,18 @@ func _physics_process(delta: float) -> void:
 		return   # despawned by a hit this step
 	velocity.y += grav * delta
 	var to := global_position + velocity * delta
+	if catches_fire and not burning and _crosses_fire(global_position, to):
+		burning = true
+		Sfx.play("ignite", self)
 	if solid_mask != 0:
 		var hit := sweep(get_world_2d().direct_space_state, global_position, to, radius,
 				solid_mask, false, _room)
 		if not hit.is_empty():
 			global_position = hit.position
+			# A solid that takes hits itself (a BurnableBarrier) gets this one.
+			var col: Object = hit.get("collider")
+			if col is Node and col.has_method("take_hit"):
+				_try_hit(col)
 			_despawn()
 			return
 	global_position = to
@@ -144,11 +184,44 @@ static func sweep(space: PhysicsDirectSpaceState2D, from: Vector2, to: Vector2, 
 	return {}
 
 
+## Does the step from `from` to `to` pass through a flame (fire layer)?
+func _crosses_fire(from: Vector2, to: Vector2) -> bool:
+	var q := PhysicsRayQueryParameters2D.create(from, to, LAYER_FIRE)
+	q.collide_with_areas = true
+	q.collide_with_bodies = false
+	q.hit_from_inside = true
+	return not get_world_2d().direct_space_state.intersect_ray(q).is_empty()
+
+
+func _try_hit(target: Node) -> void:
+	if not pierce and not is_physics_processing():
+		return   # already spent on something else this step
+	super._try_hit(target)
+	if not pierce and _already_hit.has(target.get_instance_id()) and target.has_method("take_hit"):
+		_despawn()
+
+
+func make_info() -> Dictionary:
+	var info := super.make_info()
+	if burning:
+		info["fire"] = true
+	return info
+
+
 func _despawn() -> void:
 	set_physics_process(false)
 	queue_free()
 
 
 func _draw() -> void:
+	if not pierce:
+		# A dart: a shaft along its flight, aflame at the tip when burning.
+		var d := velocity.normalized()
+		draw_line(-d * 9.0, d * 3.0, color, 2.0)
+		if burning:
+			var flick := 2.5 + sin(Time.get_ticks_msec() * 0.04) * 1.0
+			draw_circle(d * 3.0, flick, Color(1.0, 0.55, 0.15))
+			draw_circle(d * 3.0, flick * 0.5, Color(1.0, 0.9, 0.5))
+		return
 	draw_circle(Vector2.ZERO, radius, color)
 	draw_line(Vector2.ZERO, -velocity.normalized() * radius * 3.0, Color(color, 0.4), 1.5)

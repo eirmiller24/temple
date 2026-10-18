@@ -663,3 +663,101 @@ entry ids, and empty means the first. Test: `tests/test_room_boot.tscn`.
 (99 small keys, 9 dried fruit, 3 climbing gear). The equipped weapon and
 slots come from `add_item`'s first-come rule: sword, slingshot on X,
 grapple on Y. No save slot is picked, so a shrine saves to slot 1.
+
+**The article *a* is the null consonant (Eir, 2026-10-15).** It replaces
+the '·| decision above. *A* is written as one vertical stroke, a
+one-glyph word like *is* = Z, and takes the §11.4 breaks like any single
+consonant: *fingers a great* is …[R/Z]·[∅/']·[G/R]…, *was a ghastly*
+is …[Z/∅]·['/∅]·G…. A word that opens with the null consonant counts as
+vowel-initial only if more follows (`_starts_with_vowel`), so *a* is
+never swallowed by the V·_·V rule. design_v2 §11.3 and script.md are
+updated. Tests: 65 checks. Noticed while doing this: the clue section
+added to design_v2 §11.8 and script.md §7 earlier today is no longer in
+either file on disk. Not restored; asked Eir.
+
+## 2026-10-17 — Down-dash, Quality Boots, whip swing, explosive, darts, fire
+
+**Asked for (Eir):**
+- In the air, down + dash dashes straight down.
+- The dash needs the Quality Boots, and test loads get them.
+- The whip got shorter. It latches onto its own targets (thin things like beams, with a flag separate from the grappling hook's) and swings the player, with no climbing.
+- A remote explosive: first use sets it at the feet, second detonates it. Small blast that also hurts the player. Ammo 10, with upgrades.
+- Wooden darts: faster than the slingshot, no drop, catch fire through a flame and set what they hit alight. Ammo 20, with upgrades.
+- Test loads have full ammo.
+- Follow-up answers from Eir:
+  - Fire is a torch, an ignite path, a burnable barrier, and enemies that burn.
+  - Jump lets go of a swing.
+  - The blast hits enemies, breakable walls, switches and levers.
+  - Whip targets are a room object.
+
+**What landed.**
+- **Down-dash.** Same time, cooldown, i-frames and once-per-airtime as the side dash, at `player.down_dash_speed` (520).
+  - A separate fast-fall state was tried and dropped: with its terminal speed equal to the normal one, gravity reaches 640 four ticks after the dash anyway.
+- **Quality Boots.** A passive item with `dash: true` and `replaces: ratty_boots`; owning it removes the Ratty Boots. `Player.can_dash()` gates the dash.
+- **Ammo** (`GameState`).
+  - `ammo: true` items stay owned at ×0, so they keep their slot.
+  - `capacity(id)` = `stack` + each owned `ammo_for` upgrade's count × `ammo_bonus`. Picking up an upgrade fills the ammo it raises.
+  - `grant_all_items()` adds ammo last, so the test loadout is every upgrade plus full ammo (20 charges, 40 darts).
+  - The HUD and items tab always show ammo counts.
+- **Explosive Charge** (`game/combat/explosive.gd`). A body that drops to the floor. The blast is a one-shot tier-0 Hitbox on enemy hurtboxes, switches and breakable walls (`objects.explosive.damage`). The player takes `player_damage` if their body centre is inside `radius`. One charge out at a time.
+- **Darts.** `Projectile.setup_dart`: no gravity, stops at the first thing it hits (`pierce = false`), and catches fire when its step crosses the new `fire` layer.
+  - A burning dart's hit info carries `fire: true`.
+  - Projectiles now also call `take_hit` on a **solid** they stop at, if it has the method, because a stone or dart stops at a body before its Area can overlap anything behind it.
+  - The reticle previews darts.
+- **Fire.**
+  - `Torch`: lit = a flame on the `fire` layer; unlit = a `switch`-layer target that a burning hit lights, saved per room.
+  - `BurnableBarrier`: solid; burns for `objects.fire.barrier_burn_time`, a flame the whole time, then gone for good via a flag.
+  - `Enemy.ignite()`: burns for `enemy_burn_time`, losing `enemy_burn_damage` every `enemy_burn_tick`, with no stagger.
+- **Whip.**
+  - `reach` 46 → 40, `hitbox` 76×14 → 64×14.
+  - `WhipPoint` is on the new `whip` layer (15). The grapple's raycast doesn't include that layer, and grapple anchors aren't on it.
+  - The latch target is picked when the attack is pressed (the reticle shows it in red) and taken on the first active frame. A fresh ray then would miss a thin beam after the ~20 px fall during startup.
+  - `State.SWING` is a fixed-length rope pendulum under plain gravity. Left/right pumps it (`weapons.whip.swing_pump`). Jump lets go, rising at least `swing_release_hop`.
+- **Physics layers 15 `whip` and 16 `fire`** were added to `project.godot` and `tools/gen_project_godot.py`.
+- **Tests.** `tests/test_items.tscn` has 44 checks. `test_room_boot` now expects capacity and replaced items.
+
+**Placeholders chosen without a brief.**
+- Numbers:
+  - `down_dash_speed` 520.
+  - Explosive: radius 40 px, 3 damage to enemies, 1 to the player.
+  - Darts: speed 820, lifetime 0.9 s, 1 damage.
+  - Burn: 3 s, 1 HP every 1 s. Barrier burn time 1.2 s.
+  - `swing_pump` 420; `swing_release_hop` −260.
+- Quality Boots keep the Ratty Boots' 1.15 speed and `hazard_protect`. "Better protection" means nothing yet: hazard damage is 1, and one protection already cancels it.
+- Upgrades:
+  - Charge Satchel +5 and Dart Quiver +10, two of each.
+  - Picking one up fills that ammo.
+  - Names and descriptions are placeholders.
+- Behaviour:
+  - The charge falls to the floor if set in mid-air.
+  - Attacking or dashing doesn't detonate it.
+  - Leaving the room loses it, and its ammo is spent.
+- Art is drawn in code with no manifest sprite: the charge, the dart shaft and flame, the torch, the barrier and its flames, the whip beam and line, and the enemy flame particles.
+  - The down-dash plays `fall`.
+  - Sounds reuse existing streams: `explosive_set`, `explosive_blast`, `dart`, `ignite`, `whip_latch`.
+- A torch is a wall sconce with its position at the flame. It doesn't drive a wiring channel.
+
+**Found.**
+- Slingshot stones pass through enemies and stop only at walls. Unchanged.
+- `tools/gen_project_godot.py` has drifted: running it drops the godot-ai/terminal plugins and `_mcp_game_helper` from `project.godot`. Not fixed; noted in CLAUDE.md.
+- The burnt-barrier flag is named after the node, like the locked door's, so renaming a barrier brings it back.
+
+**Follow-up, same day (Eir).**
+- Slingshot stones now stop at the first thing they hit, as darts do (`pierce = false` in `setup_slingshot`). A test checks that the enemy behind the first one is untouched.
+- Enemy shots still pass through what they hit (`pierce` defaults to true). Unchanged; not asked.
+- `tools/gen_project_godot.py` is fixed. It now writes the godot-ai/room_tools/terminal plugin list and the `_mcp_game_helper` autoload, and regenerating reproduces `project.godot` exactly. The CLAUDE.md drift note is removed.
+
+**Follow-up: whip length back, latch aim assist (Eir).**
+- The whip is back to `reach` 46 and hitbox 76×14.
+- The whip and the grappling hook now auto-target latch points within 5° of the aim (`weapons.whip.latch_assist_deg`, `objects.grapple.assist_deg`). It covers points in reach with nothing in the way, and picks the closest in angle.
+- Only dedicated latch points count: the groups `whip_points` and `grapple_anchors`. The hook's assist never picks a pullable block or a switch.
+- An exact hit wins, so a shot that already latches or pulls something isn't redirected.
+- The reticle shows the assisted target.
+- Tests cover a whip point at 4.5° (taken) and 9° (not), and an anchor at 4° (taken, and latching for real while falling) and 9° (not). A pullable block is ignored even with the assist widened to 10°.
+
+**Follow-up: the hook activates switches (Eir).**
+- The hook's ray now includes the `switch` layer. A `SwitchArea` with `hook_switch` (levers, latching buttons) gets an ordinary `take_hit` (`kind` `"grapple"`, 0 damage), and the player isn't pulled.
+- The unlit torch and the burnable barrier set `hook_switch = false`. To the hook they're just obstacles, so the reticle doesn't go red at them. Momentary buttons aren't on the switch layer at all.
+- A shot already aimed at a switch is never redirected by the anchor assist.
+- The reticle goes red at a switch.
+- Tests: the hook flips a lever, presses a latching button, keeps a lever shot when an anchor is 3° off, and doesn't treat an unlit torch as a switch.

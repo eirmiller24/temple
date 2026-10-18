@@ -125,7 +125,7 @@
     },
     "boulder": {
       "sheet": "res://assets/ai_placeholder/objects/boulder.png",
-      "frame_w": 64, "frame_h": 64, "ground_y": 64, "body_h": 64, "scale": 0.5,
+      "frame_w": 64, "frame_h": 64, "ground_y": 64, "body_h": 56, "scale": 0.5,
       "clips": {"idle": {"row": 0, "frames": 1, "fps": 1, "loop": true}}
     },
     "button": {

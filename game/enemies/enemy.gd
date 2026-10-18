@@ -33,6 +33,11 @@ extends EnemyBody
 ## staggered/dead), _hurt_ended, _interrupted, _on_damaged, _on_died,
 ## _hit_interrupts, _knockback_resist.
 ##
+## Burning: a hit carrying `fire: true` (a burning dart) sets the enemy
+## alight for objects.fire.enemy_burn_time, losing enemy_burn_damage every
+## enemy_burn_tick s — no stagger, no knockback — and re-lighting restarts
+## the clock.
+##
 ## Crushing (design §7.6, Crush): squeezed by a moving solid, an enemy is
 ## displaced and takes on_hit(); with nowhere to go it dies.
 
@@ -63,6 +68,9 @@ var _flash_time := 0.0
 var _death_time := 0.0
 var _rearm_time := 0.0
 var _crush_ledge := NAN  ## one-way ledge stood on last frame (Crush)
+var burning := 0.0       ## seconds of burning left
+var _burn_tick := 0.0
+var _flames: CPUParticles2D
 
 
 func _ready() -> void:
@@ -121,6 +129,7 @@ func _knockback_resist() -> float:
 func _physics_process(delta: float) -> void:
 	clock += delta
 	_tick_fx(delta)
+	_tick_burn(delta)
 	match state:
 		State.DEAD:
 			_death_time -= delta
@@ -164,6 +173,53 @@ func _tick_fx(delta: float) -> void:
 	elif state == State.TELL:
 		f = TELL_PULSE_MAX * (0.5 + 0.5 * sin(clock * TAU * TELL_PULSE_HZ))
 	_mat.set_shader_parameter("flash", f)
+
+
+func ignite() -> void:
+	if state == State.DEAD or state == State.HIDDEN:
+		return
+	var fire: Dictionary = Data.req(Data.objects, "fire", "objects.json")
+	if burning <= 0.0:
+		_burn_tick = Data.num(fire, "enemy_burn_tick", "objects.fire")
+		Sfx.play("ignite", self)
+	burning = Data.num(fire, "enemy_burn_time", "objects.fire")
+	if _flames == null:
+		_flames = CPUParticles2D.new()
+		_flames.amount = 14
+		_flames.lifetime = 0.5
+		_flames.direction = Vector2.UP
+		_flames.spread = 25.0
+		_flames.gravity = Vector2(0, -60)
+		_flames.initial_velocity_min = 10.0
+		_flames.initial_velocity_max = 30.0
+		_flames.scale_amount_min = 2.0
+		_flames.scale_amount_max = 4.0
+		_flames.color = Color(1.0, 0.55, 0.15)
+		_flames.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+		_flames.emission_rect_extents = Vector2(cn("body_w") / 2.0, cn("body_h") / 4.0)
+		_flames.position = Vector2(0, -cn("body_h") / 2.0)
+		add_child(_flames)
+	_flames.emitting = true
+
+
+func _tick_burn(delta: float) -> void:
+	if burning <= 0.0:
+		return
+	if state == State.DEAD:
+		burning = 0.0
+		_flames.emitting = false
+		return
+	burning -= delta
+	_burn_tick -= delta
+	var fire: Dictionary = Data.req(Data.objects, "fire", "objects.json")
+	if _burn_tick <= 0.0:
+		_burn_tick += Data.num(fire, "enemy_burn_tick", "objects.fire")
+		hp -= Data.inum(fire, "enemy_burn_damage", "objects.fire")
+		flash(FLASH_SECONDS)
+		if hp <= 0:
+			die()
+	if burning <= 0.0:
+		_flames.emitting = false
 
 
 func flash(seconds: float) -> void:
@@ -217,6 +273,8 @@ func on_hit(info: Dictionary) -> void:
 	if state == State.DEAD or state == State.HIDDEN:
 		return
 	hp -= int(info.get("damage", 1))
+	if bool(info.get("fire", false)) and hp > 0:
+		ignite()
 	Juice.hitstop(float(info.get("hitstop", 0.0)))
 	Sfx.play(cs("hit_sfx"), self)
 	flash(FLASH_SECONDS)

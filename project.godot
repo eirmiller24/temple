@@ -255,6 +255,8 @@ debug_rooms={
 2d_physics/layer_12="projectile"
 2d_physics/layer_13="breakable"
 2d_physics/layer_14="room_exit"
+2d_physics/layer_15="whip"
+2d_physics/layer_16="fire"
 
 [physics]
 

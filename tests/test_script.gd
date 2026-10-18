@@ -75,10 +75,13 @@ func _run() -> int:
 	_check(_chain("'|fily|") == "F·i·[L/Y]", "both ends of 'Ophelia' drop")
 	_check(_chain("bi dhat '|z dh| kwesch|n") == "B·i·[∅/Dh]·a·[T/∅]·[Z/∅]·[Dh/∅]·[K/W]·e·[S/Ch]·|·N",
 		"'be that is the question' (Eir's example)")
-	_check(_chain("'|") == "'·|", "a word that is only the null vowel ('a') is written in full")
+	_check(_chain("'|") == "'", "'a' is just the null consonant (Eir, 2026-10-15)")
+	_check(_chain("f|ng|g|rz '| gret") == "F·|·[N/G]·|·G·|·[R/Z]·[∅/']·[G/R]·e·T", "'fingers a great': a takes a half-slot like any one-consonant word")
+	_check(_chain("bi '|") == "B·i·[∅/']", "'be a': vowel → a")
 	_check(_chain("rh's'") == "[R/H]·|·S", "the pillar syllable Rhys' is [R/H]·|·S (§11.6)")
-	_check(_chain("t '| si") == "T·_·'·|·[∅/S]·i", "'…t a sea' keeps the article")
-	_check(_chain("'| dor") == "'·|·[∅/D]·o·R", "the article before a consonant")
+	_check(_chain("t '| si") == "[T/∅]·['/∅]·S·i", "'…t a sea' keeps the article")
+	_check(_chain("'| dor") == "['/∅]·D·o·R", "the article before a consonant")
+	_check(_chain("'| 'over") == "'·_·'·o·V·e·R", "the article before a vowel-initial word")
 	_check(_chain("strong").begins_with("[S/T]·|·R"), "a null vowel inside a word stays")
 
 	# --- refused and guessed ----------------------------------------------------

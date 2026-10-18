@@ -1,0 +1,23 @@
+{
+  "_comment": "Tool-miner settings. Env overrides: TOOL_MINER_CLAUDE (command, e.g. \"toolbox run -c fedora-toolbox-43 claude\"), TOOL_MINER_MODEL.",
+  "model": "sonnet",
+  "consolidate_model": "sonnet",
+  "claude_cmd": null,
+  "toolbox_container": null,
+  "claude_timeout_s": 1200,
+  "max_budget_usd_per_call": 2.0,
+  "batch_max_chars": 160000,
+  "idle_minutes": 30,
+  "min_user_turns": 1,
+  "surface_after_sessions": 2,
+  "surface_after_sessions_by_kind": {"doc-drift": 1},
+  "consolidate_every_days": 7,
+  "notify": true,
+  "digest": {
+    "user_chars": 2500,
+    "assistant_chars": 280,
+    "command_chars": 300,
+    "error_chars": 240,
+    "session_max_chars": 40000
+  }
+}

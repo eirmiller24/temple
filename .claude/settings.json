@@ -1,1 +1,20 @@
-{"permissions": {"allow": ["Bash"]}}
+{
+  "permissions": {
+    "allow": [
+      "Bash"
+    ]
+  },
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/tools/tool_miner/enqueue.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

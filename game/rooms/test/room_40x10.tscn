@@ -1,0 +1,53 @@
+[gd_scene format=4 uid="uid://c8gv5kdugpal8"]
+
+[ext_resource type="Script" uid="uid://wt7rjb7ti660" path="res://game/rooms/nodes/room.gd" id="1_ncf6j"]
+[ext_resource type="TileSet" uid="uid://cy8afq58omfbr" path="res://game/rooms/tileset_kind.tres" id="2_gb3uy"]
+[ext_resource type="TileSet" uid="uid://dlm6t26nrf8vi" path="res://assets/tilesets/SSW.tres" id="3_g6a0p"]
+[ext_resource type="Script" uid="uid://bnfijy4qgfae1" path="res://game/rooms/nodes/room_entry.gd" id="4_epfkg"]
+[ext_resource type="PackedScene" path="res://game/objects/floor_button.tscn" id="5_g6a0p"]
+[ext_resource type="PackedScene" path="res://game/objects/boulder.tscn" id="6_epfkg"]
+
+[node name="room_40x10" type="Node2D" unique_id=315594052]
+script = ExtResource("1_ncf6j")
+world_x = 0
+world_y = 64
+skin = "cave_dark"
+background = "cave_depths"
+music = "collapse"
+
+[node name="Collision" type="TileMapLayer" parent="." unique_id=601142013]
+modulate = Color(1, 1, 1, 0.35)
+tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAABAAAAAAAAAAAAAAABAAkAAAAAAAAAAAACAAAAAAAAAAAAAAACAAkAAAAAAAAAAAADAAAAAAAAAAAAAAADAAkAAAAAAAAAAAAEAAAAAAAAAAAAAAAEAAkAAAAAAAAAAAAFAAAAAAAAAAAAAAAFAAkAAAAAAAAAAAAGAAAAAAAAAAAAAAAGAAkAAAAAAAAAAAAHAAAAAAAAAAAAAAAHAAkAAAAAAAAAAAAIAAAAAAAAAAAAAAAIAAkAAAAAAAAAAAAJAAAAAAAAAAAAAAAJAAkAAAAAAAAAAAAKAAAAAAAAAAAAAAAKAAkAAAAAAAAAAAALAAAAAAAAAAAAAAALAAkAAAAAAAAAAAAMAAAAAAAAAAAAAAAMAAkAAAAAAAAAAAANAAAAAAAAAAAAAAANAAkAAAAAAAAAAAAOAAAAAAAAAAAAAAAOAAkAAAAAAAAAAAAPAAAAAAAAAAAAAAAPAAkAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAkAAAAAAAAAAAARAAAAAAAAAAAAAAARAAkAAAAAAAAAAAASAAAAAAAAAAAAAAASAAkAAAAAAAAAAAATAAAAAAAAAAAAAAATAAkAAAAAAAAAAAAUAAAAAAAAAAAAAAAUAAkAAAAAAAAAAAAVAAAAAAAAAAAAAAAVAAkAAAAAAAAAAAAWAAAAAAAAAAAAAAAWAAkAAAAAAAAAAAAXAAAAAAAAAAAAAAAXAAkAAAAAAAAAAAAYAAAAAAAAAAAAAAAYAAkAAAAAAAAAAAAZAAAAAAAAAAAAAAAZAAkAAAAAAAAAAAAaAAAAAAAAAAAAAAAaAAkAAAAAAAAAAAAbAAAAAAAAAAAAAAAbAAkAAAAAAAAAAAAcAAAAAAAAAAAAAAAcAAkAAAAAAAAAAAAdAAAAAAAAAAAAAAAdAAkAAAAAAAAAAAAeAAAAAAAAAAAAAAAeAAkAAAAAAAAAAAAfAAAAAAAAAAAAAAAfAAkAAAAAAAAAAAAgAAAAAAAAAAAAAAAgAAkAAAAAAAAAAAAhAAAAAAAAAAAAAAAhAAkAAAAAAAAAAAAiAAAAAAAAAAAAAAAiAAkAAAAAAAAAAAAjAAAAAAAAAAAAAAAjAAkAAAAAAAAAAAAkAAAAAAAAAAAAAAAkAAkAAAAAAAAAAAAlAAAAAAAAAAAAAAAlAAkAAAAAAAAAAAAmAAAAAAAAAAAAAAAmAAkAAAAAAAAAAAAnAAAAAAAAAAAAAAAnAAEAAAAAAAAAAAAnAAIAAAAAAAAAAAAnAAMAAAAAAAAAAAAnAAQAAAAAAAAAAAAnAAUAAAAAAAAAAAAnAAYAAAAAAAAAAAAnAAcAAAAAAAAAAAAnAAgAAAAAAAAAAAAnAAkAAAAAAAAAAAA=")
+tile_set = ExtResource("2_gb3uy")
+
+[node name="DecorBack" type="TileMapLayer" parent="." unique_id=127235256]
+z_index = -2
+tile_set = ExtResource("3_g6a0p")
+
+[node name="DecorFront" type="TileMapLayer" parent="." unique_id=640834373]
+z_index = 2
+tile_set = ExtResource("3_g6a0p")
+
+[node name="Props" type="Node2D" parent="." unique_id=11085894]
+z_index = 1
+
+[node name="Entries" type="Node2D" parent="." unique_id=882225012]
+
+[node name="main" type="Marker2D" parent="Entries" unique_id=156397014]
+position = Vector2(80, 288)
+script = ExtResource("4_epfkg")
+
+[node name="Exits" type="Node2D" parent="." unique_id=603036121]
+
+[node name="Objects" type="Node2D" parent="." unique_id=1696296087]
+
+[node name="trap_plate" parent="Objects" unique_id=440509230 instance=ExtResource("5_g6a0p")]
+position = Vector2(640, 288)
+channel = 1
+
+[node name="boulder" parent="Objects" unique_id=867905481 instance=ExtResource("6_epfkg")]
+position = Vector2(1184, 160)
+size = 4
+channel = 1
+
+[node name="Enemies" type="Node2D" parent="." unique_id=1358612420]

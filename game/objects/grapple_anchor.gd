@@ -20,6 +20,13 @@ func _setup_runtime() -> void:
 	s.shape = c
 	_area.add_child(s)
 	add_child(_area)
+	# Dedicated latch point: the hook's aim assist looks for these only.
+	add_to_group("grapple_anchors")
+
+
+## Where the hook's aim assist aims (world space).
+func latch_point() -> Vector2:
+	return global_position
 
 
 ## Grapple contract (the player raycasts and calls this on what it hit).

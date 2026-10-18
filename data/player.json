@@ -17,6 +17,7 @@
   "run_speed": 185.0,
   "walk_threshold": 0.6,
   "accel": 1500.0,
+  "surface_max_press": 2000.0,
   "decel": 2200.0,
   "air_accel": 1000.0,
   "crouch_speed": 55.0,
@@ -34,6 +35,7 @@
   "dash_time": 0.16,
   "dash_cooldown": 0.4,
   "dash_iframes": true,
+  "down_dash_speed": 520.0,
 
   "hurt_knockback": [180.0, -230.0],
   "hurt_stun": 0.25,

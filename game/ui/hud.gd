@@ -129,7 +129,7 @@ func _item_text(id: String) -> String:
 	var def := GameState.item_def(id)
 	var text := String(def.get("name", id))
 	var n := GameState.count(id)
-	if n > 1:
+	if n > 1 or GameState.is_ammo(id):
 		text += "  ×%d" % n
 	return text
 

@@ -131,7 +131,11 @@ def render_event(ev):
 # Written in the exact form the editor itself saves (section order, no
 # values that equal the engine default, its standard header), so opening
 # the project in the editor does not rewrite the file and git stays quiet.
-# Everything after the [input] section goes in FOOTER.
+# Everything after the [input] section goes in FOOTER. The editor plugins
+# (godot-ai, room_tools, the local-only terminal) and godot-ai's
+# _mcp_game_helper autoload (its export plugin strips it from exports) are
+# what enabling them in the editor writes; keep them here or regenerating
+# disables them.
 HEADER = """; Engine configuration file.
 ; It's best edited using the editor UI and not directly,
 ; since the parameters that go here are not all obvious.
@@ -162,6 +166,7 @@ Controls="*res://game/autoload/controls.gd"
 SaveManager="*res://game/autoload/save_manager.gd"
 GameState="*res://game/autoload/game_state.gd"
 RoomRegistry="*res://game/autoload/room_registry.gd"
+_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [display]
 
@@ -174,7 +179,7 @@ window/stretch/scale_mode="integer"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/room_tools/plugin.cfg")
+enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg", "res://addons/room_tools/plugin.cfg", "res://addons/terminal/plugin.cfg")
 
 [input]
 
@@ -200,6 +205,8 @@ FOOTER = """
 2d_physics/layer_12="projectile"
 2d_physics/layer_13="breakable"
 2d_physics/layer_14="room_exit"
+2d_physics/layer_15="whip"
+2d_physics/layer_16="fire"
 
 [physics]
 

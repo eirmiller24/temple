@@ -58,7 +58,8 @@ x is `ks`). So is any punctuation: §11.4 hasn't defined it yet.
   consonant with it. Inside a word it stays: `kwesch|n` is
   [K/W]·e·[S/Ch]·|·N. So *be that is the question* is
   B·i·[∅/Dh]·a·[T/∅]·[Z/∅]·[Dh/∅]·[K/W]·e·[S/Ch]·|·N. A word that is
-  nothing but the null vowel ("a") is written in full, '·|. The pillar
+  nothing but the null vowel ("a") is just the null consonant, one
+  stroke, and breaks like any one-consonant word. The pillar
   syllable *Rhys'* (`rh's'`) is [R/H]·|·S. All of this is in design_v2
   §11.3 and §11.6.
 - Spaces between words become the §11.4 word breaks — half-empty slots or

@@ -118,7 +118,7 @@ func _row(id: String) -> Button:
 	var def := GameState.item_def(id)
 	var text := String(def.get("name", id))
 	var n := GameState.count(id)
-	if n > 1:
+	if n > 1 or GameState.is_ammo(id):
 		text += "  ×%d" % n
 	var b := UiTheme.button(text, UiTheme.SIZE_BODY, LIST_WIDTH - 12)
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -220,7 +220,7 @@ func _show_details() -> void:
 		"attack": where = "  ·  equipped on " + Controls.glyph("attack")
 		"item_x", "item_y": where = "  ·  on " + _mark(id)
 	var n := GameState.count(id)
-	_kind.text = String(def.get("kind", "")) + ("  ·  ×%d" % n if n > 1 else "") + where
+	_kind.text = String(def.get("kind", "")) + ("  ·  ×%d" % n if n > 1 or GameState.is_ammo(id) else "") + where
 	_desc.text = String(def.get("description", ""))
 	_hint.text = UiItemVerbs.verb_hint(id)
 

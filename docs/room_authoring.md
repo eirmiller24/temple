@@ -45,6 +45,18 @@ writes the `world_x`/`world_y` you typed in the dialog, saves it under
 decor layers, the `Entries`/`Exits`/`Objects`/`Enemies` containers and
 one entry are already there and already typed.
 
+**From a chat:** the same plugin registers a godot-ai tool, `new_room`
+(`addons/room_tools/mcp_new_room.gd`, shared code in `room_factory.gd`),
+so "give me a 30x20 room" does the whole thing in one call. Give it
+`width` and `height` in tiles (walls included). It paints a solid border
+that size, stands `main` on the floor two columns in from the left wall,
+copies the entry hall's skin, background and music, saves to
+`game/rooms/test/room_<w>x<h>.tscn`, rebuilds `data/rooms.json` and opens
+the scene. If you don't give `world_x`/`world_y`, it puts the room four
+tiles below the lowest existing room, at the leftmost room's x, where it
+overlaps nothing. Move it before you wire any exits. `name`, `folder`,
+`display_name`, `skin`, `background` and `music` override the defaults.
+
 The template is a **copy**, not an inherited scene. Inheritance would keep
 every room linked to the template, so one tweak there would silently change
 all of them. Rooms are independent by design. The template also lives
@@ -642,13 +654,17 @@ about `Data`/`GameState` at parse time.
 | Scene | Exported fields | Does |
 |---|---|---|
 | `push_block.tscn` (`PushBlock`) | `block_material` (stone / iron / wood) | A one-tile crate. The player walking into it calls `push(dir, delta)` and it slides at `objects.push_block.push_speed`; it falls, weighs buttons, carries the player. A block resting on a key spot (any floor button) saves its position and is still there next visit; left anywhere else it resets to where it was authored. The grappling hook pulls **iron** and **wood** blocks toward the player (`grapple_hit()` returns `"pull"`); stone is too heavy. Layers `pushable` + `grapple`. |
-| `floor_button.tscn` (`FloorButton`) | `channel`, `latching` | A pressure plate. Pressed by standing weight — player, push block, enemy. Drives its channel while pressed; a latching one stays down forever (saved: it is still down on the next visit) and also takes a hit (a slingshot stone). A momentary one saves nothing and re-reads its weight on arrival. Sprite: the `button` manifest entry, `raised`/`pressed` clips. |
-| `lever.tscn` (`Lever`) | `channel`, `flag`, `starts_on` | Toggled by any hit (sword, whip reach, slingshot) on its `switch`-layer area. Drives its channel while on. Its on/off position is saved per room and restored on every visit, whichever way it was left; `starts_on` only sets the first visit. A `flag` is set the first time it lands on, for anything else to test. It does **not** hold the lever on. |
+| `floor_button.tscn` (`FloorButton`) | `channel`, `latching` | A pressure plate. Pressed by standing weight — player, push block, enemy. Drives its channel while pressed; a latching one stays down forever (saved: it is still down on the next visit) and also takes a hit (a slingshot stone, the grappling hook). A momentary one saves nothing and re-reads its weight on arrival. Sprite: the `button` manifest entry, `raised`/`pressed` clips. |
+| `lever.tscn` (`Lever`) | `channel`, `flag`, `starts_on` | Toggled by any hit (sword, whip reach, slingshot, dart, explosive blast, grappling hook) on its `switch`-layer area. Drives its channel while on. Its on/off position is saved per room and restored on every visit, whichever way it was left; `starts_on` only sets the first visit. A `flag` is set the first time it lands on, for anything else to test. It does **not** hold the lever on. |
 | `gate.tscn` (`Gate`) | `channel`, `w`, `h`, `inverted` | A `w`×`h` portcullis that slides up `h` tiles (at `objects.gate.open_speed`) while any source drives its channel (`inverted` opens on *inactive*), opening the gap beneath it. The slab is an AnimatableBody on the `world` layer and is **solid all the time**: lowered, raised and mid-slide, and it carries what stands on it. Like every moving solid it **crushes** (design §7.6, `game/combat/crush.gd`, `objects.crush`): anyone it squeezes is displaced to the nearest free spot and hit. With nowhere to go, the player **voids out** (`World.void_out()`: the room reloads and they're back where they last entered it) and an enemy dies. Author it over **empty** Collision cells, with the `h` cells above clear for the raised slab. Position = the slab's bottom-centre. |
+| `boulder.tscn` (`Boulder`) | `channel`, `size` | A one-shot rolling-boulder trap. It is hidden and has no collision until its channel goes active. Then it appears with its feet at the node's position, drops (`objects.boulder.gravity`), and on landing rolls toward the player at `roll_speed` until it hits a wall, where it stays. It is a heavy rolling solid. If it rolls (or drops) into the player faster than `impact_speed` along the contact, that's a **hit** (`impact_damage`, `impact_knockback`), repeated each time their i-frames end. Contacts you can stand on, chasing it, and leaning on a stopped one never hurt. Its solid is a `size`-tile circle StaticBody on the `world` layer that rotates and *declares* its velocity and spin (an invisible CharacterBody does the moving; a kinematic body's velocity is derived as motion ÷ step, NaN during hitstop), so its surface moves (twice its speed on top, standing still at the floor). Standing on it, the engine's platform carry takes you with the surface: stand still and you're walked off the front into its path; run against the roll to stay on, like a clown on a ball. Size it no taller than the player's jump (`jump_height_tiles`, 4) if they should be able to jump on: taller, and they always clip its face first. On its flanks the player gets Coulomb friction (`friction`, capped by `player.json surface_max_press`): a tug, never a launch. Pinned against a wall it **crushes** like a gate does, so the player voids out. Art is scaled by `body_h` in sprites.json, the rock's own height in its frame. Author it high up over empty Collision cells. Reloading the room resets it. |
 | `locked_door.tscn` (`LockedDoor`) | `needs_item`, `consumes`, `w`, `h` | A solid door in a doorway. Interact (LB / E) in front of it: with the item it opens (consuming a key), without it a toast says what it needs. Opening sets the permanent flag `door_<room>_<node>` so it stays open in that save. |
 | `pickup.tscn` (`Pickup`) | `item_id`, `count`, `flag`, `appearance` | An item on the floor; walk over it. `flag` makes it once-ever (naming the flag IS the suppression). `appearance` `"chest"` draws the chest sprite instead of the floating gem. Dropped items from the pause menu are Pickups made with `setup(id, n)` and a 1 s re-collect grace. |
 | `save_shrine.tscn` (`SaveShrine`) | *(none)* | Interact to save: sets the respawn point to **this shrine** (`GameState.set_respawn(room, node name)`), heals if `objects.save_shrine.heal_on_save`, writes the current slot (slot 1 if the run was never saved). `World.load_room()` accepts a shrine's node name as an entry id, so death and Continue land on it. |
-| `grapple_anchor.tscn` (`GrappleAnchor`) | *(none)* | A ring on a wall or ceiling. The hook's raycast hits its `grapple`-layer area, `grapple_hit()` answers `"anchor"`, and the player is pulled to it at `objects.grapple.pull_speed` (jump to let go early). |
+| `grapple_anchor.tscn` (`GrappleAnchor`) | *(none)* | A ring on a wall or ceiling. The hook's raycast hits its `grapple`-layer area, `grapple_hit()` answers `"anchor"`, and the player is pulled to it at `objects.grapple.pull_speed` (jump to let go early). A shot that would latch or pull nothing aims itself at the nearest anchor within `objects.grapple.assist_deg` (5°), in range and in sight. Anchors are the only things the assist looks for (group `grapple_anchors`); pullable blocks and switches never draw it. |
+| `whip_point.tscn` (`WhipPoint`) | `length` | A thin beam the **whip** wraps round. Its area is on the `whip` layer, never `grapple`: the hook ignores it, and a grapple anchor ignores the whip. A whip swing aimed at it within reach (`weapons.whip.reach` + half the hitbox width; the reticle turns red) latches on. A swing aimed within `weapons.whip.latch_assist_deg` (5°) of one, in reach and in sight, takes it too. The player then swings below it on a rope of fixed length (no climbing), driven by left/right, and jumps to let go. Position = the beam's centre. |
+| `torch.tscn` (`Torch`) | `lit` | A wall torch. Lit, its flame is on the `fire` layer and a dart flying through it catches fire. Unlit, it sits on the `switch` layer (it stops darts and stones) and a **burning** hit lights it. A torch lit that way stays lit on later visits (saved per room). Position = the flame's centre. |
+| `burnable_barrier.tscn` (`BurnableBarrier`) | `w`, `h` | A wooden barricade, solid (`world`). Only a burning hit (`fire: true`) affects it: it burns for `objects.fire.barrier_burn_time`, with a `fire`-layer flame the whole time, then it is gone for good (flag `burnt_<room>_<node>`). Author it over **empty** Collision cells. Position = bottom-centre. |
 
 Position is FEET (bottom-centre) for everything that stands on the
 floor; the gate and door positions are the slab's bottom-centre and want
@@ -684,13 +700,18 @@ through `GameState.set_flag()`, and flags are saved too.
 `_handle_pushes` calls `push()` on anything it slides into sideways that
 has the method; `_interact` calls `interact(self)` on the nearest `Area2D`
 on layer 8 within 28 px; `_fire_grapple` raycasts against world + pushable
-+ grapple layers and calls `grapple_hit(self)` on the collider (and,
++ grapple + switch layers. On a `SwitchArea` whose `hook_switch` is true
+(levers, latching buttons; false on the fire-only torch and barrier) it
+calls `take_hit` with an ordinary hit, `kind` `"grapple"`. Otherwise it calls `grapple_hit(self)` on the collider (and,
 while aiming, `grapple_mode(self)` every frame: the same answer —
 `"anchor"`, `"pull"` or `"none"` — with no side effects, which turns the
 aim reticle red for anything but `"none"`; implement both); the
 attack `Hitbox` calls `take_hit(info)` on anything on layers 5, 10 or 13.
 The hit info dict is `{damage, knockback, source, origin, kind, tier,
-hitstop}`; `tier` 1 is keystone-grade.
+hitstop}`; `tier` 1 is keystone-grade. A burning dart's hit also carries
+`fire: true`: enemies burn (`objects.fire`), unlit torches light and
+barriers burn. Anything else may ignore it. The explosive's blast is an
+ordinary tier-0 hit on layers 5, 10 and 13, `kind` `"explosion"`.
 
 ### 7.2 Enemies (`Enemies` node)
 

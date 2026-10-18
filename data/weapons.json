@@ -1,5 +1,5 @@
 {
-  "_comment": "Attack-button weapons. Timings in seconds; hitbox [w, h] px, placed `reach` px from the player's centre along the attack direction. aimable weapons follow free-aim (LT); the others swing in the facing direction.",
+  "_comment": "Attack-button weapons. Timings in seconds; hitbox [w, h] px, placed `reach` px from the player's centre along the attack direction. aimable weapons follow free-aim (LT); the others swing in the facing direction. latch (the whip): a swing whose aim line meets a whip point (layer whip) within reach + hitbox width / 2 latches on — or, if it misses, the nearest whip point within latch_assist_deg of the aim, in reach and in sight and the player swings from it on a rope of fixed length (no climbing). swing_pump px/s² is how hard left/right drives the swing; jump lets go with the swing's velocity, its y no slower than swing_release_hop.",
   "sword": {
     "damage": 1,
     "reach": 22.0,
@@ -24,6 +24,10 @@
     "hitstop": 0.04,
     "aimable": true,
     "clip": "attack",
-    "sfx": "whip"
+    "sfx": "whip",
+    "latch": true,
+    "latch_assist_deg": 5.0,
+    "swing_pump": 420.0,
+    "swing_release_hop": -260.0
   }
 }

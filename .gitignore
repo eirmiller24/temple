@@ -37,3 +37,6 @@ raw_assets/
 # Godot Terminal dock: a local editor tool (GDExtension with Linux-only
 # binaries installed). Not part of the game. See CLAUDE.md.
 addons/terminal/
+
+# Tool miner state: queue, ledger, proposals, briefs (tools/tool_miner/README.md)
+.tool_miner/

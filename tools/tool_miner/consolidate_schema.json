@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "merges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "keep": {"type": "string"},
+          "absorb": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "title": {"type": "string", "description": "New title for the kept entry, or \"\" to keep it."},
+          "summary": {"type": "string", "description": "New summary for the kept entry, or \"\" to keep it."},
+          "reason": {"type": "string"}
+        },
+        "required": ["keep", "absorb", "title", "summary", "reason"]
+      }
+    },
+    "already_exist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "where": {"type": "string", "description": "Repo path of the existing tool/doc."},
+          "reason": {"type": "string"}
+        },
+        "required": ["id", "where", "reason"]
+      }
+    }
+  },
+  "required": ["merges", "already_exist"]
+}

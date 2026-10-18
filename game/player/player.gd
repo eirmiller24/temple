@@ -12,14 +12,15 @@ extends CharacterBody2D
 ##   B / J               attack with the equipped weapon (whip follows aim)
 ##   X, Y / K, L         item slots
 ##   RT / S / Down       crouch + crawl (its own button, never stick-down)
-##   RB / Shift          dash
+##   RB / Shift          dash, once Quality Boots are owned (down + dash in
+##                       the air: dash straight down)
 ##   LT (hold) / RMB     free-aim. Setting aim_swap_sticks (default on):
 ##                       left stick aims, right stick moves. Off (claw
 ##                       grip): left stick keeps moving, right stick aims.
 ##   LB / E              interact
 ##   Ctrl                walk (keyboard only; sticks use magnitude)
 
-enum State { NORMAL, CROUCH, DASH, ATTACK, HURT, DEAD, GRAPPLE }
+enum State { NORMAL, CROUCH, DASH, ATTACK, HURT, DEAD, GRAPPLE, SWING }
 
 const LAYER_PLAYER := 1 << 1
 const LAYER_WORLD := 1 << 0
@@ -30,10 +31,14 @@ const LAYER_WORLD := 1 << 0
 const DROP_THROUGH_NUDGE := 5.0
 const LAYER_PUSHABLE := 1 << 8
 const LAYER_PLAYER_HURTBOX := 1 << 3
+## How close (px) a moving surface counts as touching (_moving_surface_contacts).
+const SURFACE_REACH := 2.0
 const LAYER_PLAYER_HITBOX := 1 << 5
 const MASK_PLAYER_HITBOX := (1 << 4) | (1 << 9) | (1 << 12)   # enemy_hurtbox | switch | breakable
 const LAYER_INTERACT := 1 << 7
 const LAYER_GRAPPLE := 1 << 10
+const LAYER_SWITCH := 1 << 9
+const LAYER_WHIP := 1 << 14
 ## Where slingshot stones and the grappling hook leave from (feet-relative).
 const SHOT_ORIGIN := Vector2(0, -22)
 ## Where melee swings are centred (feet-relative).
@@ -55,10 +60,11 @@ var camera: Camera2D
 var aim_line: Line2D
 var interact_sensor: Area2D
 var grapple_line: Line2D
+var whip_line: Line2D
 var reticle: AimReticle
 
 ## Which aimable thing the reticle previews: the last one used
-## ("slingshot", "grapple", "weapon"), or "" — see _reticle_kind().
+## ("slingshot", "darts", "grapple", "weapon"), or "" — see _reticle_kind().
 var _reticle_use := ""
 var _coyote := 0.0
 var _jump_buffer := 0.0
@@ -66,12 +72,21 @@ var _was_on_floor := false
 var _dash_time := 0.0
 var _dash_cooldown := 0.0
 var _air_dash_used := false
+## Unit direction of the current dash: (±1, 0), or (0, 1) for a down-dash.
+var _dash_dir := Vector2.RIGHT
 var _attack_phase := 0  # 0 startup, 1 active, 2 recovery
 var _attack_time := 0.0
 var _attack_dir := Vector2.RIGHT
 var _hurt_time := 0.0
 var _iframes := 0.0
 var _grapple_target: Node2D = null
+## The whip point swung from (State.SWING) and the rope's fixed length.
+var _swing_point: Node2D = null
+var _swing_len := 0.0
+## The whip point the current whip swing will latch onto (_try_whip_latch).
+var _latch_target: Node2D = null
+## The Explosive Charge set and not yet detonated (null when none).
+var _explosive: Explosive = null
 var _grapple_cooldown := 0.0
 var _item_cooldown := 0.0
 var _step_timer := 0.0
@@ -190,6 +205,15 @@ func _build_children() -> void:
 	grapple_line.top_level = true
 	grapple_line.z_index = 4
 	add_child(grapple_line)
+
+	whip_line = Line2D.new()
+	whip_line.name = "WhipLine"
+	whip_line.width = 2.0
+	whip_line.default_color = Color(0.55, 0.38, 0.22)
+	whip_line.visible = false
+	whip_line.top_level = true
+	whip_line.z_index = 4
+	add_child(whip_line)
 
 	camera = Camera2D.new()
 	camera.name = "Camera"
@@ -322,6 +346,8 @@ func _update_reticle() -> void:
 	match kind:
 		"slingshot":
 			t = _trace_slingshot(aim_dir)
+		"darts":
+			t = _trace_slingshot(aim_dir, "darts")
 		"grapple":
 			t = _trace_grapple(aim_dir)
 		_:
@@ -335,7 +361,7 @@ func _reticle_kind() -> String:
 	var kinds: Array[String] = []
 	for id: String in [GameState.slot_x, GameState.slot_y]:
 		var use := String(GameState.item_def(id).get("use", "")) if id != "" else ""
-		if use == "slingshot" or use == "grapple":
+		if use == "slingshot" or use == "grapple" or use == "darts":
 			kinds.append(use)
 	if bool(_weapon_def().get("aimable", false)):
 		kinds.append("weapon")
@@ -347,10 +373,12 @@ func _reticle_kind() -> String:
 ## Where the player is aiming, not where the stone lands: a straight line
 ## (no gravity, so a real stone drops below it) out to speed × lifetime,
 ## stopped by anything that would stop or take a stone.
-func _trace_slingshot(dir: Vector2) -> Dictionary:
-	var cfg: Dictionary = Data.req(Data.objects, "slingshot", "objects.json")
+## `section` "darts": the same rule with a dart's speed and lifetime (and
+## for a dart the straight line is the truth).
+func _trace_slingshot(dir: Vector2, section := "slingshot") -> Dictionary:
+	var cfg: Dictionary = Data.req(Data.objects, section, "objects.json")
 	var from := global_position + SHOT_ORIGIN + dir * 12.0
-	var reach := Data.num(cfg, "speed", "objects.slingshot") * Data.num(cfg, "lifetime", "objects.slingshot")
+	var reach := Data.num(cfg, "speed", "objects." + section) * Data.num(cfg, "lifetime", "objects." + section)
 	var to := from + dir * reach
 	var hit := Projectile.sweep(get_world_2d().direct_space_state, from, to, Projectile.SLINGSHOT_RADIUS,
 			Projectile.SLINGSHOT_MASK | Projectile.SLINGSHOT_SOLIDS, true, room)
@@ -363,9 +391,7 @@ func _trace_grapple(dir: Vector2) -> Dictionary:
 	var g := _grapple_ray(dir)
 	if g.hit.is_empty():
 		return {"pos": g.to, "hit": false}
-	var col: Object = g.hit.collider
-	var mode := String(col.grapple_mode(self)) if col != null and col.has_method("grapple_mode") else "none"
-	return {"pos": g.hit.position, "hit": true, "latch": mode == "anchor" or mode == "pull"}
+	return {"pos": g.hit.position, "hit": true, "latch": _hook_mode(g.hit.collider) != "none"}
 
 
 ## An aimable melee weapon: the far edge of its hitbox, or the first thing
@@ -373,6 +399,9 @@ func _trace_grapple(dir: Vector2) -> Dictionary:
 ## Area on the hit layers only), so the trace does too.
 func _trace_swing(dir: Vector2) -> Dictionary:
 	var w := _weapon_def()
+	var latch := _whip_latch_ray(dir)
+	if latch.has("point"):
+		return {"pos": latch.position, "hit": true, "latch": true}
 	var box: Array = Data.req(w, "hitbox", "weapons.json")
 	var from := global_position + SWING_ORIGIN
 	var to := from + dir * (Data.num(w, "reach", "weapons.json") + float(box[0]) / 2.0)
@@ -410,9 +439,13 @@ func _physics_process(delta: float) -> void:
 			_tick_hurt(delta, p)
 		State.GRAPPLE:
 			_tick_grapple(delta, p)
+		State.SWING:
+			_tick_swing(delta, p, move)
 
 	if state != State.GRAPPLE:
+		var pre := velocity
 		move_and_slide()
+		_surface_contacts(pre, delta)
 	_check_crush()
 	_handle_pushes(move, delta)
 	_update_animation(move, on_floor)
@@ -570,8 +603,9 @@ func _tick_normal(delta: float, p: Dictionary, move: Vector2, on_floor: bool) ->
 		_apply_gravity(delta)
 	# --- verbs ------------------------------------------------------------------------
 	if Input.is_action_just_pressed("dash") and _dash_cooldown <= 0.0 and state == State.NORMAL \
-			and (on_floor or not _air_dash_used) and not in_water:
-		_start_dash(p)
+			and (on_floor or not _air_dash_used) and not in_water and can_dash():
+		# Down held in the air: dash straight down.
+		_start_dash(p, not on_floor and _holding_down(move, p))
 		return
 	if Input.is_action_just_pressed("attack") and state != State.CROUCH:
 		_start_attack(p)
@@ -582,6 +616,14 @@ func _tick_normal(delta: float, p: Dictionary, move: Vector2, on_floor: bool) ->
 		use_slot(GameState.slot_y)
 	if Input.is_action_just_pressed("interact"):
 		_interact()
+
+
+## Dashing needs an owned item with "dash" (the Quality Boots).
+func can_dash() -> bool:
+	for id: String in GameState.inventory:
+		if bool(GameState.item_def(id).get("dash", false)):
+			return true
+	return false
 
 
 func _passive_speed_mult() -> float:
@@ -656,23 +698,40 @@ func _sample_tile_kinds() -> void:
 
 # --- dash ----------------------------------------------------------------------------------
 
-func _start_dash(p: Dictionary) -> void:
+## `down`: the air down-dash — same time, cooldown, i-frames and one-per-
+## airtime as the side dash, at down_dash_speed. It ends at that speed, so
+## with down_dash_speed near terminal_velocity the fall that follows is
+## already close to full speed.
+func _start_dash(p: Dictionary, down := false) -> void:
 	state = State.DASH
 	_dash_time = Data.num(p, "dash_time", "player.json")
 	_dash_cooldown = Data.num(p, "dash_cooldown", "player.json")
 	if not is_on_floor():
 		_air_dash_used = true
-	velocity = Vector2(facing * Data.num(p, "dash_speed", "player.json"), 0.0)
+	_dash_dir = Vector2.DOWN if down else Vector2(facing, 0)
+	velocity = _dash_dir * _dash_speed(p)
 	if bool(Data.req(p, "dash_iframes", "player.json")):
 		_iframes = maxf(_iframes, _dash_time)
 	Sfx.play("dash", self)
-	SpriteDb.play(sprite, "dash", ["run"])
+	if down:
+		SpriteDb.play(sprite, "fall")   # no down-dash clip yet
+	else:
+		SpriteDb.play(sprite, "dash", ["run"])
+
+
+func _dash_speed(p: Dictionary) -> float:
+	return Data.num(p, "down_dash_speed" if _dash_dir.y > 0.0 else "dash_speed", "player.json")
 
 
 func _tick_dash(delta: float, p: Dictionary) -> void:
 	_dash_time -= delta
-	velocity.x = facing * Data.num(p, "dash_speed", "player.json")
-	velocity.y = 0.0
+	if _dash_dir.y > 0.0:
+		velocity = _dash_dir * _dash_speed(p)
+		if _dash_time <= 0.0 or is_on_floor() or in_water:
+			state = State.NORMAL
+		return
+	_dash_dir.x = facing
+	velocity = _dash_dir * _dash_speed(p)
 	if _dash_time <= 0.0 or is_on_wall():
 		state = State.NORMAL
 		velocity.x *= 0.5
@@ -701,6 +760,7 @@ func _start_attack(_p: Dictionary) -> void:
 	_attack_dir = action_dir() if bool(w.get("aimable", false)) else Vector2(facing, 0)
 	if bool(w.get("aimable", false)):
 		_reticle_use = "weapon"
+	_latch_target = _whip_latch_ray(_attack_dir).get("point")
 	if absf(_attack_dir.x) > 0.2:
 		facing = 1 if _attack_dir.x > 0 else -1
 	var box: Array = Data.req(w, "hitbox", "weapons.json")
@@ -739,6 +799,8 @@ func _tick_attack(delta: float, p: Dictionary, move: Vector2, on_floor: bool) ->
 			1:
 				_attack_time = Data.num(w, "active", "weapons.json")
 				hitbox.active = true
+				if _try_whip_latch():
+					return
 			2:
 				_attack_time = Data.num(w, "recovery", "weapons.json")
 				hitbox.active = false
@@ -776,6 +838,8 @@ func on_hit(info: Dictionary) -> void:
 		_set_body_height(_stand_height)
 	if state == State.GRAPPLE:
 		_end_grapple()
+	if state == State.SWING:
+		_end_swing()
 	state = State.HURT
 	_hurt_time = Data.num(p, "hurt_stun", "player.json")
 	_iframes = Data.num(p, "iframes", "player.json")
@@ -796,6 +860,98 @@ func _tick_hurt(delta: float, p: Dictionary) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, Data.num(p, "decel", "player.json") * 0.5 * delta)
 	if _hurt_time <= 0.0:
 		state = State.NORMAL
+
+
+## Contact with a heavy moving surface: bodies with a "surface_friction"
+## meta, i.e. a Boulder.
+##
+## Impact: if the surface is coming AT the player along the contact normal
+## faster than its "impact" meta's speed (a crawl), that's a hit (damage,
+## knockback away from it). Only the normal component counts, so riding on
+## top (any contact you can stand on), chasing it, or leaning on a stopped
+## one never hurts; i-frames space repeat hits while it keeps rolling into you.
+##
+## Friction: standing on one (within
+## floor_max_angle) is the engine's moving-platform carry, which already
+## uses the surface velocity under the feet. This handles everything
+## steeper. Coulomb: the surface drags the player toward its own velocity
+## at the contact point, by at most friction × how hard they're pressed into
+## it this frame. The press is capped at player.json surface_max_press
+## (px/s²), so running or dashing into the back of a boulder rolling away
+## gets a tug, never a launch.
+func _surface_contacts(pre: Vector2, delta: float) -> void:
+	for c in _moving_surface_contacts():
+		var body: CollisionObject2D = c.body
+		var n: Vector2 = c.normal
+		if absf(n.angle_to(up_direction)) <= floor_max_angle:
+			continue   # standing on it: a landing, carried by the engine
+		var vs := surface_velocity(body, c.point)
+		if body.has_meta("impact"):
+			var imp: Dictionary = body.get_meta("impact")
+			if vs.dot(n) > float(imp.speed):
+				on_hit({"damage": int(imp.damage), "knockback": imp.knockback,
+						"source": body, "origin": body.global_position, "kind": "impact",
+						"tier": 0, "hitstop": 0.0})
+		var t := n.orthogonal()
+		var press := minf(maxf((vs - pre).dot(n), 0.0),
+				Data.num(Data.player, "surface_max_press", "player.json") * delta)
+		var limit := float(body.get_meta("surface_friction")) * press
+		velocity += t * clampf((vs - velocity).dot(t), -limit, limit)
+
+
+## Moving-surface bodies touching the player now: [{body, point, normal}],
+## normal pointing from the surface toward the player. Found by a shape
+## query (the collider grown by SURFACE_REACH), not move_and_slide's slide
+## collisions: a body that moves INTO a player standing still only
+## depenetrates them, and that is never reported as a collision.
+func _moving_surface_contacts() -> Array:
+	var out := []
+	var space := get_world_2d().direct_space_state
+	var cap := shape.shape as CapsuleShape2D
+	var reach := CapsuleShape2D.new()
+	reach.radius = cap.radius + SURFACE_REACH
+	reach.height = cap.height + SURFACE_REACH * 2.0
+	var q := PhysicsShapeQueryParameters2D.new()
+	q.shape = reach
+	q.transform = shape.global_transform
+	q.collision_mask = collision_mask
+	q.exclude = [get_rid()]
+	var hits := space.intersect_shape(q, 16)
+	var others: Array[RID] = [get_rid()]
+	var surfaces := []
+	for h in hits:
+		var col: Object = h.collider
+		if col is CollisionObject2D and col.has_meta("surface_friction"):
+			if not surfaces.has(col):
+				surfaces.append(col)
+		else:
+			others.append(h.rid)
+	for body: CollisionObject2D in surfaces:
+		# Rest info against this body alone: its contact point and normal.
+		var ex := others.duplicate()
+		for o: CollisionObject2D in surfaces:
+			if o != body:
+				ex.append(o.get_rid())
+		q.exclude = ex
+		var info := space.get_rest_info(q)
+		if info.is_empty():
+			continue
+		out.append({"body": body, "point": info.point, "normal": (info.normal as Vector2).normalized()})
+	return out
+
+
+## The velocity of `body`'s surface at world point `at`: its linear velocity
+## plus its spin, as the physics server has them. A moving surface should be
+## a StaticBody2D that declares them (constant_linear/angular_velocity, see
+## Boulder): for a kinematic body the server works them out as motion ÷ step,
+## which is NaN during hitstop. A non-finite answer reads as still.
+static func surface_velocity(body: CollisionObject2D, at: Vector2) -> Vector2:
+	var r := at - body.global_position
+	var st := PhysicsServer2D.body_get_direct_state(body.get_rid())
+	if st == null:
+		return Vector2.ZERO
+	var v := st.get_velocity_at_local_position(r)
+	return v if v.is_finite() else Vector2.ZERO
 
 
 ## Design §7.6: squeezed by a moving solid, the player is displaced and
@@ -841,6 +997,11 @@ func use_slot(item_id: String) -> void:
 		"grapple":
 			_reticle_use = "grapple"
 			_fire_grapple()
+		"explosive":
+			_use_explosive(item_id)
+		"darts":
+			_reticle_use = "darts"
+			_fire_dart(item_id)
 		"lantern":
 			toggle_lantern()
 		"climbing_gear":
@@ -884,15 +1045,51 @@ func _fire_slingshot() -> void:
 	var dir := action_dir()
 	var shot := Projectile.new()
 	shot.setup_slingshot(cfg, self, dir)
+	_launch(shot, dir)
+	Sfx.play("slingshot", self)
+	_item_cooldown = 0.18
+
+
+func _launch(shot: Projectile, dir: Vector2) -> void:
 	# Into the tree first: before that, global_position is just position,
 	# and the room sits at its world offset, so every room but one at
 	# (0, 0) put the stone thousands of px away.
 	(room if room != null else get_parent()).add_child(shot)
 	shot.global_position = global_position + SHOT_ORIGIN + dir * 12.0
-	Sfx.play("slingshot", self)
-	_item_cooldown = 0.18
 	if absf(dir.x) > 0.2:
 		facing = 1 if dir.x > 0 else -1
+
+
+## Wooden darts: one per use, straight and fast (Projectile.setup_dart).
+func _fire_dart(item_id: String) -> void:
+	if GameState.count(item_id) <= 0:
+		return
+	var cfg: Dictionary = Data.req(Data.objects, "darts", "objects.json")
+	GameState.remove_item(item_id, 1)
+	var dir := action_dir()
+	var shot := Projectile.new()
+	shot.setup_dart(cfg, self, dir)
+	_launch(shot, dir)
+	Sfx.play("dart", self)
+	_item_cooldown = Data.num(cfg, "cooldown", "objects.darts")
+
+
+## Explosive Charge: the first use sets one at the feet (one charge of
+## ammo), the next sets it off. One out at a time.
+func _use_explosive(item_id: String) -> void:
+	var cfg: Dictionary = Data.req(Data.objects, "explosive", "objects.json")
+	_item_cooldown = Data.num(cfg, "cooldown", "objects.explosive")
+	if _explosive != null and is_instance_valid(_explosive) and not _explosive.is_spent():
+		_explosive.detonate(self)
+		_explosive = null
+		return
+	if GameState.count(item_id) <= 0:
+		return
+	GameState.remove_item(item_id, 1)
+	_explosive = Explosive.new()
+	(room if room != null else get_parent()).add_child(_explosive)
+	_explosive.global_position = global_position
+	Sfx.play("explosive_set", self)
 
 
 func _fire_grapple() -> void:
@@ -911,7 +1108,11 @@ func _fire_grapple() -> void:
 	if not hit.is_empty():
 		end = hit.position
 		var col: Node = hit.collider
-		if col != null and col.has_method("grapple_hit"):
+		if _hook_mode(col) == "switch":
+			col.take_hit({"damage": 0, "knockback": Vector2.ZERO, "source": self,
+					"origin": global_position, "kind": "grapple", "tier": 0, "hitstop": 0.0})
+			Sfx.play("grapple_latch", self)
+		elif col != null and col.has_method("grapple_hit"):
 			var mode: String = col.grapple_hit(self)
 			if mode == "anchor":
 				_grapple_target = col
@@ -925,15 +1126,78 @@ func _fire_grapple() -> void:
 
 ## The hook's raycast, shared by firing and the aim reticle:
 ## {from, to, hit} where hit is intersect_ray's result (empty on a miss).
+## A shot that would latch or pull nothing aims itself at the nearest grapple
+## anchor within objects.grapple.assist_deg (_assist_target); pullable
+## blocks and switches never draw the aim.
 func _grapple_ray(dir: Vector2) -> Dictionary:
 	var cfg: Dictionary = Data.req(Data.objects, "grapple", "objects.json")
 	var from := global_position + SHOT_ORIGIN
-	var to := from + dir * Data.num(cfg, "range", "objects.grapple")
-	var q := PhysicsRayQueryParameters2D.create(from, to, LAYER_WORLD | LAYER_PUSHABLE | LAYER_GRAPPLE)
+	var reach := Data.num(cfg, "range", "objects.grapple")
+	var mask := LAYER_WORLD | LAYER_PUSHABLE | LAYER_GRAPPLE | LAYER_SWITCH
+	var g := _ray(from, from + dir * reach, mask)
+	if _hook_mode(g.hit.get("collider")) != "none":
+		return g
+	var anchor := _assist_target("grapple_anchors", from, dir, reach,
+			Data.num(cfg, "assist_deg", "objects.grapple"), mask)
+	if anchor != null:
+		return _ray(from, from + (anchor.latch_point() - from).normalized() * reach, mask)
+	return g
+
+
+## What the hook does to `col`: "anchor" / "pull" (its grapple_mode),
+## "switch" (a SwitchArea that takes the hook: lever, latching button —
+## activated like any hit), or "none".
+func _hook_mode(col: Object) -> String:
+	if col == null:
+		return "none"
+	if col is SwitchArea:
+		return "switch" if (col as SwitchArea).hook_switch else "none"
+	if col.has_method("grapple_mode"):
+		return String(col.grapple_mode(self))
+	return "none"
+
+
+func _ray(from: Vector2, to: Vector2, mask: int) -> Dictionary:
+	var q := PhysicsRayQueryParameters2D.create(from, to, mask)
 	q.exclude = [get_rid()]
 	q.collide_with_areas = true
 	q.collide_with_bodies = true
 	return {"from": from, "to": to, "hit": get_world_2d().direct_space_state.intersect_ray(q)}
+
+
+## Aim assist: of the nodes in `group` (dedicated latch points with
+## latch_point()), the one closest in angle to `dir`, no more than `deg`
+## off it, within `reach` of `from`, and the first thing a ray toward it on
+## `mask` meets (nothing in the way). Null when none qualifies.
+func _assist_target(group: String, from: Vector2, dir: Vector2, reach: float, deg: float,
+		mask: int) -> Node2D:
+	var best: Node2D = null
+	var best_angle := deg_to_rad(deg)
+	for n: Node2D in get_tree().get_nodes_in_group(group):
+		var to: Vector2 = n.latch_point() - from
+		if to.length() > reach or to.length() < 1.0:
+			continue
+		var a := absf(dir.angle_to(to))
+		if a > best_angle:
+			continue
+		var hit: Dictionary = _ray(from, from + to + to.normalized() * 2.0, mask).hit
+		if hit.is_empty() or _latch_owner(hit.collider) != n:
+			continue
+		best = n
+		best_angle = a
+	return best
+
+
+## The latch point a collider belongs to: a WhipPoint's area, or a
+## GrappleTarget's object. Null for anything else.
+static func _latch_owner(col: Object) -> Node:
+	if col == null:
+		return null
+	if col.has_meta("whip_point"):
+		return col.get_meta("whip_point")
+	if col is GrappleTarget:
+		return col.target
+	return null
 
 
 func _show_grapple_line(from: Vector2, to: Vector2, seconds: float) -> void:
@@ -977,6 +1241,100 @@ func _end_grapple() -> void:
 	_grapple_target = null
 	grapple_line.visible = false
 	velocity = velocity.limit_length(260.0)
+
+
+# --- whip swing -------------------------------------------------------------------------------
+# A whip swing whose aim line reaches a WhipPoint (layer `whip`; not the
+# grapple's layer, which is for things the hook can bite into) wraps
+# round it. The player then hangs from it on a rope of fixed length: a
+# pendulum under plain gravity, driven by left/right (swing_pump). No
+# climbing: the length never changes. Jump lets go with the swing's
+# velocity (rising at least swing_release_hop).
+
+## The whip's latch line: {point, position} when it reaches a WhipPoint
+## before any wall — or, missing, the nearest one within the weapon's
+## latch_assist_deg (_assist_target) — else {}. Only for a weapon with
+## "latch" (the whip).
+func _whip_latch_ray(dir: Vector2) -> Dictionary:
+	var w := _weapon_def()
+	if w.is_empty() or not bool(w.get("latch", false)):
+		return {}
+	var box: Array = Data.req(w, "hitbox", "weapons.json")
+	var from := global_position + SWING_ORIGIN
+	var reach := Data.num(w, "reach", "weapons.json") + float(box[0]) / 2.0
+	var hit: Dictionary = _ray(from, from + dir * reach, LAYER_WORLD | LAYER_WHIP).hit
+	if not hit.is_empty() and (hit.collider as Object).has_meta("whip_point"):
+		return {"point": hit.collider.get_meta("whip_point"), "position": hit.position}
+	var point := _assist_target("whip_points", from, dir, reach,
+			Data.num(w, "latch_assist_deg", "weapons.json"), LAYER_WORLD | LAYER_WHIP)
+	if point == null:
+		return {}
+	return {"point": point, "position": point.latch_point()}
+
+
+## The latch target is chosen when the swing starts (_start_attack: what
+## the reticle showed) and taken on the first active frame. Not re-traced
+## then: a player falling through the startup drops ~20 px, enough for a
+## fresh ray (or a strict reach check) to miss a thin beam. The rope takes
+## whatever length it is at that moment.
+func _try_whip_latch() -> bool:
+	var target := _latch_target
+	_latch_target = null
+	if target == null or not is_instance_valid(target):
+		return false
+	var hand := global_position + SHOT_ORIGIN
+	hitbox.active = false
+	_swing_point = target
+	_swing_len = (_swing_point.latch_point() - hand).length()
+	state = State.SWING
+	Sfx.play("whip_latch", self)
+	return true
+
+
+func _tick_swing(delta: float, p: Dictionary, move: Vector2) -> void:
+	if _swing_point == null or not is_instance_valid(_swing_point) or in_water:
+		_end_swing()
+		return
+	var w := _weapon_def()
+	if w.is_empty():
+		_end_swing()
+		return
+	if Input.is_action_just_pressed("jump"):
+		_end_swing()
+		velocity.y = minf(velocity.y, Data.num(w, "swing_release_hop", "weapons.json"))
+		Sfx.play("jump", self)
+		return
+	var anchor: Vector2 = _swing_point.latch_point()
+	velocity.y += Data.num(p, "gravity", "player.json") * delta
+	if is_on_floor():
+		velocity.x = move_toward(velocity.x, move.x * Data.num(p, "run_speed", "player.json"),
+				Data.num(p, "accel", "player.json") * delta)
+	else:
+		velocity.x += move.x * Data.num(w, "swing_pump", "weapons.json") * delta
+	velocity = velocity.limit_length(Data.num(p, "terminal_velocity", "player.json"))
+	# The rope only pulls: taut, it cancels any velocity away from the
+	# anchor, then keeps the next position on the circle.
+	var hand := global_position + SHOT_ORIGIN
+	var r := hand - anchor
+	if r.length() >= _swing_len - 0.5 and r.length() > 0.0:
+		var n := r.normalized()
+		var out := velocity.dot(n)
+		if out > 0.0:
+			velocity -= n * out
+	var next := hand + velocity * delta
+	if (next - anchor).length() > _swing_len:
+		next = anchor + (next - anchor).normalized() * _swing_len
+		velocity = (next - hand) / delta
+	if absf(velocity.x) > 5.0:
+		facing = 1 if velocity.x > 0.0 else -1
+	whip_line.points = PackedVector2Array([hand + velocity * delta, anchor])
+	whip_line.visible = true
+
+
+func _end_swing() -> void:
+	state = State.NORMAL
+	_swing_point = null
+	whip_line.visible = false
 
 
 # --- interaction, pushing, exits -------------------------------------------------------------
@@ -1048,7 +1406,7 @@ func _update_animation(move: Vector2, on_floor: bool) -> void:
 	match state:
 		State.ATTACK, State.HURT, State.DASH, State.DEAD:
 			return
-		State.GRAPPLE:
+		State.GRAPPLE, State.SWING:
 			SpriteDb.play(sprite, "jump", ["fall"])
 			return
 		State.CROUCH:
@@ -1085,7 +1443,8 @@ func _update_animation(move: Vector2, on_floor: bool) -> void:
 
 
 func _landing_check(on_floor_before: bool) -> void:
-	if not _was_on_floor and is_on_floor() and velocity.y >= 0.0 and state != State.DASH:
+	if not _was_on_floor and is_on_floor() and velocity.y >= 0.0 \
+			and (state != State.DASH or _dash_dir.y > 0.0):
 		Sfx.play("land", self)
 		if state == State.NORMAL:
 			_land_time = 0.12
