@@ -48,3 +48,4 @@ be regenerated or re-animated. Two were renamed on copy:
 | `pickups/` | `chest.png`, `chest_cache.png`, `equipment.png`, `money.png` | `objects.chest`; the rest are spare |
 | `stations/` | `beacon.png`, `training_lever.png`, `wave_lever.png` | `objects.save_shrine`, `objects.lever`; `wave_lever` spare |
 | `effects/` | `smash_burst.png` | spare (impact burst, 6 frames) |
+| `ui/` | `item_<id>.png` ×12 (generated here, 2026-10-17) | `icons.<id>` — the pause menu and HUD item icons |

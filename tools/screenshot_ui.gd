@@ -1,7 +1,8 @@
 extends Node
 ## Renders the UI screens once each to user://screenshots/ui_<name>.png:
 ## title, start menu, start-menu options, controls (remap) panel, the
-## in-game HUD, the pause menu's ITEMS and MAP tabs and its options. Like
+## in-game HUD, the pause menu's ITEMS tab (starting kit, every item, the
+## pack popup), its MAP tab and its options. Like
 ## tools/screenshot_rooms.gd it needs a real renderer:
 ##
 ##   xvfb-run -a godot --path . --rendering-driver opengl3 \
@@ -37,6 +38,19 @@ func _ready() -> void:
 	pause.open(pause.Tab.ITEMS)
 	await _settle()
 	await _shot("pause_items")
+	# Every item, a key in the pack, then the pack popup on the fruit.
+	GameState.grant_all_items()
+	GameState.add_item("small_key", 2)
+	await _settle()
+	pause.items.highlight_item("darts")
+	await _settle()
+	await _shot("pause_items_full")
+	pause.items.highlight_item("dried_fruit")
+	await _settle(2)
+	pause.items._activate(pause.items._focused)
+	await _settle()
+	await _shot("pause_items_popup")
+	pause.items._close_popup(false)
 	pause._set_tab(pause.Tab.MAP)
 	await _settle()
 	await _shot("pause_map")

@@ -3,20 +3,22 @@ extends Control
 ## this node runs PROCESS_MODE_ALWAYS), `map` opens straight to MAP. Two
 ## tabs — ITEMS (UiItemsTab) and MAP (UiMinimap, full, panned with ui_*
 ## while nothing has focus) — switched with menu_tab_prev/next or a click,
-## and a bottom row: Options (UiOptionsPanel), Save & Quit to Title (saves
-## to GameState.slot_index when >= 0, then emits quit_to_title) and Resume.
+## and a footer: the highlighted item's verb hint on the left, then
+## Options (UiOptionsPanel), Save & Quit to Title (saves to
+## GameState.slot_index when >= 0, then emits quit_to_title) and Resume.
 ##
-## Input is polled once per frame here and handed down (options → items →
-## tabs → back), which resolves the shared gamepad buttons (the attack
-## button is use in the list and back everywhere else by default; interact
-## is assign in the list and prev-tab elsewhere) in one place.
+## Input is polled once per frame here and handed down (item popup →
+## options → items → tabs → back), which resolves the shared gamepad
+## buttons in one place: attack is back everywhere (Controls.MIRRORS); in
+## the item popup item 1's button drops and item 2's uses; on a tool the
+## item buttons assign.
 
 signal quit_to_title
 
 enum Tab { ITEMS, MAP }
 
-const PANEL := Rect2(80, 36, 800, 468)
-const BODY := Rect2(96, 86, 768, 356)
+const PANEL := Rect2(24, 16, 912, 508)
+const BODY := Rect2(40, 62, 880, 400)
 const MAP_TILE_PX := 8.0
 const PAN_TILES_PER_SEC := 30.0
 
@@ -30,6 +32,7 @@ var _tab_buttons: Array = []
 var _bottom: Array = []
 var _room_label: Label
 var _tab_hint: Label
+var _verb_hint: Label
 var _last_focus: Control
 
 
@@ -90,7 +93,7 @@ func _build_body() -> void:
 	items.position = BODY.position
 	items.size = BODY.size
 	add_child(items)
-	items.rebuilt.connect(_wire_focus)
+	items.hint_changed.connect(func(t: String) -> void: _verb_hint.text = t)
 	map = UiMinimap.new()
 	map.full = true
 	map.show_names = true
@@ -106,12 +109,18 @@ func _build_body() -> void:
 
 
 func _build_footer() -> void:
+	var rule := UiTheme.rule(PANEL.size.x - 32, Color(UiTheme.DIM, 0.5))
+	rule.position = Vector2(PANEL.position.x + 16, PANEL.end.y - 50)
+	add_child(rule)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
-	row.alignment = BoxContainer.ALIGNMENT_END
-	row.position = Vector2(BODY.position.x, PANEL.end.y - 48)
-	row.size = Vector2(BODY.size.x, 34)
+	row.position = Vector2(BODY.position.x, PANEL.end.y - 42)
+	row.size = Vector2(BODY.size.x, 32)
 	add_child(row)
+	_verb_hint = UiTheme.label("", UiTheme.SIZE_SMALL, UiTheme.DIM)
+	_verb_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_verb_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(_verb_hint)
 	var opt := UiTheme.button("Options", UiTheme.SIZE_LABEL, 120)
 	var quit := UiTheme.button("Save & Quit to Title", UiTheme.SIZE_LABEL, 190)
 	var resume := UiTheme.button("Resume", UiTheme.SIZE_LABEL, 120)
@@ -177,29 +186,18 @@ func _set_tab(t: int) -> void:
 		(_tab_buttons[i] as Button).button_pressed = i == t
 	items.visible = t == Tab.ITEMS and not options.visible
 	map.visible = t == Tab.MAP and not options.visible
+	_verb_hint.visible = t == Tab.ITEMS
 	if t == Tab.MAP:
 		map.pan = Vector2.ZERO
 		if is_inside_tree():
 			get_viewport().gui_release_focus()
 	elif is_open:
-		if items.first_row() != null:
-			items.focus_list()
-		else:
-			(_bottom[2] as Button).grab_focus()
-	_wire_focus()
-
-
-## ui_down off the end of the item list lands on Resume; ui_up from the
-## bottom row returns to the list (ITEMS) or stays put (MAP).
-func _wire_focus() -> void:
-	var last := items.last_row() if tab == Tab.ITEMS else null
-	var first := items.first_row() if tab == Tab.ITEMS else null
+		items.focus_list()
+	# ui_up from the bottom row finds the nearest item cell (Godot's
+	# geometric focus) on ITEMS and stays put on MAP.
 	for b: Button in _bottom:
-		b.focus_neighbor_top = b.get_path_to(last) if last != null else NodePath(".")
+		b.focus_neighbor_top = NodePath("") if t == Tab.ITEMS else NodePath(".")
 		b.focus_neighbor_bottom = NodePath(".")
-	if last != null:
-		last.focus_neighbor_bottom = last.get_path_to(_bottom[2])
-		first.focus_neighbor_top = NodePath(".")
 
 
 func _open_options() -> void:
@@ -236,6 +234,9 @@ func _process(delta: float) -> void:
 			open(Tab.MAP)
 		return
 	_focus_sound()
+	if tab == Tab.ITEMS and items.is_modal() and not options.visible:
+		items.poll()
+		return
 	if options.visible:
 		if options.poll():
 			return

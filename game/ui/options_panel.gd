@@ -17,7 +17,6 @@ var _sfx: HSlider
 var _music_value: Label
 var _sfx_value: Label
 var _fullscreen: Button
-var _hold: Button
 var _swap: Button
 var _swap_help: Label
 var _controls_btn: Button
@@ -41,7 +40,6 @@ func _ready() -> void:
 	_sfx = _slider_row(_box, "SFX volume")
 	_sfx_value = _sfx.get_meta("value_label")
 	_fullscreen = _toggle_row("")
-	_hold = _toggle_row("")
 	_swap = _toggle_row("")
 	_swap_help = UiTheme.label("", UiTheme.SIZE_SMALL, UiTheme.DIM)
 	_box.add_child(_swap_help)
@@ -53,7 +51,7 @@ func _ready() -> void:
 	_hint = UiTheme.label("", UiTheme.SIZE_SMALL, UiTheme.DIM)
 	_box.add_child(_hint)
 
-	_rows = [_music, _sfx, _fullscreen, _hold, _swap, _controls_btn, _back]
+	_rows = [_music, _sfx, _fullscreen, _swap, _controls_btn, _back]
 	UiTheme.chain_focus(_rows)
 	_music.focus_neighbor_left = NodePath("")
 	_music.focus_neighbor_right = NodePath("")
@@ -63,7 +61,6 @@ func _ready() -> void:
 	_music.value_changed.connect(func(v: float) -> void: _apply("music_volume", v / 100.0))
 	_sfx.value_changed.connect(func(v: float) -> void: _apply("sfx_volume", v / 100.0))
 	_fullscreen.pressed.connect(func() -> void: _toggle("fullscreen"))
-	_hold.pressed.connect(func() -> void: _toggle("hold_to_assign"))
 	_swap.pressed.connect(func() -> void: _toggle("aim_swap_sticks"))
 	_controls_btn.pressed.connect(_open_controls)
 	_back.pressed.connect(close)
@@ -116,9 +113,6 @@ func refresh() -> void:
 	_music_value.text = "%d%%" % int(_music.value)
 	_sfx_value.text = "%d%%" % int(_sfx.value)
 	_fullscreen.text = "Fullscreen:  %s" % _onoff(s.fullscreen)
-	var ix := Controls.glyph("item_x")
-	var iy := Controls.glyph("item_y")
-	_hold.text = "Hold %s/%s in the item menu to assign:  %s" % [ix, iy, _onoff(s.hold_to_assign)]
 	_swap.text = "Aiming (%s) swaps sticks:  %s" % [Controls.glyph("aim", "pad"), _onoff(s.aim_swap_sticks)]
 	_swap_help.text = "On: left stick aims, right stick moves.   Off: left stick moves, right stick aims (claw grip)."
 	_hint.text = "left/right adjust   " + Controls.hint([["menu_accept", "toggle"], ["menu_back", "back"]])

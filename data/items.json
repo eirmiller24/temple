@@ -1,5 +1,5 @@
 {
-  "_comment": "Every item the inventory can hold (design_v2 §10). kind: weapon (B button), tool (assignable to X/Y), consumable (usable from the menu), key, passive. hide_use is the Fang trick (§9.2): Use still works but the menu never lists it. ammo: the count is ammunition — it stays in the inventory at ×0 and its cap is stack plus every ammo_for upgrade owned (count × ammo_bonus). replaces: owning this item removes that one (Quality Boots → Ratty Boots). dash: owning it allows the dash.",
+  "_comment": "Every item the inventory can hold (design_v2 §10). kind picks the pause-menu section (UiItemVerbs.section): weapon → WEAPONS (equipped on the attack button), tool → TOOLS (put on an item button), passive → EQUIPMENT (always on); these three are permanent, never dropped, and get one fixed slot each in file order. Any other kind (consumable, key, quest items) goes in the PACK, the only section with Use/Drop. usable: the pack popup lists Use. hide_use is the Fang trick (§9.2): Use still works but the menu never lists it. ammo: the count is ammunition — it stays in the inventory at ×0 and its cap is stack plus every ammo_for upgrade owned (count × ammo_bonus). replaces: owning this item removes that one (Quality Boots → Ratty Boots). dash: owning it allows the dash.",
   "items": {
     "sword": {
       "name": "Bandit's Sword",
@@ -35,7 +35,6 @@
       "name": "Lantern",
       "kind": "tool",
       "assignable": true,
-      "usable": true,
       "use": "lantern",
       "description": "Light. Its batteries will die before the Knowledge Fang.",
       "stack": 1

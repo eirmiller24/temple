@@ -1,6 +1,7 @@
 extends Control
-## In-game overlay: hearts top-left, the two item slots and the weapon
-## bottom-left (each fronted by its live button glyph), a small minimap top-right, and the room's display name
+## In-game overlay: hearts top-left, the action buttons bottom-left (the
+## weapon, then the two item slots: each an icon cell (UiItemCell) badged
+## with its live button glyph, ammo counted in the corner), a small minimap top-right, and the room's display name
 ## fading in for a moment on World.room_changed. Thin, semi-transparent
 ## panels; everything is driven by GameState signals after bind(world).
 ## Also hosts the F1 tuning panel (game/debug) so it exists whenever a
@@ -10,14 +11,14 @@ const TUNING_SCENE := "res://game/debug/tuning_panel.tscn"
 const MARGIN := 12.0
 const MINIMAP_SIZE := Vector2(120, 80)
 const ROOM_NAME_TIME := 2.0
+const SLOT_PX := 44.0
 
 var world: World
 var hearts: UiHearts
 var minimap: UiMinimap
-var _slot_x: Label
-var _slot_y: Label
-var _weapon: Label
-var _slot_keys := {}   # action -> the glyph Label in front of each slot
+var _slot_x: UiItemCell
+var _slot_y: UiItemCell
+var _weapon: UiItemCell
 var _room_label: Label
 var _room_tween: Tween
 
@@ -37,14 +38,13 @@ func _ready() -> void:
 	slots.anchor_top = 1.0
 	slots.anchor_bottom = 1.0
 	slots.offset_left = MARGIN
-	slots.offset_top = -MARGIN - 30
+	slots.offset_top = -MARGIN - SLOT_PX
 	slots.offset_bottom = -MARGIN
 	add_child(slots)
-	_slot_x = _slot(slots, "item_x")
-	_slot_y = _slot(slots, "item_y")
-	_weapon = _slot(slots, "attack")
-	Controls.bindings_changed.connect(_refresh_glyphs)
-	_refresh_glyphs()
+	_weapon = _slot(slots)
+	_slot_x = _slot(slots)
+	_slot_y = _slot(slots)
+	Controls.bindings_changed.connect(_refresh_slots)
 
 	minimap = UiMinimap.new()
 	minimap.tile_px = 3.0
@@ -85,22 +85,11 @@ func _panel(at: Vector2) -> PanelContainer:
 	return p
 
 
-func _slot(parent: Control, action: String) -> Label:
-	var p := PanelContainer.new()
-	p.add_theme_stylebox_override("panel", UiTheme.panel(UiTheme.PANEL_THIN, Color(UiTheme.DIM, 0.6), 6))
-	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	p.custom_minimum_size.x = 120
-	parent.add_child(p)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	p.add_child(row)
-	var k := UiTheme.label(Controls.glyph(action), UiTheme.SIZE_LABEL, UiTheme.ACCENT)
-	row.add_child(k)
-	_slot_keys[action] = k
-	var name_label := UiTheme.label("—", UiTheme.SIZE_LABEL)
-	row.add_child(name_label)
-	return name_label
+func _slot(parent: Control) -> UiItemCell:
+	var c := UiItemCell.new(SLOT_PX, 1, false)
+	c.modulate.a = 0.92
+	parent.add_child(c)
+	return c
 
 
 func bind(w: World) -> void:
@@ -112,26 +101,18 @@ func bind(w: World) -> void:
 		_on_room_changed(w.room_name)
 
 
-func _refresh_glyphs() -> void:
-	for action: String in _slot_keys:
-		(_slot_keys[action] as Label).text = Controls.glyph(action)
-
-
 func _refresh_slots() -> void:
-	_slot_x.text = _item_text(GameState.slot_x)
-	_slot_y.text = _item_text(GameState.slot_y)
-	_weapon.text = _item_text(GameState.weapon)
+	_show(_weapon, GameState.weapon, "attack")
+	_show(_slot_x, GameState.slot_x, "item_x")
+	_show(_slot_y, GameState.slot_y, "item_y")
 
 
-func _item_text(id: String) -> String:
-	if id == "" or not GameState.has_item(id):
-		return "—"
-	var def := GameState.item_def(id)
-	var text := String(def.get("name", id))
-	var n := GameState.count(id)
-	if n > 1 or GameState.is_ammo(id):
-		text += "  ×%d" % n
-	return text
+## The badge is always the button's glyph, so an empty slot still says
+## which button it is.
+func _show(cell: UiItemCell, id: String, action: String) -> void:
+	if id != "" and not GameState.has_item(id):
+		id = ""
+	cell.show_item(id, UiItemsTab.count_text(id), Controls.glyph(action))
 
 
 func _on_room_changed(room: String) -> void:

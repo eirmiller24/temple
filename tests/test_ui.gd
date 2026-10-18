@@ -147,16 +147,16 @@ func _run() -> int:
 	hud.bind(world)
 	await _ticks(5)
 	_check(hud.hearts != null and hud.hearts.max_hp == GameState.max_hp, "HUD hearts follow max_hp")
-	_check(hud._slot_x.text.begins_with("Slingshot"), "HUD X slot shows Slingshot (got '%s')" % hud._slot_x.text)
-	_check(hud._weapon.text.begins_with("Bandit"), "HUD B shows the sword")
+	_check(hud._slot_x.id == "slingshot", "HUD item 1 slot shows the slingshot (got '%s')" % hud._slot_x.id)
+	_check(hud._weapon.id == "sword" and hud._weapon.icon_texture() != null, "HUD attack slot shows the sword's icon")
+	_check(hud._slot_x.badge_text() == Controls.glyph("item_x"), "HUD slot is badged with its button glyph")
 	_check(hud.minimap != null and hud.minimap.world == world, "HUD minimap bound")
 	GameState.damage(1)
 	await _ticks(3)
 	_check(hud.hearts.hp == GameState.hp, "hearts update on damage")
 	GameState.assign("y", "slingshot")
 	await _ticks(2)
-	_check(hud._slot_y.text.begins_with("Slingshot") and hud._slot_x.text.begins_with("Grappling"),
-			"GameState.assign swaps the HUD slots")
+	_check(hud._slot_y.id == "slingshot" and hud._slot_x.id == "grapple", "GameState.assign swaps the HUD slots")
 	GameState.assign("x", "slingshot")
 	await _ticks(2)
 
@@ -169,11 +169,20 @@ func _run() -> int:
 	_check(pause.is_open and pause.visible and get_tree().paused, "pause opens the menu and pauses the tree")
 	_check(pause.tab == pause.Tab.ITEMS, "opens on ITEMS")
 	var items: UiItemsTab = pause.items
-	_check(items.list_has_focus(), "item list takes focus")
-	_check(items._ids.size() == GameState.inventory.size(), "list shows every inventory item (%d)" % items._ids.size())
-	_check(items.highlighted_id() == "sword", "weapons list first (got '%s')" % items.highlighted_id())
+	_check(items.has_cell_focus(), "an item cell takes focus")
+	_check(items.highlighted_id() == "sword" and items.highlighted_section() == "weapons",
+			"the first cell is the sword under WEAPONS (got '%s')" % items.highlighted_id())
+	_check(items.cells("weapons").size() == UiItemsTab.fixed_slots("weapon").size()
+			and items.cells("tools").size() == UiItemsTab.fixed_slots("tool").size(),
+			"weapons and tools get one fixed slot per item in items.json")
+	var boots := UiItemsTab.fixed_slots("passive").filter(func(c: Array) -> bool: return c.has("quality_boots"))
+	_check(boots.size() == 1 and boots[0] == ["ratty_boots", "quality_boots"], "Quality Boots share the Ratty Boots slot")
+	_check(items.cells("pack").size() >= UiItemsTab.COLS * UiItemsTab.PACK_ROWS, "the pack has its fixed grid")
+	_check(UiItemsTab.pack_ids() == ["dried_fruit"], "only the fruit is in the starting pack (got %s)" % str(UiItemsTab.pack_ids()))
+	await _event("ui_right")
+	_check(items.has_cell_focus() and items.highlighted_section() == "weapons", "ui_right moves along the weapons row")
 	await _event("ui_down")
-	_check(items.highlighted_id() != "sword", "ui_down highlights the next item")
+	_check(items.highlighted_section() == "tools", "ui_down reaches the tools row (got '%s')" % items.highlighted_section())
 	await _tap("menu_tab_next")
 	_check(pause.tab == pause.Tab.MAP and pause.map.visible, "menu_tab_next shows the MAP tab")
 	var pan0: Vector2 = pause.map.pan
@@ -182,68 +191,92 @@ func _run() -> int:
 	Input.action_release("ui_right")
 	_check(pause.map.pan.x > pan0.x, "ui_right pans the full map")
 	await _tap("menu_tab_prev")
-	_check(pause.tab == pause.Tab.ITEMS and items.list_has_focus(), "menu_tab_prev returns to ITEMS with focus")
+	_check(pause.tab == pause.Tab.ITEMS and items.has_cell_focus(), "menu_tab_prev returns to ITEMS with focus")
 
-	# Verbs: use (heal), assign prompt, drop.
-	items.highlight(items._ids.find("dried_fruit"))
+	# Weapons: accept equips, the item buttons and drop do nothing.
+	GameState.add_item("whip")
+	await _ticks(2)
+	_check(items.highlight_item("whip"), "the whip has a weapons cell")
 	await _ticks(1)
-	var use_verb := Controls.glyph("attack") + " use"
-	_check(items.verb_hint("dried_fruit").contains(use_verb), "usable item lists '%s'" % use_verb)
-	_check(not items.verb_hint("small_key").contains(use_verb), "key item hides the use verb")
+	await _tap("menu_accept")
+	_check(GameState.weapon == "whip", "accept on a weapon equips it")
+	await _tap("menu_slot_x")
+	_check(GameState.slot_x != "whip" and GameState.has_item("whip"), "an item button does not put a weapon in a slot")
+	_check(UiItemVerbs.drop(world, "whip").contains("can't") and GameState.has_item("whip"), "weapons can't be dropped")
+	items.highlight_item("sword")
+	await _ticks(1)
+	await _tap("menu_accept")
+	_check(GameState.weapon == "sword", "accept on the sword equips it back")
+
+	# Tools: the item buttons assign directly; accept opens nothing.
+	_check(items.highlight_item("lantern"), "the lantern has a tools cell")
+	await _ticks(1)
+	await _tap("menu_slot_x")
+	_check(GameState.slot_x == "lantern", "item 1's button assigns the lantern to it")
+	await _tap("menu_slot_y")
+	_check(GameState.slot_y == "lantern" and GameState.slot_x != "lantern", "item 2's button moves it there")
+	await _tap("menu_accept")
+	_check(not items.is_popup_open() and pause.is_open, "accept on a tool opens no popup")
+	_check(UiItemVerbs.drop(world, "lantern").contains("can't") and GameState.has_item("lantern"), "tools can't be dropped")
+	_check(items.loadout_cell("item_y").id == "lantern", "the loadout card follows the assignment")
+	GameState.assign("x", "slingshot")
+	GameState.assign("y", "grapple")
+	await _ticks(2)
+
+	# Pack: accept opens the popup; item 2's button uses, accept toggles
+	# the description, attack (= menu_back) backs out, item 1's button drops.
+	_check(items.highlight_item("dried_fruit"), "the fruit has a pack cell")
+	await _ticks(1)
+	await _tap("menu_accept")
+	_check(items.popup_item() == "dried_fruit" and items.is_modal(), "accept on a pack item opens its popup")
+	_check(not items.popup_showing_description(), "the press that opened the popup does not also run it")
+	var labels := items._popup_box.get_children().filter(func(c: Node) -> bool: return c is Button).map(
+			func(b: Button) -> String: return b.text)
+	_check(labels.size() == 4 and String(labels[0]).ends_with("Use"), "usable item lists Use, Drop, Description, Close (%s)" % str(labels))
+	await _tap("menu_accept")
+	_check(items.popup_showing_description(), "accept again shows the description")
+	await _tap("menu_accept")
+	_check(items.is_popup_open() and not items.popup_showing_description(), "accept returns to the verbs")
 	var fruit0 := GameState.count("dried_fruit")
 	var hp0 := GameState.hp
 	await _tap("menu_use")
 	_check(GameState.hp == mini(hp0 + 2, GameState.max_hp) and GameState.count("dried_fruit") == fruit0 - 1,
 			"menu_use eats a fruit (hp %d → %d)" % [hp0, GameState.hp])
-	await _tap("menu_use")  # full hp: returns false → error sound, no change
+	_check(not items.is_popup_open() and items.has_cell_focus(), "using closes the popup and focus returns to the cell")
+	await _tap("menu_accept")
+	await _tap("menu_use")  # full hp: returns false → error, no change
 	_check(GameState.count("dried_fruit") == fruit0 - 1, "menu_use at full hp is refused")
-	items.highlight(items._ids.find("lantern"))
-	await _ticks(1)
-	await _tap("menu_assign")
-	_check(items.is_assigning(), "menu_assign prompts for a slot")
-	await _tap("menu_slot_x")
-	_check(GameState.slot_x == "lantern" and not items.is_assigning(), "menu_slot_x assigns the lantern to X")
-	items.highlight(items._ids.find("sword"))
-	await _ticks(1)
-	await _tap("menu_assign")
-	_check(not items.is_assigning() and GameState.slot_x == "lantern", "non-assignable item is refused")
+	_check(InputMap.action_get_events("menu_back").any(func(e: InputEvent) -> bool:
+			return InputMap.event_is_action(e, "attack")), "menu_back carries the attack button")
+	await _tap("menu_accept")
+	await _tap("menu_back")
+	_check(not items.is_popup_open() and pause.is_open, "menu_back shuts the popup, not the menu")
 	GameState.add_item("small_key", 2)
 	await _ticks(2)
-	items.highlight(items._ids.find("small_key"))
+	items.highlight_item("small_key")
 	await _ticks(1)
+	await _tap("menu_accept")
+	var key_labels := items._popup_box.get_children().filter(func(c: Node) -> bool: return c is Button).map(
+			func(b: Button) -> String: return b.text)
+	_check(key_labels.size() == 3 and not str(key_labels).contains("Use"), "a key lists no Use (%s)" % str(key_labels))
 	await _tap("menu_drop")
-	_check(GameState.count("small_key") == 1, "menu_drop removes one key")
-	# Hidden-use hook: a fake item with hide_use shows no Use verb but menu_use still runs.
+	_check(GameState.count("small_key") == 1 and not items.is_popup_open(), "menu_drop drops one key and closes the popup")
+	_check(items.status_text().begins_with("Dropped"), "the card reports the drop (%s)" % items.status_text())
+	# Hidden-use hook: a fake item with hide_use lists no Use but menu_use still runs.
 	Data.items.items["_test_fang"] = {"name": "Test Fang", "kind": "key", "hide_use": true, "description": "", "stack": 1}
 	GameState.add_item("_test_fang")
 	await _ticks(2)
-	_check(not items.verb_hint("_test_fang").contains(use_verb), "hide_use item lists no Use verb")
-	items.highlight(items._ids.find("_test_fang"))
+	_check(UiItemVerbs.section("_test_fang") == "pack", "a quest item lands in the pack")
+	_check(UiItemVerbs.pack_verbs("_test_fang").filter(func(v: Array) -> bool: return v[1] == "use").is_empty(),
+			"hide_use item lists no Use verb")
+	items.highlight_item("_test_fang")
 	await _ticks(1)
+	await _tap("menu_accept")
 	await _tap("menu_use")
-	_check(items._status.text.begins_with("Can't use"), "menu_use still reaches the hidden item (refused by player)")
+	_check(items.status_text().begins_with("Can't use"), "menu_use still reaches the hidden item (refused by player)")
 	GameState.remove_item("_test_fang")
+	GameState.remove_item("small_key", 9)
 	Data.items.items.erase("_test_fang")
-	await _ticks(2)
-
-	# Hold-to-assign (optional mode): hold Y assigns, a Y tap still drops.
-	var hold0 := bool(SaveManager.settings.hold_to_assign)
-	SaveManager.set_setting("hold_to_assign", true)
-	GameState.add_item("climbing_gear", 2)
-	await _ticks(2)
-	items.highlight(items._ids.find("climbing_gear"))
-	await _ticks(1)
-	await get_tree().process_frame
-	Input.action_press("menu_slot_y")
-	await get_tree().create_timer(0.45).timeout
-	Input.action_release("menu_slot_y")
-	await _ticks(2)
-	_check(GameState.slot_y == "climbing_gear" and GameState.count("climbing_gear") == 2, "holding Y assigns to Y without dropping")
-	await _tap("menu_slot_y")
-	_check(GameState.count("climbing_gear") == 1, "a Y tap in hold mode still drops")
-	SaveManager.set_setting("hold_to_assign", hold0)
-	GameState.remove_item("climbing_gear", 9)
-	GameState.assign("y", "grapple")
 	await _ticks(2)
 
 	# Options from the pause menu: change SFX volume, then restore.
@@ -291,11 +324,18 @@ func _run() -> int:
 			has_b = has_b or ev.button_index == JOY_BUTTON_B
 			has_a = has_a or ev.button_index == JOY_BUTTON_A
 	_check(has_b and not has_a, "InputMap 'jump' now has B and not A")
+	var drop_pad := ""
+	for ev in InputMap.action_get_events("menu_drop"):
+		if ev is InputEventJoypadButton:
+			drop_pad = Controls.event_name(ev)
+	_check(drop_pad == "A", "menu_drop mirrors the remapped item 1 button (%s)" % drop_pad)
 	var use_pad := ""
 	for ev in InputMap.action_get_events("menu_use"):
 		if ev is InputEventJoypadButton:
 			use_pad = Controls.event_name(ev)
-	_check(use_pad == "Y", "menu_use mirrors the remapped attack button (%s)" % use_pad)
+	_check(use_pad == "X", "menu_use mirrors the remapped item 2 button (%s)" % use_pad)
+	_check(Controls.glyph("menu_back", "pad") == "Y" and Controls.glyph("ui_cancel", "pad") == "Y",
+			"menu_back and ui_cancel follow the remapped attack button (%s)" % Controls.glyph("menu_back", "pad"))
 	var slot_pad := ""
 	for ev in InputMap.action_get_events("menu_slot_x"):
 		if ev is InputEventJoypadButton:
@@ -312,7 +352,7 @@ func _run() -> int:
 			"panel row shows the new glyph and the clash mark")
 	ctl._show_row_status("jump")
 	_check(ctl._status.text.contains("Dash"), "focusing the row explains the clash (%s)" % ctl._status.text)
-	_check(hud._slot_keys["item_x"].text == Controls.glyph("item_x"), "HUD slot glyphs refreshed")
+	_check(hud._slot_x.badge_text() == Controls.glyph("item_x"), "HUD slot glyphs refreshed")
 	# Keyboard rebind through the capture path.
 	ctl._listen("dash", "key", ctl._rows[5].key)
 	var k := InputEventKey.new()

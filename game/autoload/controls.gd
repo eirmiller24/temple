@@ -3,12 +3,12 @@ extends Node
 ## holds the DEFAULT input map; this autoload captures it at boot and then
 ## owns the live InputMap: SaveManager.settings.bindings overrides any
 ## remappable action's pad and/or keyboard events, and the menu actions
-## that mirror a gameplay button (B is "use" in the item list because B is
-## attack, X/Y pick a slot because they are the item buttons, LB assigns
-## because LB interacts…) are rebuilt from the mirrored action so the
-## menus follow a remap for free. Godot's own ui_accept / ui_cancel follow
-## menu_accept / menu_back the same way, so focused buttons agree with
-## the rest of the UI.
+## that mirror a gameplay button (attack is back in every menu; the item
+## buttons assign a tool; in the item popup item 2 uses and item 1 drops;
+## LB/RB turn tabs…) are rebuilt from the mirrored action so the menus
+## follow a remap for free. Godot's own ui_accept / ui_cancel follow
+## menu_accept / attack the same way, so focused buttons agree with the
+## rest of the UI. Esc and Backspace always back out on the keyboard.
 ##
 ## UI text never hard-codes a button name: glyph(action) / hint(pairs)
 ## return the live binding ("B", "LB", "Space", "RMB"), pad glyphs while a
@@ -40,40 +40,38 @@ const ACTIONS := [
 	["pause", "Pause / items"],
 	["map", "Map"],
 	["menu_accept", "Menu: accept"],
-	["menu_back", "Menu: back"],
 ]
 
 ## Menu actions that are the same physical control as a gameplay action.
 const MIRRORS := {
-	"menu_use": "attack",
+	"menu_use": "item_y",
+	"menu_drop": "item_x",
+	"menu_back": "attack",
 	"menu_slot_x": "item_x",
 	"menu_slot_y": "item_y",
-	"menu_drop": "item_y",
-	"menu_assign": "interact",
 	"menu_tab_prev": "interact",
 	"menu_tab_next": "dash",
 	"ui_accept": "menu_accept",
-	"ui_cancel": "menu_back",
+	"ui_cancel": "attack",
 }
 
 ## Keyboard events a menu action always has, on top of its mirror.
 ## (physical keycodes; see KEY_* constants)
 const FIXED_KEYS := {
 	"menu_accept": [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE],
-	"menu_back": [KEY_BACKSPACE],
+	"menu_back": [KEY_ESCAPE, KEY_BACKSPACE],
 	"menu_tab_prev": [KEY_Q],
 	"menu_tab_next": [KEY_R],
 	"ui_accept": [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE],
-	"ui_cancel": [KEY_ESCAPE],
+	"ui_cancel": [KEY_ESCAPE, KEY_BACKSPACE],
 }
 
 ## Actions whose buttons clash if they share one: the gameplay verbs, and
-## the two menu verbs. (A menu verb sharing a button with a gameplay one —
-## B is attack and Menu: back by default — is fine: the menus resolve it
-## by priority, use-in-the-list before back.)
+## Menu: accept against attack (which is Menu: back). (Menu: accept sharing
+## a button with another gameplay verb — A is jump and accept — is fine.)
 const GROUPS := [
 	["jump", "attack", "item_x", "item_y", "interact", "dash", "crouch", "aim", "walk", "pause", "map"],
-	["menu_accept", "menu_back"],
+	["menu_accept", "attack"],
 ]
 
 const BUTTON_NAMES := {

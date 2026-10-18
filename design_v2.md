@@ -169,9 +169,15 @@ flowchart TD
 **Movement verbs across the game:** run, jump, crouch/**bow**, crouch jump (jumping while crouched keeps you crouched in the air), drop through a one-way platform (hold down + jump), climb ropes, swim, double jump (Life Fang), dash (Quality Boots), grapple (Grappling Hook).
 
 ### 7.2 Controls & the pause menu
-- The pause menu handles items: **A** selects, **B** uses, **Y** drops.
-- Dropping is a real mechanic (it decides endings and works the pillars), not just inventory housekeeping.
-- Fang activation is hidden inside this ordinary flow. A Fang's menu entry lists only **Drop**, but Use still works if you press it (§9.2).
+- The pause menu's ITEMS page is split into sections, Zelda-subscreen style (decided 2026-10-17; replaces the old "A selects, B uses, Y drops, LB assigns" list):
+  - **Weapons.** Select one (A, the jump button) and it is equipped on the attack button. No item menu, can't be dropped.
+  - **Tools.** Permanent items you put on a button: press an item button on one and it goes on that button. Can't be dropped.
+  - **Equipment.** Passive permanent items (boots, ammo upgrades). Shown, nothing to press, can't be dropped.
+  - **Pack.** Consumables and quest items. Selecting one opens its item menu: item 2's button uses it, item 1's drops it, attack backs out, and A again shows the description. On the author's pad that reads Y use, B drop, X back.
+- **Back is the attack button in every menu** (plus Esc/Backspace on the keyboard). It is not a separate binding.
+- Each section keeps a fixed slot per item, so a missing item shows as a gap.
+- Dropping is a real mechanic (it decides endings and works the pillars), not just inventory housekeeping. Only pack items drop.
+- Fang activation is hidden inside this ordinary flow. A Fang sits in the pack, and its item menu lists only **Drop**, but Use still works if you press it (§9.2).
 
 ### 7.3 Radio, then telepathy
 - The professor sometimes calls right after you enter a room. **Time is paused while the radio is on**, so calls can't be exploited.

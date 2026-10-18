@@ -1,0 +1,173 @@
+{
+  "_comment": "PixelLab item icons for the pause menu and HUD action buttons, generated 2026-10-17 in the temple project. One record per file; schema per docs/authoring/ai_art.md §3.",
+  "entries": [
+    {
+      "file": "item_sword.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of a short worn iron sword with a leather-wrapped grip, diagonal, blade pointing up-right, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "1d9840d4-f074-46d1-92a7-c67488981cd5",
+        "gallery_asset": "d8d6da7c-8eaa-5cc6-8db6-9f418643398d"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'sword' (data/sprites.json icons.sword). "
+    },
+    {
+      "file": "item_whip.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of an Indiana Jones style bullwhip: a thick dark wooden handle at the bottom left with a long brown leather lash curling in an S-shaped loop, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "dd375853-789c-49dd-aacc-e0c7e92be2a8",
+        "gallery_asset": "d56a459d-e304-5150-8e1e-a713530c9ee0"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'whip' (data/sprites.json icons.whip). Second roll; the first (job ee52bb3f-2e5b-410b-bfb1-d3d6d6eb8972, a plain coil) read as rope next to climbing_gear."
+    },
+    {
+      "file": "item_slingshot.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of a wooden Y-shaped slingshot with a red rubber band, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "db0a7bba-1eb2-429b-a460-5d74d7a9fe61",
+        "gallery_asset": "07434575-6c19-5a87-b46c-c4a1421acb63"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'slingshot' (data/sprites.json icons.slingshot). "
+    },
+    {
+      "file": "item_grapple.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of a steel three-pronged grappling hook with a coil of rope, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "622f349a-7108-46c0-b480-a47108295ade",
+        "gallery_asset": "047a5753-6637-536b-b6d9-c8c6e7190a71"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'grapple' (data/sprites.json icons.grapple). "
+    },
+    {
+      "file": "item_lantern.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of a battery-powered camping lantern, metal frame, glowing warm yellow glass, carry handle on top, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "738df3a9-e73e-4446-a182-43ef94094e16",
+        "gallery_asset": "2fdf2391-b571-5821-bcbc-df6ea8b732c4"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'lantern' (data/sprites.json icons.lantern). "
+    },
+    {
+      "file": "item_ratty_boots.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of a single ratty worn-out brown boot with a torn sole and loose laces, side view, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "9679d438-daa2-41cc-9982-76556dc4acfc",
+        "gallery_asset": "69018181-791a-5ffe-b6c1-b72f2054229f"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'ratty_boots' (data/sprites.json icons.ratty_boots). "
+    },
+    {
+      "file": "item_quality_boots.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of a single sturdy new hiking boot, dark leather, thick tread sole, bright laces, side view, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "1d24c537-bcdf-4dec-95bc-023b21d27126",
+        "gallery_asset": "30daebff-be45-582d-acef-85a03f0737c6"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'quality_boots' (data/sprites.json icons.quality_boots). "
+    },
+    {
+      "file": "item_explosive.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of an explosive charge: a bundle of three red dynamite sticks tied with cord and a short fuse, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "04992876-0f8a-407d-b598-5db49da73f32",
+        "gallery_asset": "aa2a3af9-470a-5f42-beee-842d3cfc6a00"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'explosive' (data/sprites.json icons.explosive). "
+    },
+    {
+      "file": "item_darts.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of three small wooden darts with sharp iron tips and short white feather fletching, lying parallel diagonally pointing up-right, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "a5ee53fe-b9df-4e5a-ad0e-fd3da5860564",
+        "gallery_asset": "4c724c45-7f7e-555b-9196-9318c626f7a4"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'darts' (data/sprites.json icons.darts). Second roll; the first (job 05b4350f-2798-45b5-9557-cea4ff6f2c1a) came out as a leaf. Shows two darts, not three."
+    },
+    {
+      "file": "item_explosive_upgrade.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of a canvas satchel bag with a leather strap and buckle, red dynamite stick poking out the top, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "7bd35144-b651-4b22-aa9e-9146e19d53e1",
+        "gallery_asset": "1ec5e4e4-9550-5dd0-befb-fc2e885d693d"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'explosive_upgrade' (data/sprites.json icons.explosive_upgrade). "
+    },
+    {
+      "file": "item_darts_upgrade.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of a brown leather quiver full of wooden darts with feather fletching, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "eabf811e-39c5-4f51-a824-be6f7a04661c",
+        "gallery_asset": "4914cfa4-5e50-5591-90a7-d28d1c9fb4a4"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'darts_upgrade' (data/sprites.json icons.darts_upgrade). "
+    },
+    {
+      "file": "item_climbing_gear.png",
+      "tool": "pixellab",
+      "method": "create_image_pixen(width=32, height=32, no_background=true, outline='single color black outline', detail='medium detail'); downloaded unchanged",
+      "prompt": "inventory icon of climbing gear: a coiled rope with a steel carabiner and an iron piton, game item icon, centered, no text",
+      "style_ref": "none",
+      "ids": {
+        "job": "59bf4dd4-12be-4364-9e23-11b1b516602a",
+        "gallery_asset": "ad2e1bfd-ab77-5644-a20c-eb8d1a6c212c"
+      },
+      "date": "2026-10-17",
+      "canvas": "32x32, drawn at 1x in the pause menu and HUD",
+      "notes": "Item icon for data/items.json 'climbing_gear' (data/sprites.json icons.climbing_gear). "
+    }
+  ]
+}

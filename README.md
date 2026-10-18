@@ -128,13 +128,16 @@ aims, for claw-grip players who shoot while running. A full jump clears
 | Interact | LB | E |
 | Pause / items | Start | Esc |
 | Map | Back | Tab |
-| Menu: accept / back | A / B | Enter / Esc |
-| Menu: use / drop / assign | = attack / item 2 / interact | = attack / item 2 / interact |
+| Menu: accept | A | Enter / Space |
+| Menu: back | = attack | = attack, Esc, Backspace |
+| Menu: assign a tool | = item 1 / item 2 | = item 1 / item 2 |
+| Pack item menu: use / drop / close | = item 2 / item 1 / attack | = item 2 / item 1 / attack |
 | Menu: tabs | = interact / dash | Q / R |
 
-The menu verbs mirror the gameplay buttons (B uses an item because B is
-attack), so they follow a remap; *Menu: accept* and *Menu: back* are their
-own rows. Remaps live in `user://settings.json`; "Reset to defaults" in
+The menu verbs mirror the gameplay buttons (a tool goes on whichever
+button you press; in a pack item's menu item 1 drops because the item
+buttons are the item verbs; back is always the attack button), so they
+follow a remap; *Menu: accept* is its own row. Remaps live in `user://settings.json`; "Reset to defaults" in
 the panel forgets them.
 
 Debug keys in play: **F1** tuning panel (edits any `player`, `objects` or

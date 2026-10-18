@@ -761,3 +761,27 @@ either file on disk. Not restored; asked Eir.
 - A shot already aimed at a switch is never redirected by the anchor assist.
 - The reticle goes red at a switch.
 - Tests: the hook flips a lever, presses a latching button, keeps a lever shot when an anchor is 3° off, and doesn't treat an unlit torch as a switch.
+
+## 2026-10-17 — Item menu rework, item icons
+
+Eir asked for a sectioned item menu in place of the single list, and icons so the HUD can show action buttons.
+
+**What changed.**
+- The pause menu panel now fills the screen (912×508). The ITEMS tab (`game/ui/items_tab.gd`) is a subscreen: WEAPONS and EQUIPMENT on top, TOOLS, then a 7×2 PACK grid, with a detail card (3× icon, name, kind, count, button, description, status) and a LOADOUT row on the right. The highlighted cell's verbs show in the footer.
+- Sections come from `kind` (`UiItemVerbs.section`): weapon, tool and passive are permanent, with one fixed slot each in `items.json` order. Everything else goes in the pack. An item that `replaces` another takes over its slot (Quality Boots over Ratty Boots).
+- Weapons: accept equips. Tools: `menu_slot_x`/`menu_slot_y` assign directly; LB-assign (`menu_assign`) and the hold-to-assign option are gone. Equipment: display only. Pack: accept opens a popup. `menu_use` (item 2's button) uses, `menu_drop` (item 1's) drops, `menu_back` (attack) backs out, and accept toggles the description. `hide_use` still hides Use while `menu_use` still works.
+- `UiItemVerbs.drop` refuses anything outside the pack.
+- New mirrors in `Controls.MIRRORS`/`gen_project_godot.py`: `menu_use` ← item_y, `menu_drop` ← item_x.
+- **Back is the attack button everywhere (Eir).** `menu_back` and `ui_cancel` now mirror `attack`, with Esc and Backspace fixed on the keyboard. *Menu: back* is no longer a row in the Controls panel; a saved override for it is ignored. The clash group `[menu_accept, menu_back]` became `[menu_accept, attack]`.
+- The HUD's three text slots are now icon cells (`UiItemCell`, `game/ui/item_cell.gd`): weapon, item 1, item 2, each badged with its live glyph, with ammo counted in the corner (red at 0).
+- 12 PixelLab icons (`create_image_pixen`, 32×32) for every weapon, tool and passive: `assets/ai_placeholder/ui/item_<id>.png`, records in `ui/ai_provenance.json`, manifest `data/sprites.json` → `icons`, read by `UiItemIcon`. Whip and darts were each rerolled once. Pack items (Dried Fruit, Small Key) have no icon and show their name.
+- The lantern lost `usable` (tools have no menu Use now). `Player.use_item_from_menu`'s lantern branch is unreachable from the menu but kept.
+- `tools/screenshot_ui.gd` adds `pause_items_full` (every item) and `pause_items_popup`.
+
+**Placeholders I filled (the brief was silent).**
+- Section names (WEAPONS / EQUIPMENT / TOOLS / PACK), the layout, the 7×2 pack size, cell sizes, and showing empty fixed slots as gaps.
+- Passives get their own EQUIPMENT strip rather than sharing TOOLS, since they can't go on a button.
+- Accept on a tool only prints a hint, and accept on equipment says "Always in use."
+- The popup's description also appears on the detail card, so A in the popup repeats it.
+- Icon prompts and art direction (black outline, medium detail, no style reference).
+

@@ -151,5 +151,20 @@
       "frame_w": 236, "frame_h": 119, "ground_y": 119, "body_h": 119, "scale": 0.45,
       "clips": {"idle": {"row": 0, "frames": 1, "fps": 1, "loop": true}}
     }
+  },
+  "icons": {
+    "_comment": "Item icons (UiItemIcon), keyed by data/items.json id: a 32x32 texture drawn at 1x in the pause menu and on the HUD. An item without an entry shows its name instead.",
+    "sword":             {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_sword.png"},
+    "whip":              {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_whip.png"},
+    "slingshot":         {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_slingshot.png"},
+    "grapple":           {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_grapple.png"},
+    "lantern":           {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_lantern.png"},
+    "explosive":         {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_explosive.png"},
+    "darts":             {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_darts.png"},
+    "climbing_gear":     {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_climbing_gear.png"},
+    "ratty_boots":       {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_ratty_boots.png"},
+    "quality_boots":     {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_quality_boots.png"},
+    "explosive_upgrade": {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_explosive_upgrade.png"},
+    "darts_upgrade":     {"_source": "assets/ai_placeholder/ui/ai_provenance.json — PixelLab, quarantined", "texture": "res://assets/ai_placeholder/ui/item_darts_upgrade.png"}
   }
 }

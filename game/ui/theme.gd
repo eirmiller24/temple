@@ -42,6 +42,49 @@ static func empty() -> StyleBoxEmpty:
 	return StyleBoxEmpty.new()
 
 
+## An item slot's frame (UiItemCell): `state` is normal, hover, focus,
+## equipped or empty. Focus draws a 2px accent ring outside the cell so the
+## icon never shifts.
+static func cell(state: String) -> StyleBoxFlat:
+	var sb: StyleBoxFlat
+	match state:
+		"hover":
+			sb = panel(Color(0.12, 0.11, 0.16, 0.95), TEXT, 0)
+		"focus":
+			sb = panel(Color(ACCENT, 0.10), ACCENT, 0)
+			sb.set_border_width_all(2)
+			sb.set_expand_margin_all(2)
+		"equipped":
+			sb = panel(Color(ACCENT, 0.16), Color(ACCENT, 0.7), 0)
+		"empty":
+			sb = panel(Color(0.04, 0.035, 0.055, 0.6), Color(DIM, 0.35), 0)
+		_:
+			sb = panel(Color(0.08, 0.07, 0.11, 0.92), DIM, 0)
+	sb.set_corner_radius_all(3)
+	return sb
+
+
+## A section title: small accent caps and a hairline running to `width`.
+static func section_header(text: String, width: float) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	row.custom_minimum_size.x = width
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(label(text, SIZE_SMALL, ACCENT))
+	var r := rule(0, Color(DIM, 0.6))
+	r.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(r)
+	return row
+
+
+## Label outline for text drawn over art (counts, button badges).
+static func outline(l: Label, px: int = 4) -> Label:
+	l.add_theme_constant_override("outline_size", px)
+	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
+	return l
+
+
 ## One Theme for the whole UI layer: buttons, sliders, line edits.
 static func theme() -> Theme:
 	if _theme != null:

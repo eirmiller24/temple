@@ -11,7 +11,6 @@ const DEFAULT_SETTINGS := {
 	"music_volume": 0.8,
 	"sfx_volume": 1.0,
 	"fullscreen": false,
-	"hold_to_assign": false,   # hold the item buttons in the item menu to assign (off by default)
 	"aim_swap_sticks": true,   # free-aim: left stick aims, right stick moves (off = claw grip: right stick aims)
 	"bindings": {},            # Controls overrides, {action: {"pad": [...], "key": [...]}}
 }

@@ -62,17 +62,18 @@ ACTIONS = {
     "walk":       (0.5, [("key", "Ctrl")]),
     # --- menus ------------------------------------------------------------
     # These are the DEFAULTS. At runtime game/autoload/controls.gd owns the
-    # InputMap: every action above plus menu_accept/menu_back is remappable
-    # (Options -> Controls), and menu_use/slot/drop/assign/tab_* are rebuilt
-    # as mirrors of attack / item_x / item_y / interact / dash so the menus
-    # follow a remap. Keep the two tables in step (Controls.MIRRORS).
+    # InputMap: every action above plus menu_accept is remappable
+    # (Options -> Controls), and menu_back/use/drop/slot_*/tab_* are
+    # rebuilt as mirrors of attack / item_y / item_x / interact / dash so
+    # the menus follow a remap (attack is back in every menu; Esc and
+    # Backspace always are too). Keep the two tables in step
+    # (Controls.MIRRORS).
     "pause":      (0.5, [("key", "Escape"), ("btn", "Start")]),
     "map":        (0.5, [("key", "Tab"), ("btn", "Back")]),
     "menu_accept":(0.5, [("key", "Enter"), ("key", "Space"), ("btn", "A")]),
-    "menu_back":  (0.5, [("key", "Escape"), ("key", "Backspace"), ("btn", "B")]),
-    "menu_use":   (0.5, [("key", "J"), ("btn", "B")]),
-    "menu_drop":  (0.5, [("key", "L"), ("btn", "Y")]),
-    "menu_assign":(0.5, [("key", "E"), ("btn", "LB")]),
+    "menu_back":  (0.5, [("key", "Escape"), ("key", "Backspace"), ("key", "J"), ("btn", "B")]),
+    "menu_use":   (0.5, [("key", "L"), ("btn", "Y")]),
+    "menu_drop":  (0.5, [("key", "K"), ("btn", "X")]),
     "menu_slot_x":(0.5, [("key", "K"), ("btn", "X")]),
     "menu_slot_y":(0.5, [("key", "L"), ("btn", "Y")]),
     "menu_tab_prev": (0.5, [("key", "Q"), ("btn", "LB")]),

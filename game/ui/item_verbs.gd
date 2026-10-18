@@ -1,12 +1,39 @@
 class_name UiItemVerbs
 extends RefCounted
-## The pause menu's item verbs as plain functions over GameState / World:
-## use (weapons equip, usable or hidden-use items go through
+## The pause menu's item rules as plain functions over GameState / World.
+## Every item belongs to one section of the menu by its kind (section()):
+##
+##   weapons    kind "weapon": accept equips it on the attack button.
+##   tools      kind "tool": an item button assigns it to that button.
+##   equipment  kind "passive": always on, nothing to press.
+##   pack       everything else (consumable, key, quest items): the only
+##              section with a verb popup, and the only one that drops.
+##
+## use (weapons equip; usable or hidden-use pack items go through
 ## Player.use_item_from_menu), drop (remove one and put a Pickup at the
-## player's feet when the project has a Pickup yet, else toast) and assign.
-## Each returns the status line the menu shows and plays the sound.
+## player's feet when the project has a Pickup yet, else toast) and assign
+## each return the status line the menu shows and play the sound.
 
 const PICKUP_SCENE := "res://game/objects/pickup.tscn"
+const SECTIONS := {"weapon": "weapons", "tool": "tools", "passive": "equipment"}
+const SECTION_NAMES := {"weapons": "Weapon", "tools": "Tool", "equipment": "Equipment"}
+
+
+static func section(id: String) -> String:
+	return String(SECTIONS.get(String(GameState.item_def(id).get("kind", "")), "pack"))
+
+
+## "Weapon", "Tool", "Equipment", or the pack item's own kind ("Consumable", "Key").
+static func section_name(id: String) -> String:
+	var s := section(id)
+	if SECTION_NAMES.has(s):
+		return String(SECTION_NAMES[s])
+	return String(GameState.item_def(id).get("kind", "item")).capitalize()
+
+
+## Weapons, tools and equipment are permanent: only the pack drops.
+static func droppable(id: String) -> bool:
+	return section(id) == "pack"
 
 
 static func use(world: World, id: String) -> String:
@@ -31,6 +58,9 @@ static func use(world: World, id: String) -> String:
 
 static func drop(world: World, id: String) -> String:
 	var name := String(GameState.item_def(id).get("name", id))
+	if not droppable(id):
+		Sfx.play("menu_error")
+		return "%s can't be dropped." % name
 	GameState.remove_item(id, 1)
 	var spawned := spawn_pickup(world, id)
 	Sfx.play("item_drop")
@@ -74,25 +104,43 @@ static func assignable(id: String) -> bool:
 	return bool(GameState.item_def(id).get("assignable", false))
 
 
-## Returns "" when the item cannot go in a slot.
+## Returns the status line; refuses (error sound) an item that cannot go
+## on an item button.
 static func assign(slot: String, id: String) -> String:
+	var name := String(GameState.item_def(id).get("name", id))
 	if not assignable(id):
 		Sfx.play("menu_error")
-		return ""
+		return "%s can't go on a button." % name
 	GameState.assign(slot, id)
 	Sfx.play("item_equip")
-	return "%s → %s" % [String(GameState.item_def(id).get("name", id)), Controls.glyph("item_" + slot)]
+	return "%s → %s" % [name, Controls.glyph("item_" + slot)]
 
 
-## "A select  B use  Y drop  LB assign" with the LIVE glyphs (Controls),
-## minus "use" for items that hide it or cannot be used (design §9.2: a
-## Fang lists only Drop).
-static func verb_hint(id: String) -> String:
+## The pack popup's rows as [gameplay action whose glyph to show, verb],
+## in display order. "use" is left out for items that hide it or cannot
+## be used (design §9.2: a Fang lists only Drop) — menu_use still works.
+static func pack_verbs(id: String) -> Array:
 	var def := GameState.item_def(id)
-	var verbs := [["menu_accept", "select"]]
-	var usable := String(def.get("kind", "")) == "weapon" or bool(def.get("usable", false))
-	if usable and not bool(def.get("hide_use", false)):
-		verbs.append(["attack", "use"])
-	verbs.append(["item_y", "drop"])
-	verbs.append(["interact", "assign"])
-	return Controls.hint(verbs)
+	var verbs := []
+	if bool(def.get("usable", false)) and not bool(def.get("hide_use", false)):
+		verbs.append(["item_y", "use"])
+	verbs.append(["item_x", "drop"])
+	verbs.append(["menu_accept", "description"])
+	verbs.append(["attack", "back"])
+	return verbs
+
+
+## The footer hint for a highlighted cell, with the live glyphs.
+static func cell_hint(section_id: String, id: String) -> String:
+	var parts := PackedStringArray()
+	if id != "":
+		match section_id:
+			"weapons":
+				if GameState.weapon != id:
+					parts.append(Controls.hint([["menu_accept", "equip"]]))
+			"tools":
+				parts.append("%s / %s assign" % [Controls.glyph("item_x"), Controls.glyph("item_y")])
+			"pack":
+				parts.append(Controls.hint([["menu_accept", "options"]]))
+	parts.append(Controls.hint([["attack", "back"]]))
+	return "    ".join(parts)
