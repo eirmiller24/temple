@@ -72,5 +72,13 @@
       {"texture": "res://assets/backdrops/SSW2_SET2_background_day3.png", "factor": 0.5, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -90, "scale": 1},
       {"texture": "res://assets/backdrops/SSW2_SET2_background_day4.png", "factor": 0.7, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": -30, "scale": 1}
     ]
+  },
+  "outside": {
+    "color": "#694642",
+    "parallax": [
+      {"texture": "res://assets/backdrops/SSWorlds_SET2_Background_day1.png", "factor": 0.1, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": 36, "scale": 1},
+      {"texture": "res://assets/backdrops/SSWorlds_SET2_Background_day2.png", "factor": 0.3, "tint": "#ffffff", "repeat_x": true, "repeat_y": false, "y_px": 162, "scale": 1},
+      {"texture": "res://assets/backdrops/SSW_CastlePack_Background4.png", "factor": 0.5, "tint": "#eca0a0", "repeat_x": true, "repeat_y": false, "y_px": 250, "scale": 1}
+    ]
   }
 }

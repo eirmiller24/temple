@@ -41,8 +41,9 @@ func _process(delta: float) -> void:
 		playtime += delta
 
 
-## Fresh run from data/player.json.
-func new_game() -> void:
+## Fresh run from data/player.json's `start_key` block: "start" for a real
+## new game, "test_start" for tests (the entry hall with a loadout).
+func new_game(start_key: String = "start") -> void:
 	var p := Data.player
 	max_hp = Data.inum(p, "max_hp", "player.json")
 	hp = max_hp
@@ -56,11 +57,12 @@ func new_game() -> void:
 	playtime = 0.0
 	lantern_on = false
 	slot_index = -1
-	var start: Dictionary = Data.req(p, "start", "player.json")
+	var start: Dictionary = Data.req(p, start_key, "player.json")
+	var where := "player.json." + start_key
 	current_room = ""
-	respawn_room = String(Data.req(start, "room", "player.json.start"))
-	respawn_entry = String(Data.req(start, "entry", "player.json.start"))
-	for id: String in Data.req(start, "items", "player.json.start"):
+	respawn_room = String(Data.req(start, "room", where))
+	respawn_entry = String(Data.req(start, "entry", where))
+	for id: String in Data.req(start, "items", where):
 		add_item(id, int(start.items[id]))
 	weapon = String(start.get("weapon", ""))
 	slot_x = String(start.get("slot_x", ""))

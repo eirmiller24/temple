@@ -79,8 +79,8 @@ func _debug_keys() -> void:
 
 # --- starting --------------------------------------------------------------------------------
 
-func start_new_game() -> void:
-	GameState.new_game()
+func start_new_game(start_key: String = "start") -> void:
+	GameState.new_game(start_key)
 	await load_room(GameState.respawn_room, GameState.respawn_entry)
 
 

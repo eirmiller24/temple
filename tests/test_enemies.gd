@@ -101,7 +101,7 @@ func _run() -> int:
 
 	var world := World.new()
 	get_tree().root.add_child(world)
-	await world.start_new_game()
+	await world.start_new_game("test_start")
 	await _ticks(30)
 	_check(world.player != null and world.room != null, "world started in '%s'" % world.room_name)
 	# The test room ships its own enemies and puzzle objects (a gate, a

@@ -1,0 +1,160 @@
+[gd_scene format=4 uid="uid://b8f4c38idhwl"]
+
+[ext_resource type="Script" uid="uid://wt7rjb7ti660" path="res://game/rooms/nodes/room.gd" id="1_i4ewi"]
+[ext_resource type="TileSet" uid="uid://cy8afq58omfbr" path="res://game/rooms/tileset_kind.tres" id="2_yx7nh"]
+[ext_resource type="TileSet" uid="uid://dlm6t26nrf8vi" path="res://assets/tilesets/SSW.tres" id="3_tdnh5"]
+[ext_resource type="Script" uid="uid://bnfijy4qgfae1" path="res://game/rooms/nodes/room_entry.gd" id="4_bwvi4"]
+[ext_resource type="Texture2D" uid="uid://c5nghi1rgm6wh" path="res://assets/ai_placeholder/props/rubble_slope_tall.png" id="4_per5l"]
+[ext_resource type="Texture2D" uid="uid://nbnrub4qqpss" path="res://assets/ai_placeholder/props/rubble_slope_low.png" id="5_7trh3"]
+[ext_resource type="Script" uid="uid://cb201xglbo7yl" path="res://game/rooms/nodes/room_exit.gd" id="5_yx7nh"]
+[ext_resource type="Texture2D" uid="uid://cg3s83mgng2ku" path="res://assets/ai_placeholder/props/rubble_heap_3.png" id="6_5fdkp"]
+[ext_resource type="Texture2D" uid="uid://bi6qbu581mh3n" path="res://assets/ai_placeholder/props/rubble_heap_4.png" id="7_edeya"]
+[ext_resource type="Texture2D" uid="uid://xv87v2ujiwha" path="res://assets/ai_placeholder/props/rubble_heap_1.png" id="8_m7iip"]
+[ext_resource type="Texture2D" uid="uid://b3ta72tdnboda" path="res://assets/ai_placeholder/props/rubble_heap_2.png" id="9_evfii"]
+
+[node name="crevasse" type="Node2D" unique_id=1374084781]
+script = ExtResource("1_i4ewi")
+display_name = "The Crevasse"
+world_x = 0
+world_y = -60
+skin = "cave_brown"
+background = "outside"
+music = "collapse"
+
+[node name="Collision" type="TileMapLayer" parent="." unique_id=1088639063]
+modulate = Color(1, 1, 1, 0.35)
+tile_map_data = PackedByteArray("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")
+tile_set = ExtResource("2_yx7nh")
+
+[node name="DecorBack" type="TileMapLayer" parent="." unique_id=824045018]
+z_index = -2
+tile_map_data = PackedByteArray("AAAAABgAAwAPAAAAAAABABgAAwAQAAAAAAACABgAAwARAAAAAAADABgAAwAPAAAAAAAEABgAAwAQAAAAAAAFABgAAwARAAAAAAAGABgAAwAPAAAAAAAHABgAAwAQAAAAAAAIABgAAwARAAAAAAAJABgAAwAPAAAAAAAKABgAAwAQAAAAAAALABgAAwARAAAAAAAMABgAAwAPAAAAAAANABgAAwAQAAAAAAAOABgAAwARAAAAAAAPABgAAwAPAAAAAAAQABgAAwAQAAAAAAARABgAAwARAAAAAAASABgAAwAPAAAAAAATABgAAwAQAAAAAAAUABgAAwARAAAAAAAVABgAAwAPAAAAAAAWABgAAwAQAAAAAAAXABgAAwARAAAAAAAYABgAAwAPAAAAAAAZABgAAwAQAAAAAAAaABgAAwARAAAAAAAbABgAAwAPAAAAAAAcABgAAwAQAAAAAAAdABgAAwARAAAAAAAeABgAAwAPAAAAAAAfABgAAwAQAAAAAAAgABgAAwARAAAAAAAhABgAAwAPAAAAAAAiABgAAwAQAAAAAAAjABgAAwARAAAAAAAkABgAAwAPAAAAAAAlABgAAwAQAAAAAAAmABgAAwARAAAAAAAnABgAAwAPAAAAAAAoABgAAwAQAAAAAAApABgAAwARAAAAAAAqABgAAwAPAAAAAAArABgAAwAQAAAAAAAsABgAAwARAAAAAAAtABgAAwAPAAAAAAAuABgAAwAQAAAAAAAvABgAAwARAAAAAAAwABgAAwAPAAAAAAAxABgAAwAQAAAAAAAyABgAAwARAAAAAAAzABgAAwAPAAAAAAA0ABgAAwAQAAAAAAA1ABgAAwARAAAAAAA2ABgAAwAPAAAAAAA3ABgAAwAQAAAAAAA4ABgAAwARAAAAAAA5ABgAAwAPAAAAAAA6ABgAAwAQAAAAAAA7ABgAAwARAAAAAAA8ABgAAwAPAAAAAAA9ABgAAwAQAAAAAAA+ABgAAwARAAAAAAA/ABgAAwAPAAAAAAA=")
+tile_set = ExtResource("3_tdnh5")
+
+[node name="rubble_wall_l" type="Sprite2D" parent="DecorBack" unique_id=314563966]
+position = Vector2(-42, 591)
+scale = Vector2(2, 2)
+texture = ExtResource("4_per5l")
+centered = false
+
+[node name="rubble_slope_l" type="Sprite2D" parent="DecorBack" unique_id=1053581754]
+position = Vector2(82, 695)
+texture = ExtResource("5_7trh3")
+centered = false
+
+[node name="rubble_wall_r" type="Sprite2D" parent="DecorBack" unique_id=994956112]
+position = Vector2(1804, 596)
+scale = Vector2(2, 2)
+texture = ExtResource("4_per5l")
+centered = false
+flip_h = true
+
+[node name="rubble_slope_r" type="Sprite2D" parent="DecorBack" unique_id=1857211207]
+position = Vector2(1775, 698)
+texture = ExtResource("5_7trh3")
+centered = false
+flip_h = true
+
+[node name="DecorFront" type="TileMapLayer" parent="." unique_id=1679597741]
+z_index = 2
+tile_set = ExtResource("3_tdnh5")
+
+[node name="rubble_heap_r1" type="Sprite2D" parent="DecorFront" unique_id=381680874]
+position = Vector2(-28, 761)
+texture = ExtResource("8_m7iip")
+centered = false
+flip_h = true
+
+[node name="rubble_heap_r6" type="Sprite2D" parent="DecorFront" unique_id=239600176]
+position = Vector2(96, 759)
+texture = ExtResource("8_m7iip")
+centered = false
+flip_h = true
+
+[node name="rubble_heap_r5" type="Sprite2D" parent="DecorFront" unique_id=605742719]
+position = Vector2(2013, 757)
+texture = ExtResource("8_m7iip")
+centered = false
+flip_h = true
+
+[node name="rubble_heap_r2" type="Sprite2D" parent="DecorFront" unique_id=672814726]
+position = Vector2(1982, 762)
+texture = ExtResource("9_evfii")
+centered = false
+
+[node name="rubble_heap_r3" type="Sprite2D" parent="DecorFront" unique_id=867268618]
+position = Vector2(2037, 763)
+texture = ExtResource("9_evfii")
+centered = false
+
+[node name="rubble_heap_r4" type="Sprite2D" parent="DecorFront" unique_id=1094098867]
+position = Vector2(143, 762)
+texture = ExtResource("9_evfii")
+centered = false
+
+[node name="rubble_heap_l4" type="Sprite2D" parent="DecorFront" unique_id=137375312]
+position = Vector2(-5, 758)
+texture = ExtResource("7_edeya")
+centered = false
+
+[node name="rubble_heap_l2" type="Sprite2D" parent="DecorFront" unique_id=705177556]
+position = Vector2(30, 755)
+texture = ExtResource("7_edeya")
+centered = false
+
+[node name="rubble_heap_l3" type="Sprite2D" parent="DecorFront" unique_id=901340838]
+position = Vector2(1810, 758)
+texture = ExtResource("7_edeya")
+centered = false
+
+[node name="rubble_heap_l1" type="Sprite2D" parent="DecorFront" unique_id=1438118352]
+position = Vector2(432, 757)
+texture = ExtResource("6_5fdkp")
+centered = false
+
+[node name="rubble_heap_l5" type="Sprite2D" parent="DecorFront" unique_id=1974406805]
+position = Vector2(-62, 762)
+texture = ExtResource("6_5fdkp")
+centered = false
+
+[node name="rubble_heap_l6" type="Sprite2D" parent="DecorFront" unique_id=385218208]
+position = Vector2(1912, 758)
+texture = ExtResource("6_5fdkp")
+centered = false
+
+[node name="rubble_heap_l7" type="Sprite2D" parent="DecorFront" unique_id=1324098265]
+position = Vector2(432, 757)
+texture = ExtResource("6_5fdkp")
+centered = false
+
+[node name="Props" type="Node2D" parent="." unique_id=468203184]
+z_index = 1
+
+[node name="Entries" type="Node2D" parent="." unique_id=255625701]
+
+[node name="main" type="Marker2D" parent="Entries" unique_id=688558634]
+position = Vector2(1552, 800)
+script = ExtResource("4_bwvi4")
+
+[node name="Exits" type="Node2D" parent="." unique_id=982790530]
+
+[node name="exit_left" type="Area2D" parent="Exits" unique_id=281466480]
+position = Vector2(0, 704)
+collision_layer = 8192
+collision_mask = 2
+monitoring = false
+monitorable = false
+script = ExtResource("5_yx7nh")
+direction = "left"
+
+[node name="exit_right" type="Area2D" parent="Exits" unique_id=346806677]
+position = Vector2(2016, 704)
+collision_layer = 8192
+collision_mask = 2
+monitoring = false
+monitorable = false
+script = ExtResource("5_yx7nh")
+
+[node name="Objects" type="Node2D" parent="." unique_id=1521046397]
+
+[node name="Enemies" type="Node2D" parent="." unique_id=59048849]

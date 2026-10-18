@@ -56,7 +56,7 @@ func _run() -> int:
 
 	var world := World.new()
 	get_tree().root.add_child(world)
-	await world.start_new_game()
+	await world.start_new_game("test_start")
 	await _ticks(30)
 	_check(world.player != null, "player spawned")
 	_check(world.room != null and world.room_name == GameState.respawn_room,

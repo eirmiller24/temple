@@ -141,7 +141,7 @@ func _run() -> int:
 	# --- world + HUD -------------------------------------------------------------------------------------
 	var world := World.new()
 	get_tree().root.add_child(world)
-	await world.start_new_game()
+	await world.start_new_game("test_start")
 	await _ticks(10)
 	var hud := _instance("res://game/ui/hud.tscn")
 	hud.bind(world)

@@ -1,0 +1,101 @@
+{
+  "_comment": "PixelLab placeholders generated for this project. Schema: docs/authoring/ai_art.md \u00a73. tests/test_assets.tscn requires an entry for every png/wav/ogg in this folder.",
+  "entries": [
+    {
+      "file": "rubble_slope_tall.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object(view=sidescroller, size=128, palette=18 colours) review pack of 4; frame used as-is",
+      "prompt": "pixel art side-view free-standing mound of fallen rubble rocks and boulders, peak on the left third, rocks tumbling down a long slope to the right, entire pile fully inside the frame with a jagged natural outline on every side, no flat or cut edges, dark grey-brown rock with dusty tan highlights on top edges, transparent background, no text, no ground plane",
+      "style_ref": "none",
+      "palette": "[\"#0e1212\",\"#141919\",\"#1c1d1f\",\"#1c2223\",\"#2a2e30\",\"#352a2d\",\"#3d302f\",\"#524248\",\"#533539\",\"#614a42\",\"#664a44\",\"#6a4143\",\"#774b4f\",\"#896170\",\"#916a5a\",\"#976564\",\"#a47869\",\"#c49a7c\"] \u2014 sampled from a crevasse screenshot (cave_brown floor/wall skin + outside backdrop mountains)",
+      "ids": {
+        "object": "0635e0b3-69cd-4fe6-9c7c-494b994bd443",
+        "review_pack": "b4c1aa0f-2041-473f-bd0d-a060ebfa9215 (candidate 2 of 4)"
+      },
+      "date": "2026-10-17",
+      "canvas": "128x128; art bbox 3,17-125,113",
+      "layout": "single frame, unedited PixelLab output",
+      "notes": "Sprite2D under crevasse DecorBack (rubble against the crevasse walls). Placeholder decor, no manifest entry. Replaces a first pass (review pack 02fe9a19-\u2026, prompt 'heaped against a cliff wall') whose piles had flat, cut edges."
+    },
+    {
+      "file": "rubble_slope_low.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object(view=sidescroller, size=128, palette=18 colours) review pack of 4; frame used as-is",
+      "prompt": "pixel art side-view free-standing mound of fallen rubble rocks and boulders, peak on the left third, rocks tumbling down a long slope to the right, entire pile fully inside the frame with a jagged natural outline on every side, no flat or cut edges, dark grey-brown rock with dusty tan highlights on top edges, transparent background, no text, no ground plane",
+      "style_ref": "none",
+      "palette": "[\"#0e1212\",\"#141919\",\"#1c1d1f\",\"#1c2223\",\"#2a2e30\",\"#352a2d\",\"#3d302f\",\"#524248\",\"#533539\",\"#614a42\",\"#664a44\",\"#6a4143\",\"#774b4f\",\"#896170\",\"#916a5a\",\"#976564\",\"#a47869\",\"#c49a7c\"] \u2014 sampled from a crevasse screenshot (cave_brown floor/wall skin + outside backdrop mountains)",
+      "ids": {
+        "object": "d4b21906-36b7-4710-a710-ea3ec6296a3e",
+        "review_pack": "b4c1aa0f-2041-473f-bd0d-a060ebfa9215 (candidate 3 of 4)"
+      },
+      "date": "2026-10-17",
+      "canvas": "128x128; art bbox 4,18-123,114",
+      "layout": "single frame, unedited PixelLab output",
+      "notes": "Sprite2D under crevasse DecorBack (rubble against the crevasse walls). Placeholder decor, no manifest entry. Replaces a first pass (review pack 02fe9a19-\u2026, prompt 'heaped against a cliff wall') whose piles had flat, cut edges."
+    },
+    {
+      "file": "rubble_heap_1.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object(view=sidescroller, size=64, palette=18 colours) review pack of 16; frame used as-is",
+      "prompt": "pixel art side-view small heap of fallen rubble rocks, a few broken stone chunks piled on each other, dark grey-brown rock with dusty tan highlights on top edges, transparent background, no text, no ground plane",
+      "style_ref": "none",
+      "palette": "[\"#0e1212\",\"#141919\",\"#1c1d1f\",\"#1c2223\",\"#2a2e30\",\"#352a2d\",\"#3d302f\",\"#524248\",\"#533539\",\"#614a42\",\"#664a44\",\"#6a4143\",\"#774b4f\",\"#896170\",\"#916a5a\",\"#976564\",\"#a47869\",\"#c49a7c\"] \u2014 sampled from a crevasse screenshot (cave_brown floor/wall skin + outside backdrop mountains)",
+      "ids": {
+        "object": "fb9ad3b4-a1a7-45f5-ab60-24c5b36ce4c5",
+        "review_pack": "9d5d7b05-99ba-4733-9240-bfc87e03dce7 (candidate 2 of 16)"
+      },
+      "date": "2026-10-17",
+      "canvas": "64x64; art bbox 2,15-62,60",
+      "layout": "single frame, unedited PixelLab output",
+      "notes": "Sprite2D under crevasse DecorBack (rubble against the crevasse walls). Placeholder decor, no manifest entry."
+    },
+    {
+      "file": "rubble_heap_2.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object(view=sidescroller, size=64, palette=18 colours) review pack of 16; frame used as-is",
+      "prompt": "pixel art side-view small heap of fallen rubble rocks, a few broken stone chunks piled on each other, dark grey-brown rock with dusty tan highlights on top edges, transparent background, no text, no ground plane",
+      "style_ref": "none",
+      "palette": "[\"#0e1212\",\"#141919\",\"#1c1d1f\",\"#1c2223\",\"#2a2e30\",\"#352a2d\",\"#3d302f\",\"#524248\",\"#533539\",\"#614a42\",\"#664a44\",\"#6a4143\",\"#774b4f\",\"#896170\",\"#916a5a\",\"#976564\",\"#a47869\",\"#c49a7c\"] \u2014 sampled from a crevasse screenshot (cave_brown floor/wall skin + outside backdrop mountains)",
+      "ids": {
+        "object": "fcf82680-4bcb-4c38-a7b4-4c20fe392ca5",
+        "review_pack": "9d5d7b05-99ba-4733-9240-bfc87e03dce7 (candidate 4 of 16)"
+      },
+      "date": "2026-10-17",
+      "canvas": "64x64; art bbox 2,17-62,55",
+      "layout": "single frame, unedited PixelLab output",
+      "notes": "Sprite2D under crevasse DecorBack (rubble against the crevasse walls). Placeholder decor, no manifest entry."
+    },
+    {
+      "file": "rubble_heap_3.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object(view=sidescroller, size=64, palette=18 colours) review pack of 16; frame used as-is",
+      "prompt": "pixel art side-view small heap of fallen rubble rocks, a few broken stone chunks piled on each other, dark grey-brown rock with dusty tan highlights on top edges, transparent background, no text, no ground plane",
+      "style_ref": "none",
+      "palette": "[\"#0e1212\",\"#141919\",\"#1c1d1f\",\"#1c2223\",\"#2a2e30\",\"#352a2d\",\"#3d302f\",\"#524248\",\"#533539\",\"#614a42\",\"#664a44\",\"#6a4143\",\"#774b4f\",\"#896170\",\"#916a5a\",\"#976564\",\"#a47869\",\"#c49a7c\"] \u2014 sampled from a crevasse screenshot (cave_brown floor/wall skin + outside backdrop mountains)",
+      "ids": {
+        "object": "164797af-a9b3-4dbf-8cfa-9510bc1180a2",
+        "review_pack": "9d5d7b05-99ba-4733-9240-bfc87e03dce7 (candidate 6 of 16)"
+      },
+      "date": "2026-10-17",
+      "canvas": "64x64; art bbox 2,13-62,55",
+      "layout": "single frame, unedited PixelLab output",
+      "notes": "Sprite2D under crevasse DecorBack (rubble against the crevasse walls). Placeholder decor, no manifest entry."
+    },
+    {
+      "file": "rubble_heap_4.png",
+      "tool": "pixellab",
+      "method": "create_1_direction_object(view=sidescroller, size=64, palette=18 colours) review pack of 16; frame used as-is",
+      "prompt": "pixel art side-view small heap of fallen rubble rocks, a few broken stone chunks piled on each other, dark grey-brown rock with dusty tan highlights on top edges, transparent background, no text, no ground plane",
+      "style_ref": "none",
+      "palette": "[\"#0e1212\",\"#141919\",\"#1c1d1f\",\"#1c2223\",\"#2a2e30\",\"#352a2d\",\"#3d302f\",\"#524248\",\"#533539\",\"#614a42\",\"#664a44\",\"#6a4143\",\"#774b4f\",\"#896170\",\"#916a5a\",\"#976564\",\"#a47869\",\"#c49a7c\"] \u2014 sampled from a crevasse screenshot (cave_brown floor/wall skin + outside backdrop mountains)",
+      "ids": {
+        "object": "5fd3a960-16eb-4076-998a-dc32c4dba4ae",
+        "review_pack": "9d5d7b05-99ba-4733-9240-bfc87e03dce7 (candidate 12 of 16)"
+      },
+      "date": "2026-10-17",
+      "canvas": "64x64; art bbox 2,25-61,59",
+      "layout": "single frame, unedited PixelLab output",
+      "notes": "Sprite2D under crevasse DecorBack (rubble against the crevasse walls). Placeholder decor, no manifest entry."
+    }
+  ]
+}

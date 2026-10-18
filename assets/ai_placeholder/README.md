@@ -49,3 +49,4 @@ be regenerated or re-animated. Two were renamed on copy:
 | `stations/` | `beacon.png`, `training_lever.png`, `wave_lever.png` | `objects.save_shrine`, `objects.lever`; `wave_lever` spare |
 | `effects/` | `smash_burst.png` | spare (impact burst, 6 frames) |
 | `ui/` | `item_<id>.png` ×12 (generated here, 2026-10-17) | `icons.<id>` — the pause menu and HUD item icons |
+| `props/` | `rubble_slope_tall.png`, `rubble_slope_low.png`, `rubble_heap_1..4.png` (generated here, 2026-10-17) | none — `Sprite2D`s under `crevasse` `DecorBack` |

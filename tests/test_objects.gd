@@ -57,7 +57,7 @@ func _run() -> int:
 	await get_tree().process_frame
 	world = World.new()
 	get_tree().root.add_child(world)
-	await world.start_new_game()
+	await world.start_new_game("test_start")
 	await _ticks(20)
 	var p := world.player
 	GameState.max_hp = 60
